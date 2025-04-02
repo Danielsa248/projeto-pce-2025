@@ -1,33 +1,24 @@
-import { useState } from "react";
+// App.jsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/layout/Layout.jsx';
+import Inicio from './pages/Inicio.jsx';
 
-function App() {
-  const [numero, setNumero] = useState("");
-  const [resultado, setResultado] = useState(null);
-
-  const fazerRequisicao = async () => {
-    if (!numero) return;
-    try {
-      const response = await fetch(`http://localhost:3000/teste/${numero}`);
-      const data = await response.json();
-      setResultado(data.result);
-    } catch (error) {
-      console.error("Erro ao obter dados:", error);
-    }
-  };
-
+export default function App() {
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Teste API</h1>
-      <input
-        type="number"
-        value={numero}
-        onChange={(e) => setNumero(e.target.value)}
-        placeholder="Insere um número"
-      />
-      <button onClick={fazerRequisicao}>Enviar</button>
-      {resultado !== null && <p>Resultado: {resultado}</p>}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Inicio />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 
-export default App;
+/*
+ * <Route path="medicao-glicose/" element={<FormGlicose />} />
+ * <Route path="medicao-insulina/" element={<FormInsulina />} />
+ * <Route path="agenda/" element={<Agenda />} />
+ * <Route path="historico/" element={<Historico />} />
+ * <Route path="opcoes/" element={<Opcoes />} />
+ */

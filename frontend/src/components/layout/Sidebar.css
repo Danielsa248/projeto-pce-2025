@@ -1,0 +1,47 @@
+/* Sidebar.css */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 60px; /* Altura da Topbar */
+  width: 240px;
+  height: calc(100vh - 60px);
+  background-color: #ffffff;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar.visible {
+  transform: translateX(0);
+}
+
+.nav-link {
+  display: block;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-link:visited {
+  text-decoration: none;
+}
+
+.nav-link.active {
+  background-color: #ddd;
+  color: #0277bd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 100%;
+  background-color: #0277bd;
+}
