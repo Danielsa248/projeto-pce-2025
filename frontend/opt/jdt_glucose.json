@@ -1,6 +1,10 @@
 {
     "Functions": [],
     "InternalFunctions": [],
+    "Occurrences": {
+        "lowerOccurrences": 1,
+        "upperOccurrences": 1
+    },
     "Refset": [],
     "TaskEditable": [
         "All"
@@ -23,6 +27,10 @@
             {
                 "Functions": [],
                 "InternalFunctions": [],
+                "Occurrences": {
+                    "lowerOccurrences": 0,
+                    "upperOccurrences": 1
+                },
                 "Refset": [],
                 "TaskEditable": [
                     "All"
@@ -41,6 +49,167 @@
                     {
                         "Functions": [],
                         "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "dataType": "DV_TEXT",
+                        "itemName": "Nome do teste",
+                        "itemPath": "items.0.0.items.0",
+                        "node": {
+                            "code": "at0005",
+                            "description": "*Name of the laboratory investigation performed on the specimen(s). (en)",
+                            "text": "Nome do teste"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[at0005]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": [],
+                        "value": null
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "dataType": "DV_DATE_TIME",
+                        "itemName": "Data de registo do teste",
+                        "itemPath": "items.0.0.items.1",
+                        "node": {
+                            "code": "at0075",
+                            "description": "*The date and/or time that ‘Overall test status’ was issued. (en)",
+                            "text": "Data de registo do teste"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[at0075]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": [],
+                        "value": {
+                            "date": null,
+                            "time": null
+                        }
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "archetype_id": "openEHR-EHR-CLUSTER.laboratory_test_analyte.v1",
+                        "cardinality": {
+                            "interval": {
+                                "lowerOccurrences": 1,
+                                "upperOccurrences": "*"
+                            },
+                            "ordered": false,
+                            "unique": false
+                        },
+                        "data_type": "Title",
+                        "itemName": "Resultado da análise",
+                        "itemPath": "items.0.0.items.2",
+                        "items": [
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_QUANTITY",
+                                "itemName": "Resultado da análise",
+                                "itemPath": "items.0.0.items.2.items.0",
+                                "node": {
+                                    "code": "at0001",
+                                    "description": "*The value of the analyte result. (en)",
+                                    "text": "Resultado da análise"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]/[at0001]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": {
+                                    "range": {},
+                                    "unit": "mg/dL"
+                                },
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            }
+                        ],
+                        "node": {
+                            "code": "at0000",
+                            "description": "*The result of a laboratory test for a single analyte value. (en)",
+                            "text": "Resultado da análise"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": [],
+                        "xsi_type": "C_ARCHETYPE_ROOT"
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
                         "Refset": [],
                         "TaskEditable": [
                             "All"
@@ -62,11 +231,15 @@
                         },
                         "data_type": "Title",
                         "itemName": "Refeição",
-                        "itemPath": "items.0.0.items.0",
+                        "itemPath": "items.0.0.items.3",
                         "items": [
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -79,7 +252,7 @@
                                 ],
                                 "dataType": "DV_CODED_TEXT",
                                 "itemName": "Tipo de evento",
-                                "itemPath": "items.0.0.items.0.items.0",
+                                "itemPath": "items.0.0.items.3.items.0",
                                 "itemsList": [
                                     {
                                         "code": "at0002",
@@ -120,6 +293,10 @@
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -132,7 +309,7 @@
                                 ],
                                 "dataType": "DV_QUANTITY",
                                 "itemName": "Calorias",
-                                "itemPath": "items.0.0.items.0.items.1",
+                                "itemPath": "items.0.0.items.3.items.1",
                                 "node": {
                                     "code": "at0006",
                                     "text": "Calorias"
@@ -156,6 +333,10 @@
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -168,7 +349,7 @@
                                 ],
                                 "dataType": "DV_DURATION",
                                 "itemName": "Duração",
-                                "itemPath": "items.0.0.items.0.items.2",
+                                "itemPath": "items.0.0.items.3.items.2",
                                 "node": {
                                     "code": "at0007",
                                     "text": "Duração"
@@ -181,18 +362,33 @@
                                 "ruleMandatory": [],
                                 "ruleVisibility": [],
                                 "units": [
-                                    "Ano(s)",
-                                    "Mes(es)",
-                                    "Semana(s)",
-                                    "Dia(s)",
-                                    "Hora(s)",
-                                    "Minuto(s)",
-                                    "Segundo(s)"
+                                    {
+                                        "range": {},
+                                        "unit": "Hora(s)"
+                                    },
+                                    {
+                                        "range": {},
+                                        "unit": "Minuto(s)"
+                                    },
+                                    {
+                                        "range": {},
+                                        "unit": "Segundo(s)"
+                                    }
                                 ],
-                                "value": {
-                                    "unit": null,
-                                    "value": null
-                                }
+                                "value": [
+                                    {
+                                        "unit": "Hora(s)",
+                                        "value": null
+                                    },
+                                    {
+                                        "unit": "Minuto(s)",
+                                        "value": null
+                                    },
+                                    {
+                                        "unit": "Segundo(s)",
+                                        "value": null
+                                    }
+                                ]
                             }
                         ],
                         "node": {
@@ -206,11 +402,16 @@
                         },
                         "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.diet.v0]",
                         "ruleMandatory": [],
-                        "ruleVisibility": []
+                        "ruleVisibility": [],
+                        "xsi_type": "C_ARCHETYPE_ROOT"
                     },
                     {
                         "Functions": [],
                         "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 0,
+                            "upperOccurrences": 1
+                        },
                         "Refset": [],
                         "TaskEditable": [
                             "All"
@@ -232,11 +433,15 @@
                         },
                         "data_type": "Title",
                         "itemName": "Atividade física",
-                        "itemPath": "items.0.0.items.1",
+                        "itemPath": "items.0.0.items.4",
                         "items": [
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -249,7 +454,7 @@
                                 ],
                                 "dataType": "DV_DURATION",
                                 "itemName": "Duração",
-                                "itemPath": "items.0.0.items.1.items.0",
+                                "itemPath": "items.0.0.items.4.items.0",
                                 "node": {
                                     "code": "at0001",
                                     "text": "Duração"
@@ -262,22 +467,41 @@
                                 "ruleMandatory": [],
                                 "ruleVisibility": [],
                                 "units": [
-                                    "Ano(s)",
-                                    "Mes(es)",
-                                    "Semana(s)",
-                                    "Dia(s)",
-                                    "Hora(s)",
-                                    "Minuto(s)",
-                                    "Segundo(s)"
+                                    {
+                                        "range": {},
+                                        "unit": "Hora(s)"
+                                    },
+                                    {
+                                        "range": {},
+                                        "unit": "Minuto(s)"
+                                    },
+                                    {
+                                        "range": {},
+                                        "unit": "Segundo(s)"
+                                    }
                                 ],
-                                "value": {
-                                    "unit": null,
-                                    "value": null
-                                }
+                                "value": [
+                                    {
+                                        "unit": "Hora(s)",
+                                        "value": null
+                                    },
+                                    {
+                                        "unit": "Minuto(s)",
+                                        "value": null
+                                    },
+                                    {
+                                        "unit": "Segundo(s)",
+                                        "value": null
+                                    }
+                                ]
                             },
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -290,7 +514,7 @@
                                 ],
                                 "dataType": "DV_QUANTITY",
                                 "itemName": "Calorias",
-                                "itemPath": "items.0.0.items.1.items.1",
+                                "itemPath": "items.0.0.items.4.items.1",
                                 "node": {
                                     "code": "at0002",
                                     "text": "Calorias"
@@ -323,11 +547,16 @@
                         },
                         "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.atividade_fisica.v0]",
                         "ruleMandatory": [],
-                        "ruleVisibility": []
+                        "ruleVisibility": [],
+                        "xsi_type": "C_ARCHETYPE_ROOT"
                     },
                     {
                         "Functions": [],
                         "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 0,
+                            "upperOccurrences": 1
+                        },
                         "Refset": [],
                         "TaskEditable": [
                             "All"
@@ -349,11 +578,15 @@
                         },
                         "data_type": "Title",
                         "itemName": "Peso",
-                        "itemPath": "items.0.0.items.2",
+                        "itemPath": "items.0.0.items.5",
                         "items": [
                             {
                                 "Functions": [],
                                 "InternalFunctions": [],
+                                "Occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
                                 "Refset": [],
                                 "TaskEditable": [
                                     "All"
@@ -366,7 +599,7 @@
                                 ],
                                 "dataType": "DV_QUANTITY",
                                 "itemName": "Peso",
-                                "itemPath": "items.0.0.items.2.items.0",
+                                "itemPath": "items.0.0.items.5.items.0",
                                 "node": {
                                     "code": "at0001",
                                     "text": "Peso"
@@ -404,7 +637,45 @@
                         },
                         "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.peso.v0]",
                         "ruleMandatory": [],
-                        "ruleVisibility": []
+                        "ruleVisibility": [],
+                        "xsi_type": "C_ARCHETYPE_ROOT"
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "dataType": "DV_DATE_TIME",
+                        "itemName": "time",
+                        "itemPath": "items.0.0.items.6",
+                        "node": {
+                            "code": "",
+                            "description": "Time origin of this event history. The first event is not necessarily at the origin point.",
+                            "text": "time"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/time",
+                        "ruleMandatory": [],
+                        "ruleVisibility": [],
+                        "value": {
+                            "date": null,
+                            "time": null
+                        }
                     }
                 ],
                 "node": {
