@@ -1,0 +1,754 @@
+{
+    "Functions": [],
+    "InternalFunctions": [],
+    "Refset": [],
+    "TaskEditable": [
+        "All"
+    ],
+    "TaskInReport": [
+        "All"
+    ],
+    "TaskVisible": [
+        "All"
+    ],
+    "archetypeId": "openEHR-EHR-COMPOSITION.encounter.v1",
+    "category": {
+        "code": 433,
+        "text": "event"
+    },
+    "itemName": "Registo do invidíduo",
+    "itemPath": "",
+    "items": [
+        [
+            {
+                "Functions": [],
+                "InternalFunctions": [],
+                "Refset": [],
+                "TaskEditable": [
+                    "All"
+                ],
+                "TaskInReport": [
+                    "All"
+                ],
+                "TaskVisible": [
+                    "All"
+                ],
+                "archetype_id": "openEHR-EHR-ADMIN_ENTRY.demographics.v0",
+                "data_type": "Title",
+                "itemName": "Registo de Indivíduo",
+                "itemPath": "items.0.0",
+                "items": [
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "archetype_id": "openEHR-EHR-CLUSTER.person.v1",
+                        "cardinality": {
+                            "interval": {
+                                "lowerOccurrences": 1,
+                                "upperOccurrences": "*"
+                            },
+                            "ordered": false,
+                            "unique": false
+                        },
+                        "data_type": "Title",
+                        "itemName": "Pessoa",
+                        "itemPath": "items.0.0.items.0",
+                        "items": [
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_TEXT",
+                                "itemName": "Nome",
+                                "itemPath": "items.0.0.items.0.items.0",
+                                "node": {
+                                    "code": "at0001",
+                                    "description": "O nome não estruturado do indivíduo.",
+                                    "text": "Nome"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[at0001]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "value": null
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_TEXT",
+                                "itemName": "Identificador",
+                                "itemPath": "items.0.0.items.0.items.1",
+                                "node": {
+                                    "code": "at0003",
+                                    "description": "Identificador associado ao indivíduo.",
+                                    "text": "Identificador"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[at0003]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "value": null
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "archetype_id": "openEHR-EHR-CLUSTER.address.v1",
+                                "cardinality": {
+                                    "interval": {
+                                        "lowerOccurrences": 1,
+                                        "upperOccurrences": "*"
+                                    },
+                                    "ordered": false,
+                                    "unique": false
+                                },
+                                "data_type": "Title",
+                                "itemName": "Morada",
+                                "itemPath": "items.0.0.items.0.items.2",
+                                "items": [
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "Endereço",
+                                        "itemPath": "items.0.0.items.0.items.2.items.0",
+                                        "node": {
+                                            "code": "at0001",
+                                            "description": "Uma linha de endereço não estruturada que representa todos os pormenores relevantes ao nível da rua ou do apartado que podem apoiar a identificação de um local.",
+                                            "text": "Endereço"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]/[at0001]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "Cidade",
+                                        "itemPath": "items.0.0.items.0.items.2.items.1",
+                                        "node": {
+                                            "code": "at0002",
+                                            "description": "O nome da localidade de nível mais baixo que contém o endereço.",
+                                            "text": "Cidade"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]/[at0002]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "Distrito",
+                                        "itemPath": "items.0.0.items.0.items.2.items.2",
+                                        "node": {
+                                            "code": "at0003",
+                                            "description": "*The name of a local government district or geographical area that contains the address. (en)",
+                                            "text": "Distrito"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]/[at0003]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "Código postal",
+                                        "itemPath": "items.0.0.items.0.items.2.items.3",
+                                        "node": {
+                                            "code": "at0005",
+                                            "description": "O código de uma área de entrega postal que contém o endereço, tal como definido pelo serviço de entrega postal relevante.",
+                                            "text": "Código postal"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]/[at0005]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "País",
+                                        "itemPath": "items.0.0.items.0.items.2.items.4",
+                                        "node": {
+                                            "code": "at0006",
+                                            "description": "O nome do país que contém o endereço.",
+                                            "text": "País"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]/[at0006]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0000",
+                                    "description": "Informações sobre a localização de uma pessoa, de um edifício físico ou de um ponto de referência.",
+                                    "text": "Morada"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.address.v1]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": []
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "archetype_id": "openEHR-EHR-CLUSTER.electronic_communication.v1",
+                                "cardinality": {
+                                    "interval": {
+                                        "lowerOccurrences": 1,
+                                        "upperOccurrences": "*"
+                                    },
+                                    "ordered": false,
+                                    "unique": false
+                                },
+                                "data_type": "Title",
+                                "itemName": "Comunicação eletrónica",
+                                "itemPath": "items.0.0.items.0.items.3",
+                                "items": [
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_CODED_TEXT",
+                                        "itemName": "Tipo",
+                                        "itemPath": "items.0.0.items.0.items.3.items.0",
+                                        "itemsList": [
+                                            {
+                                                "code": "at0005",
+                                                "description": "Para SMS ou chamadas de voz.",
+                                                "text": "Telemóvel"
+                                            },
+                                            {
+                                                "code": "at0007",
+                                                "text": "Email"
+                                            }
+                                        ],
+                                        "node": {
+                                            "code": "at0001",
+                                            "description": "Tipo de comunicação eletrónica.",
+                                            "text": "Tipo"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.electronic_communication.v1]/[at0001]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "terminology": "local",
+                                        "terminology_id": "local",
+                                        "value": null
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_TEXT",
+                                        "itemName": "Valor",
+                                        "itemPath": "items.0.0.items.0.items.3.items.1",
+                                        "node": {
+                                            "code": "at0002",
+                                            "description": "A combinação única de caracteres alfanuméricos, relevante para a representação de “Tipo”.",
+                                            "text": "Valor"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.electronic_communication.v1]/[at0002]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0000",
+                                    "description": "Informações sobre um tipo específico de comunicação eletrónica.",
+                                    "text": "Comunicação eletrónica"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": "*"
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.electronic_communication.v1]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": []
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "archetype_id": "openEHR-EHR-CLUSTER.genero.v0",
+                                "cardinality": {
+                                    "interval": {
+                                        "lowerOccurrences": 1,
+                                        "upperOccurrences": "*"
+                                    },
+                                    "ordered": false,
+                                    "unique": false
+                                },
+                                "data_type": "Title",
+                                "itemName": "Género",
+                                "itemPath": "items.0.0.items.0.items.4",
+                                "items": [
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_CODED_TEXT",
+                                        "itemName": "Género",
+                                        "itemPath": "items.0.0.items.0.items.4.items.0",
+                                        "itemsList": [
+                                            {
+                                                "code": "at0002",
+                                                "text": "Masculino"
+                                            },
+                                            {
+                                                "code": "at0003",
+                                                "text": "Feminino"
+                                            },
+                                            {
+                                                "code": "at0004",
+                                                "text": "Outro"
+                                            }
+                                        ],
+                                        "node": {
+                                            "code": "at0001",
+                                            "text": "Género"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.genero.v0]/[at0001]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "terminology": "local",
+                                        "terminology_id": "local",
+                                        "value": null
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0000",
+                                    "description": "Genero",
+                                    "text": "Género"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.genero.v0]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": []
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "archetype_id": "openEHR-EHR-CLUSTER.metricas.v0",
+                                "cardinality": {
+                                    "interval": {
+                                        "lowerOccurrences": 1,
+                                        "upperOccurrences": "*"
+                                    },
+                                    "ordered": false,
+                                    "unique": false
+                                },
+                                "data_type": "Title",
+                                "itemName": "Métricas",
+                                "itemPath": "items.0.0.items.0.items.5",
+                                "items": [
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_QUANTITY",
+                                        "itemName": "Altura",
+                                        "itemPath": "items.0.0.items.0.items.5.items.0",
+                                        "node": {
+                                            "code": "at0001",
+                                            "text": "Altura"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.metricas.v0]/[at0001]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "units": {
+                                            "range": {
+                                                "lower": 0,
+                                                "lowerIncluded": "true",
+                                                "upper": 300,
+                                                "upperIncluded": "true"
+                                            },
+                                            "unit": "cm"
+                                        },
+                                        "value": {
+                                            "unit": null,
+                                            "value": null
+                                        }
+                                    },
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_QUANTITY",
+                                        "itemName": "Peso",
+                                        "itemPath": "items.0.0.items.0.items.5.items.1",
+                                        "node": {
+                                            "code": "at0002",
+                                            "text": "Peso"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.metricas.v0]/[at0002]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "units": {
+                                            "range": {
+                                                "lower": 0,
+                                                "lowerIncluded": "true",
+                                                "upper": 300,
+                                                "upperIncluded": "true"
+                                            },
+                                            "unit": "kg"
+                                        },
+                                        "value": {
+                                            "unit": null,
+                                            "value": null
+                                        }
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0000",
+                                    "description": "Metricas",
+                                    "text": "Métricas"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.metricas.v0]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": []
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "archetype_id": "openEHR-EHR-CLUSTER.data_de_nascimento.v0",
+                                "cardinality": {
+                                    "interval": {
+                                        "lowerOccurrences": 1,
+                                        "upperOccurrences": "*"
+                                    },
+                                    "ordered": false,
+                                    "unique": false
+                                },
+                                "data_type": "Title",
+                                "itemName": "Data de Nascimento",
+                                "itemPath": "items.0.0.items.0.items.6",
+                                "items": [
+                                    {
+                                        "Functions": [],
+                                        "InternalFunctions": [],
+                                        "Refset": [],
+                                        "TaskEditable": [
+                                            "All"
+                                        ],
+                                        "TaskInReport": [
+                                            "All"
+                                        ],
+                                        "TaskVisible": [
+                                            "All"
+                                        ],
+                                        "dataType": "DV_DATE",
+                                        "itemName": "Data de Nascimento",
+                                        "itemPath": "items.0.0.items.0.items.6.items.0",
+                                        "node": {
+                                            "code": "at0001",
+                                            "text": "Data de Nascimento"
+                                        },
+                                        "occurrences": {
+                                            "lowerOccurrences": 1,
+                                            "upperOccurrences": 1
+                                        },
+                                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.data_de_nascimento.v0]/[at0001]",
+                                        "ruleMandatory": [],
+                                        "ruleVisibility": [],
+                                        "value": null
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0000",
+                                    "description": "Data de Nascimento",
+                                    "text": "Data de Nascimento"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]/[openEHR-EHR-CLUSTER.data_de_nascimento.v0]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": []
+                            }
+                        ],
+                        "node": {
+                            "code": "at0000",
+                            "description": "Um ser humano individual.",
+                            "text": "Pessoa"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 0,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]/[openEHR-EHR-CLUSTER.person.v1]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": []
+                    }
+                ],
+                "node": {
+                    "code": "at0000",
+                    "description": "Um arquétipo contentor utilizado para conter arquétipos EHR CLUSTER relacionados com a demografia.",
+                    "text": "Registo de Indivíduo"
+                },
+                "occurrences": {
+                    "lowerOccurrences": 0,
+                    "upperOccurrences": 1
+                },
+                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-ADMIN_ENTRY.demographics.v0]",
+                "ruleMandatory": [],
+                "ruleVisibility": [],
+                "xsi_type": "C_ARCHETYPE_ROOT"
+            }
+        ]
+    ],
+    "node": {
+        "code": "at0000",
+        "description": "Interação, contacto ou evento de cuidados entre um sujeito de cuidados e o(s) prestador(es) de cuidados de saúde.",
+        "text": "Registo do invidíduo"
+    },
+    "occurrences": {
+        "lowerOccurrences": 1,
+        "upperOccurrences": 1
+    },
+    "path": "[openEHR-EHR-COMPOSITION.encounter.v1]",
+    "rm_type_name": "COMPOSITION",
+    "ruleMandatory": [],
+    "ruleVisibility": [],
+    "templateId": "51f74f34-21f1-4b21-9bf8-feb082e48772",
+    "templateName": "Registo do indivíduo",
+    "terminology": "",
+    "themeColor": "default"
+}

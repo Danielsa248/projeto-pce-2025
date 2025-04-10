@@ -1,0 +1,91 @@
+{
+    "datatypes": {
+        "items.0.0.items.0.items.0": "input",
+        "items.0.0.items.0.items.1": "input",
+        "items.0.0.items.0.items.2.items.0": "input"
+    },
+    "fileExtensions": {},
+    "fileMaxSize": {},
+    "fontAlignment": {
+        "fieldTitle": "justify-left",
+        "formTitle": "justify-center",
+        "sectionTitle": "justify-left"
+    },
+    "fontLetters": {
+        "button": "normal-case",
+        "fieldTitle": "normal-case",
+        "formTitle": "normal-case",
+        "sectionTitle": "normal-case"
+    },
+    "fontSize": {
+        "button": "12px",
+        "field": "11px",
+        "fieldTitle": "11px",
+        "formTitle": "16px",
+        "header": "10px",
+        "sectionTitle": "12px"
+    },
+    "fontStyle": {
+        "button": [],
+        "fieldTitle": [
+            "font-bold"
+        ],
+        "formTitle": [],
+        "header": [],
+        "sectionTitle": []
+    },
+    "formOrder": {
+        "items.0.0": 1,
+        "items.0.0.items.0": 2,
+        "items.0.0.items.0.items.0": 3,
+        "items.0.0.items.0.items.1": 4,
+        "items.0.0.items.0.items.2": 5,
+        "items.0.0.items.0.items.2.items.0": 6,
+        "items.0.0.items.0.items.2.items.1": 7,
+        "items.0.0.items.0.items.2.items.2": 8,
+        "items.0.0.items.0.items.2.items.3": 9,
+        "items.0.0.items.0.items.2.items.4": 10,
+        "items.0.0.items.0.items.3": 11,
+        "items.0.0.items.0.items.3.items.0": 12,
+        "items.0.0.items.0.items.3.items.1": 13,
+        "items.0.0.items.0.items.4": 14,
+        "items.0.0.items.0.items.4.items.0": 15,
+        "items.0.0.items.0.items.5": 16,
+        "items.0.0.items.0.items.5.items.0": 17,
+        "items.0.0.items.0.items.5.items.1": 18,
+        "items.0.0.items.0.items.6": 19,
+        "items.0.0.items.0.items.6.items.0": 20
+    },
+    "formTitle": "Registo do indivíduo",
+    "hsizes": {
+        "items.0.0.items.0.items.2.items.1": "33.333333%",
+        "items.0.0.items.0.items.2.items.2": "33.333333%",
+        "items.0.0.items.0.items.2.items.3": "33.333333%",
+        "items.0.0.items.0.items.3.items.0": "33.333333%",
+        "items.0.0.items.0.items.3.items.1": "33.333333%",
+        "items.0.0.items.0.items.5.items.0": "50%",
+        "items.0.0.items.0.items.5.items.1": "50%"
+    },
+    "limitCharacters": {},
+    "sectionArchetype": {},
+    "showSectionTitle": {},
+    "textHeight": {
+        "items-0-0-items-0-items-0-value": 35,
+        "items-0-0-items-0-items-1-value": 39,
+        "items-0-0-items-0-items-2-items-0-value": 48,
+        "items-0-0-items-0-items-2-items-1-value": 37,
+        "items-0-0-items-0-items-2-items-2-value": 40,
+        "items-0-0-items-0-items-2-items-3-value": 38,
+        "items-0-0-items-0-items-2-items-4-value": 48,
+        "items-0-0-items-0-items-3-items-1-value": 42
+    },
+    "themeColor": "petróleo",
+    "themePalette": {
+        "$100": "#e1f0f4",
+        "$200": "#a0ddec",
+        "$300": "#78c8db",
+        "$400": "#54bfd9",
+        "$500": "#21accf",
+        "$600": "#1b819b"
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "datatypes": {},
+    "fileExtensions": {},
+    "fileMaxSize": {},
+    "fontAlignment": {
+        "fieldTitle": "justify-left",
+        "formTitle": "justify-center",
+        "sectionTitle": "justify-left"
+    },
+    "fontLetters": {
+        "button": "normal-case",
+        "fieldTitle": "normal-case",
+        "formTitle": "normal-case",
+        "sectionTitle": "normal-case"
+    },
+    "fontSize": {
+        "button": "12px",
+        "field": "11px",
+        "fieldTitle": "11px",
+        "formTitle": "16px",
+        "header": "10px",
+        "sectionTitle": "12px"
+    },
+    "fontStyle": {
+        "button": [],
+        "fieldTitle": [
+            "font-bold"
+        ],
+        "formTitle": [],
+        "header": [],
+        "sectionTitle": []
+    },
+    "formOrder": {
+        "items.0.0": 1,
+        "items.0.0.items.0": 2,
+        "items.0.0.items.0.items.0": 3
+    },
+    "formTitle": "Insulina Formulário",
+    "hsizes": {},
+    "limitCharacters": {},
+    "sectionArchetype": {},
+    "showSectionTitle": {},
+    "textHeight": {},
+    "themeColor": "personalizada",
+    "themePalette": {
+        "$100": "rgba(145, 245, 262, 1)",
+        "$200": "rgba(113, 228, 252, 1)",
+        "$300": "rgba(88, 212, 232, 1)",
+        "$400": "rgba(72, 200, 223, 1)",
+        "$500": "rgba(33, 172, 207, 1)",
+        "$600": "rgba(15, 145, 154, 1)"
+    }
+}

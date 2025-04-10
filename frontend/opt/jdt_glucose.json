@@ -1,0 +1,443 @@
+{
+    "Functions": [],
+    "InternalFunctions": [],
+    "Refset": [],
+    "TaskEditable": [
+        "All"
+    ],
+    "TaskInReport": [
+        "All"
+    ],
+    "TaskVisible": [
+        "All"
+    ],
+    "archetypeId": "openEHR-EHR-COMPOSITION.encounter.v1",
+    "category": {
+        "code": 433,
+        "text": "event"
+    },
+    "itemName": "Glucose Formulário",
+    "itemPath": "",
+    "items": [
+        [
+            {
+                "Functions": [],
+                "InternalFunctions": [],
+                "Refset": [],
+                "TaskEditable": [
+                    "All"
+                ],
+                "TaskInReport": [
+                    "All"
+                ],
+                "TaskVisible": [
+                    "All"
+                ],
+                "archetype_id": "openEHR-EHR-OBSERVATION.laboratory_test_result.v1",
+                "data_type": "Title",
+                "itemName": "Resultado do teste",
+                "itemPath": "items.0.0",
+                "items": [
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "archetype_id": "openEHR-EHR-CLUSTER.diet.v0",
+                        "cardinality": {
+                            "interval": {
+                                "lowerOccurrences": 1,
+                                "upperOccurrences": "*"
+                            },
+                            "ordered": false,
+                            "unique": false
+                        },
+                        "data_type": "Title",
+                        "itemName": "Refeição",
+                        "itemPath": "items.0.0.items.0",
+                        "items": [
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_CODED_TEXT",
+                                "itemName": "Tipo de evento",
+                                "itemPath": "items.0.0.items.0.items.0",
+                                "itemsList": [
+                                    {
+                                        "code": "at0002",
+                                        "description": "Sem ingestão calórica.",
+                                        "text": "Jejum"
+                                    },
+                                    {
+                                        "code": "at0003",
+                                        "description": "Depois da refeição.",
+                                        "text": "Pós-prandial"
+                                    },
+                                    {
+                                        "code": "at0004",
+                                        "description": "Antes da refeição.",
+                                        "text": "Pré-prandial"
+                                    },
+                                    {
+                                        "code": "at0005",
+                                        "description": "O prazo é desconhecido.",
+                                        "text": "Aleatório"
+                                    }
+                                ],
+                                "node": {
+                                    "code": "at0001",
+                                    "text": "Tipo de evento"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.diet.v0]/[at0001]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "terminology": "local",
+                                "terminology_id": "local",
+                                "value": null
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_QUANTITY",
+                                "itemName": "Calorias",
+                                "itemPath": "items.0.0.items.0.items.1",
+                                "node": {
+                                    "code": "at0006",
+                                    "text": "Calorias"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.diet.v0]/[at0006]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": {
+                                    "range": {},
+                                    "unit": "kcal"
+                                },
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_DURATION",
+                                "itemName": "Duração",
+                                "itemPath": "items.0.0.items.0.items.2",
+                                "node": {
+                                    "code": "at0007",
+                                    "text": "Duração"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.diet.v0]/[at0007]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": [
+                                    "Ano(s)",
+                                    "Mes(es)",
+                                    "Semana(s)",
+                                    "Dia(s)",
+                                    "Hora(s)",
+                                    "Minuto(s)",
+                                    "Segundo(s)"
+                                ],
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            }
+                        ],
+                        "node": {
+                            "code": "at0000",
+                            "description": "*Diet (en)",
+                            "text": "Refeição"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 1,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.diet.v0]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": []
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "archetype_id": "openEHR-EHR-CLUSTER.atividade_fisica.v0",
+                        "cardinality": {
+                            "interval": {
+                                "lowerOccurrences": 1,
+                                "upperOccurrences": "*"
+                            },
+                            "ordered": false,
+                            "unique": false
+                        },
+                        "data_type": "Title",
+                        "itemName": "Atividade física",
+                        "itemPath": "items.0.0.items.1",
+                        "items": [
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_DURATION",
+                                "itemName": "Duração",
+                                "itemPath": "items.0.0.items.1.items.0",
+                                "node": {
+                                    "code": "at0001",
+                                    "text": "Duração"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.atividade_fisica.v0]/[at0001]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": [
+                                    "Ano(s)",
+                                    "Mes(es)",
+                                    "Semana(s)",
+                                    "Dia(s)",
+                                    "Hora(s)",
+                                    "Minuto(s)",
+                                    "Segundo(s)"
+                                ],
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            },
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_QUANTITY",
+                                "itemName": "Calorias",
+                                "itemPath": "items.0.0.items.1.items.1",
+                                "node": {
+                                    "code": "at0002",
+                                    "text": "Calorias"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 0,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.atividade_fisica.v0]/[at0002]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": {
+                                    "range": {},
+                                    "unit": "kcal"
+                                },
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            }
+                        ],
+                        "node": {
+                            "code": "at0000",
+                            "description": "*Atividade fisica (en)",
+                            "text": "Atividade física"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 0,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.atividade_fisica.v0]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": []
+                    },
+                    {
+                        "Functions": [],
+                        "InternalFunctions": [],
+                        "Refset": [],
+                        "TaskEditable": [
+                            "All"
+                        ],
+                        "TaskInReport": [
+                            "All"
+                        ],
+                        "TaskVisible": [
+                            "All"
+                        ],
+                        "archetype_id": "openEHR-EHR-CLUSTER.peso.v0",
+                        "cardinality": {
+                            "interval": {
+                                "lowerOccurrences": 1,
+                                "upperOccurrences": "*"
+                            },
+                            "ordered": false,
+                            "unique": false
+                        },
+                        "data_type": "Title",
+                        "itemName": "Peso",
+                        "itemPath": "items.0.0.items.2",
+                        "items": [
+                            {
+                                "Functions": [],
+                                "InternalFunctions": [],
+                                "Refset": [],
+                                "TaskEditable": [
+                                    "All"
+                                ],
+                                "TaskInReport": [
+                                    "All"
+                                ],
+                                "TaskVisible": [
+                                    "All"
+                                ],
+                                "dataType": "DV_QUANTITY",
+                                "itemName": "Peso",
+                                "itemPath": "items.0.0.items.2.items.0",
+                                "node": {
+                                    "code": "at0001",
+                                    "text": "Peso"
+                                },
+                                "occurrences": {
+                                    "lowerOccurrences": 1,
+                                    "upperOccurrences": 1
+                                },
+                                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.peso.v0]/[at0001]",
+                                "ruleMandatory": [],
+                                "ruleVisibility": [],
+                                "units": {
+                                    "range": {
+                                        "lower": 0,
+                                        "lowerIncluded": "true",
+                                        "upper": 400,
+                                        "upperIncluded": "true"
+                                    },
+                                    "unit": "kg"
+                                },
+                                "value": {
+                                    "unit": null,
+                                    "value": null
+                                }
+                            }
+                        ],
+                        "node": {
+                            "code": "at0000",
+                            "description": "*Peso (en)",
+                            "text": "Peso"
+                        },
+                        "occurrences": {
+                            "lowerOccurrences": 0,
+                            "upperOccurrences": 1
+                        },
+                        "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/[openEHR-EHR-CLUSTER.peso.v0]",
+                        "ruleMandatory": [],
+                        "ruleVisibility": []
+                    }
+                ],
+                "node": {
+                    "code": "at0000",
+                    "description": "*The result, including findings and the laboratorys interpretation, of an investigation performed on specimens collected from an individual or related to that individual. (en)",
+                    "text": "Resultado do teste"
+                },
+                "occurrences": {
+                    "lowerOccurrences": 0,
+                    "upperOccurrences": 1
+                },
+                "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]",
+                "ruleMandatory": [],
+                "ruleVisibility": [],
+                "xsi_type": "C_ARCHETYPE_ROOT"
+            }
+        ]
+    ],
+    "node": {
+        "code": "at0000",
+        "description": "*Interaction, contact or care event between a subject of care and healthcare provider(s). (en)",
+        "text": "Glucose Formulário"
+    },
+    "occurrences": {
+        "lowerOccurrences": 1,
+        "upperOccurrences": 1
+    },
+    "path": "[openEHR-EHR-COMPOSITION.encounter.v1]",
+    "rm_type_name": "COMPOSITION",
+    "ruleMandatory": [],
+    "ruleVisibility": [],
+    "templateId": "68564f12-90af-4d57-a8b9-b5f21e7357a6",
+    "templateName": "Glucose Formulário",
+    "terminology": "",
+    "themeColor": "default"
+}
