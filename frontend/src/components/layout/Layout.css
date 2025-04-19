@@ -1,27 +1,10 @@
-/* Layout.css */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.content-container {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  transition: margin-left 0.3s ease;
-}
-
-.main-content.sidebar-open {
-  margin-left: 240px; /* Igual à largura da Sidebar */
+/* Layout.css */.app-container {  display: flex;  flex-direction: column;  height: 100vh;  margin: 0;  padding: 0;}.content-container {  display: flex;  flex: 1;  overflow: hidden;  margin: 0;  padding: 0;}.main-content {  flex: 1;  padding: 20px;  overflow-y: auto;  transition: margin-left 0.3s ease;  margin: 0;  padding: 0;}.main-content.sidebar-open {  margin-left: 240px; /* Igual à largura da Sidebar */
 }
 
 .main-content.sidebar-closed {
   margin-left: 0;
+}
+
+.content-transition {
+  transition: margin-left 0.3s ease, width 0.3s ease;
 }
