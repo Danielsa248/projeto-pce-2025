@@ -1,7 +1,8 @@
-// FormGlicose.jsx
 import { Form } from "protected-aidaforms";
-import jdt from "./opt/jdt_glucose.json";
-import formDesign from "./opt/style_glucose.json";
+import jdtGlicose from './opt/jdt_glucose.json';
+import jdtInsulina from './opt/jdt_insulina.json';
+import styleGlicose from './opt/style_glucose.json';
+import styleInsulina from './opt/style_insulina.json';
 
 const saveComposition = async (values) => {
     try {
@@ -17,15 +18,32 @@ const saveComposition = async (values) => {
 
         const result = await response.json();
         console.log("Guardado com sucesso:", result);
+        return result;
     } catch (err) {
         console.error("Erro ao submeter composição:", err);
+        throw err;
     }
 };
 
-export default function FormGlicose() {
+export default function FormRender({ type }) {
+    const formConfig = {
+        glicose: {
+            title: "Medição de Glicose",
+            jdt: jdtGlicose,
+            formDesign: styleGlicose
+        },
+        insulina: {
+            title: "Medição de Insulina",
+            jdt: jdtInsulina,
+            formDesign: styleInsulina
+        }
+    };
+
+    const { title, jdt, formDesign } = formConfig[type];
+
     return (
         <div className="p-3">
-            <h1>Medição de Glicose</h1>
+            <h1>{title}</h1>
             <Form
                 template={jdt}
                 formDesign={JSON.stringify(formDesign)}
