@@ -19,38 +19,6 @@ app.get('/teste/:num', (req, res) => {
 
 
 
-app.post("/api/compositions", async (req, res) => {
-    let { composition } = req.body;
-    if (typeof composition === "string") {
-        composition = JSON.parse(composition);
-    }
-
-    const id = uuidv4();
-
-    try {
-        /*
-        await pool.query(
-            "INSERT INTO public.composition VALUES ($1, $2)",
-            [id, composition]
-        );
-         */
-        res.status(201).json({ message: "Guardado com sucesso!", id });
-    } catch (err) {
-        console.error("Erro ao guardar:", err);
-        res.status(500).json({ error: "Erro ao guardar a composition" });
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
 app.listen(PORT, () => {
     console.log(`Servidor a correr em http://localhost:${PORT}`);
 });
