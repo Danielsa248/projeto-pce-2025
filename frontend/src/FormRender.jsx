@@ -4,14 +4,14 @@ import jdtInsulina from './opt/jdt_insulina.json';
 import styleGlicose from './opt/style_glucose.json';
 import styleInsulina from './opt/style_insulina.json';
 
-const saveComposition = async (values) => {
+const saveComposition = async (values, type) => {
     try {
         const response = await fetch("http://localhost:3000/api/compositions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ composition: values }),
+            body: JSON.stringify({ type, composition: values }),
         });
 
         if (!response.ok) throw new Error("Erro ao guardar");
@@ -37,6 +37,7 @@ export default function FormRender({ type }) {
             jdt: jdtInsulina,
             formDesign: styleInsulina
         }
+        /*Falta o do registo do utilizador*/
     };
 
     const { title, jdt, formDesign } = formConfig[type];
@@ -51,7 +52,7 @@ export default function FormRender({ type }) {
                 editMode={true}
                 submitButtonDisabled={false}
                 canSubmit={true}
-                onSubmit={(values, changedFields) => saveComposition(values)}
+                onSubmit={(values, changedFields) => saveComposition(values, title)}
                 saveButtonDisabled={false}
                 canSave={false}
                 canCancel={true}

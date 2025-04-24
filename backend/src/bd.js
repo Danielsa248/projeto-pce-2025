@@ -21,6 +21,68 @@ pool.connect((error, client, release) => {
 });
 
 
+// Adicionar um registo de medição
+export async function saveRegisto(tipo, id, data_registo, composition) {
+    try{
+        /*O id do utilizador esta hardcoded (temos de arranjar forma de obter o id do gajo que preenche o forms)*/
+        const result = await pool.query('INSERT INTO registos (id, utilizador, data_registo, tipo_registo, dados) VALUES ($1, $2, $3, $4, $5)',
+            [id, 1, data_registo, tipo, composition]);
+        return result.rowCount > 0;
+
+    }catch(error){
+        throw error;
+    }
+}
+
+
+// Adicionar um novo utilizador
+export async function saveUtilizador(composition) {
+    try{
+        const utilizador_id = null
+        const nome = null
+        const altura = null
+        const peso = null
+        const genero = null
+        const data_nascimento = null
+        /*morada_id, endereco, cidade, distrito, pais, cod_postal
+        tipo_contacto, contacto*/
+
+        await client.query('BEGIN');
+
+        const utilizadorResult = await client.query(
+            'INSERT INTO utilizador (id, nome, data_nasc, altura, peso, genero) VALUES ($1, $2, $3, $4, $5, $6)',
+            [utilizador_id, nome, data_nascimento, altura, peso, genero]
+        );
+
+        const utilizadorId = utilizadorResult.rows[0].id;
+
+        if (contactos && contactos.length > 0) {
+            for (const contacto of contactos) {
+                await client.query(
+                    'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
+                    [utilizador_id, tipo_contacto, contacto]
+                );
+            }
+        }
+
+        if (morada) {
+            await client.query(
+                'INSERT INTO morada (id, utilizador, endereco, cidade, distrito, pais, cod_postal) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                [morada_id, utilizador_id, endereco, cidade, distrito, pais, cod_postal]
+            );
+        }
+
+        await client.query('COMMIT');
+
+        return utilizadorId;
+
+    }catch(error){
+        await client.query('ROLLBACK');
+        throw error;
+    }
+}
+
+
 // Encontrar um utilizador por ID
 export async function getUtilizadorById(id) {
     try{
@@ -42,18 +104,6 @@ export async function deleteUtilizadorById(id) {
         console.error('Erro ao eliminar utilizador por ID:', error);
     }
 }
-
-
-// Adicionar um utilizador
-
-
-
-// Adicionar um registo de insulina
-
-
-
-// Adicionar um registo de glicose
-
 
 
 
