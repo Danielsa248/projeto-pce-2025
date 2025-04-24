@@ -24,6 +24,7 @@ pool.connect((error, client, release) => {
 // Adicionar um registo de medição
 export async function saveRegisto(tipo, id, data_registo, composition) {
     try{
+        /*O id do utilizador esta hardcoded (temos de arranjar forma de obter o id do gajo que preenche o forms)*/
         const result = await pool.query('INSERT INTO registos (id, utilizador, data_registo, tipo_registo, dados) VALUES ($1, $2, $3, $4, $5)',
             [id, 1, data_registo, tipo, composition]);
         return result.rowCount > 0;
