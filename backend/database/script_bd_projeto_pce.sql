@@ -40,7 +40,7 @@ CREATE TABLE public.morada (
 
 -- Tabela de registos
 CREATE TABLE public.registos (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     utilizador INTEGER NOT NULL,
     data_registo TIMESTAMP WITH TIME ZONE NOT NULL,
     tipo_registo registo_tipo NOT NULL,
