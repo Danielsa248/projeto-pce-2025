@@ -11,7 +11,7 @@ const FormRender = lazy(() => import('./FormRender.jsx'));
 export default function App() {
     return (
         <Router>
-            <StyleManager /> {/* Add StyleManager here */}
+            <StyleManager />
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Inicio />} />
