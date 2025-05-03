@@ -1,54 +1,33 @@
-// StyleManager.jsx
-import { useEffect } from 'react';
+// StyleManager.jsx - with forced reload
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export default function StyleManager() {
     const location = useLocation();
-
+    const previousPath = useRef('');
+    const navigatingFromForm = useRef(false);
+    
     useEffect(() => {
-        // This function runs every time the route changes
-        return () => {
-            // Create a reset stylesheet to override any lingering form styles
-            const resetStyle = document.createElement('style');
-            resetStyle.id = 'form-style-reset';
-            resetStyle.textContent = `
-        /* Reset any theme palette colors that might have been set */
-        :root {
-          --primary-color: initial !important;
-          --secondary-color: initial !important;
-          --accent-color: initial !important;
-          --background-color: initial !important;
+        const currentPath = location.pathname;
+        
+        // When leaving form pages, force a reload
+        if ((previousPath.current.includes('medicao-glicose') || 
+             previousPath.current.includes('medicao-insulina')) && 
+             !currentPath.includes('medicao-glicose') && 
+             !currentPath.includes('medicao-insulina')) {
+            
+            console.log('🔄 Navigating away from form page, will reload');
+            navigatingFromForm.current = true;
+            
+            // Use a short timeout to allow the navigation to complete first
+            setTimeout(() => {
+                window.location.reload();
+            }, 50);
         }
         
-        /* Reset any form-specific styles */
-        .form-control, .form-label, .form-title, .section-title, 
-        .button-primary, .button-secondary {
-          font-size: initial !important;
-          font-weight: initial !important;
-          text-align: initial !important;
-          color: initial !important;
-          background-color: initial !important;
-        }
-      `;
-
-            // Remove any existing reset style
-            const existingResetStyle = document.getElementById('form-style-reset');
-            if (existingResetStyle) {
-                document.head.removeChild(existingResetStyle);
-            }
-
-            // Apply the reset
-            document.head.appendChild(resetStyle);
-
-            // Optionally, remove it after a short delay to avoid flashing
-            setTimeout(() => {
-                const cleanupResetStyle = document.getElementById('form-style-reset');
-                if (cleanupResetStyle) {
-                    document.head.removeChild(cleanupResetStyle);
-                }
-            }, 100);
-        };
+        // Store current path for next comparison
+        previousPath.current = currentPath;
     }, [location.pathname]);
-
-    return null; // This component doesn't render anything
+    
+    return null;
 }

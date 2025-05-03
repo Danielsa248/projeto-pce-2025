@@ -11,25 +11,26 @@ const FormRender = lazy(() => import('./FormRender.jsx'));
 export default function App() {
     return (
         <Router>
+            <StyleManager /> {/* Add StyleManager here */}
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Inicio />} />
-                <Route
-                    path="medicao-glicose/"
-                    element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                            <FormRender key="glicose" type="glicose" />
-                        </Suspense>
-                    }
-                />
-                <Route
-                    path="medicao-insulina/"
-                    element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                            <FormRender key="insulina" type="insulina" />
-                        </Suspense>
-                    }
-                />
+                    <Route
+                        path="medicao-glicose/"
+                        element={
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <FormRender key="glicose" type="glicose" />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="medicao-insulina/"
+                        element={
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <FormRender key="insulina" type="insulina" />
+                            </Suspense>
+                        }
+                    />
                 </Route>
             </Routes>
         </Router>
