@@ -35,8 +35,8 @@ export async function saveRegisto(tipo, id, data_registo, composition) {
 }
 
 
-// Adicionar um novo utilizador
-export async function saveUtilizador(composition) {
+// Adicionar um novo utilizador (NAO FINALIZADA - ESBOÇO)
+export async function saveUser(composition) {
     try{
         const utilizador_id = null
         const nome = null
@@ -84,7 +84,7 @@ export async function saveUtilizador(composition) {
 
 
 // Encontrar um utilizador por ID
-export async function getUtilizadorById(id) {
+export async function getUserById(id) {
     try{
         const result = await pool.query('SELECT * FROM utilizador WHERE id = $1', [id]);
         return result.rows[0] || null;
@@ -96,7 +96,7 @@ export async function getUtilizadorById(id) {
 
 
 // Eliminar um utilizador por ID
-export async function deleteUtilizadorById(id) {
+export async function deleteUserById(id) {
     try{
         const result = await pool.query('DELETE FROM utilizador WHERE id = $1', [id]);
         return result.rowCount > 0;
