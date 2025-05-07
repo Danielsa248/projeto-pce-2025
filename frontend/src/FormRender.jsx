@@ -3,6 +3,8 @@ import jdtGlicose from './opt/jdt_glucose.json';
 import jdtInsulina from './opt/jdt_insulina.json';
 import styleGlicose from './opt/style_glucose.json';
 import styleInsulina from './opt/style_insulina.json';
+import jdtIndividuo from './opt/jdt_individuo.json';
+import styleIndividuo from './opt/style_individuo.json';
 
 const saveComposition = async (values, type) => {
     try {
@@ -36,8 +38,12 @@ export default function FormRender({ type }) {
             title: "Medição de Insulina",
             jdt: jdtInsulina,
             formDesign: styleInsulina
+        },
+        individuo: {
+            title: "Registo de Utilizador",
+            jdt: jdtIndividuo,
+            formDesign: styleIndividuo
         }
-        /*Falta o do registo do utilizador*/
     };
 
     const { title, jdt, formDesign } = formConfig[type];

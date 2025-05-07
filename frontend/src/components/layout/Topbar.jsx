@@ -1,5 +1,6 @@
 // Topbar.jsx
-import { Navbar, Button } from 'react-bootstrap';
+import { Navbar, Button, Dropdown } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 export default function Topbar({ toggleSidebar }) {
   return (
@@ -15,9 +16,17 @@ export default function Topbar({ toggleSidebar }) {
         <Navbar.Text className="me-3">
           USERNAME
         </Navbar.Text>
-        <Button variant="outline-light" className="border-0">
-          ⚙️
-        </Button>
+        <Dropdown align="end">
+          <Dropdown.Toggle variant="outline-light" className="border-0" id="settings-dropdown">
+            ⚙️
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item as={Link} to="/login">Login</Dropdown.Item>
+            <Dropdown.Item as={Link} to="/register">Register</Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item as={Link} to="/settings">Settings</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
       </Navbar.Collapse>
     </Navbar>
   );

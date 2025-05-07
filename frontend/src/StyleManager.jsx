@@ -1,4 +1,4 @@
-// StyleManager.jsx - with forced reload
+// StyleManager.jsx - with forced reload for all form pages
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -10,12 +10,18 @@ export default function StyleManager() {
     useEffect(() => {
         const currentPath = location.pathname;
         
-        // When leaving form pages, force a reload
-        if ((previousPath.current.includes('medicao-glicose') || 
-             previousPath.current.includes('medicao-insulina')) && 
-             !currentPath.includes('medicao-glicose') && 
-             !currentPath.includes('medicao-insulina')) {
-            
+        // Check if previous path was a form page
+        const wasOnFormPage = previousPath.current.includes('medicao-glicose') || 
+                              previousPath.current.includes('medicao-insulina') ||
+                              previousPath.current.includes('register');
+        
+        // Check if current path is not a form page
+        const isLeavingFormPage = !currentPath.includes('medicao-glicose') && 
+                                  !currentPath.includes('medicao-insulina') &&
+                                  !currentPath.includes('register');
+        
+        // When leaving any form page, force a reload
+        if (wasOnFormPage && isLeavingFormPage) {
             console.log('🔄 Navigating away from form page, will reload');
             navigatingFromForm.current = true;
             

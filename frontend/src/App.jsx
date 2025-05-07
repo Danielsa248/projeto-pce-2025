@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import Layout from './components/layout/Layout.jsx';
 import Inicio from './pages/Inicio.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
 import StyleManager from './StyleManager.jsx';
 
 // Lazy load the form component
@@ -31,6 +33,8 @@ export default function App() {
                             </Suspense>
                         }
                     />
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
                 </Route>
             </Routes>
         </Router>
