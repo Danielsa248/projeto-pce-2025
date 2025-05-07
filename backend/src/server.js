@@ -30,6 +30,8 @@ app.post("/api/compositions", async (req, res) => {
     const id = uuidv4();
     const data_registo = new Date()
 
+    let sucesso;
+    
     try {
         if (type === "Medição de Insulina") {
             const tipo = "Insulina"
