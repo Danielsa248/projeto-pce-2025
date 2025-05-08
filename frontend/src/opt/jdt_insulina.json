@@ -326,7 +326,7 @@
                         },
                         "path": "[openEHR-EHR-COMPOSITION.encounter.v1]/[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/time",
                         "ruleMandatory": [],
-                        "ruleVisibility": [],
+                        "ruleVisibility": ["Never"],
                         "value": {
                             "date": null,
                             "time": null
