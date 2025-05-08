@@ -30,27 +30,23 @@ const saveComposition = async (values, type) => {
 export default function FormRender({ type }) {
     const formConfig = {
         glicose: {
-            title: "Medição de Glicose",
             jdt: jdtGlicose,
             formDesign: styleGlicose
         },
         insulina: {
-            title: "Medição de Insulina",
             jdt: jdtInsulina,
             formDesign: styleInsulina
         },
         individuo: {
-            title: "Registo de Utilizador",
             jdt: jdtIndividuo,
             formDesign: styleIndividuo
         }
     };
 
-    const { title, jdt, formDesign } = formConfig[type];
+    const {jdt, formDesign } = formConfig[type];
 
     return (
         <div className="p-3">
-            <h1>{title}</h1>
             <Form
                 template={jdt}
                 formDesign={JSON.stringify(formDesign)}
@@ -58,7 +54,7 @@ export default function FormRender({ type }) {
                 editMode={true}
                 submitButtonDisabled={false}
                 canSubmit={true}
-                onSubmit={(values, changedFields) => saveComposition(values, title)}
+                onSubmit={(values, changedFields) => saveComposition(values, type)}
                 saveButtonDisabled={false}
                 canSave={false}
                 canCancel={true}

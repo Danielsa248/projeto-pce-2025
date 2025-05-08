@@ -1,19 +1,30 @@
 import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useAuth();
+    
+
+    const from = location.state?.from?.pathname || '/';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         
         try {
-            // Mudar Para o API DO BAKEND
+            // For now, until backend is implemented, just simulate a successful login
+            // Remove this and use real backend call when ready
+            const mockUser = { username, id: 1, name: 'Test User' };
+            
+            // Backend stuff que not done:
+            /*
             const response = await fetch('http://localhost:3000/api/login', {
                 method: 'POST',
                 headers: {
@@ -27,12 +38,13 @@ export default function Login() {
             }
             
             const data = await response.json();
+            login(data.user);
+            */
             
-            // Store user info/token in localStorage or context
-            localStorage.setItem('user', JSON.stringify(data.user));
+            login(mockUser);
             
-            // Redirect to home page
-            navigate('/');
+
+            navigate(from, { replace: true });
             
         } catch (err) {
             setError('Utilizador ou senha incorretos. Tente novamente.');
@@ -79,7 +91,7 @@ export default function Login() {
                             </Form>
                             
                             <div className="mt-4 text-center">
-                                <p>Não tem conta? <Link to="/register" style={{ color: "#0056b3" }}>Registar</Link></p>
+                                <p>Não tem conta? <Link to="/registo" style={{ color: "#0056b3" }}>Registar</Link></p>
                             </div>
                         </div>
                     </div>

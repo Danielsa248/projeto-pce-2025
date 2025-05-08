@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.5",
+    "datatables.net": "^2.3.0",
+    "datatables.net-bs5": "^2.3.0",
+    "jquery": "^3.7.1",
     "motion": "^12.6.2",
     "protected-aidaforms": "file:protected-aidaforms-1.7.2.tgz",
     "react": "^18.3.1",

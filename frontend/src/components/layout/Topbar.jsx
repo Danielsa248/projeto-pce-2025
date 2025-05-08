@@ -1,13 +1,22 @@
 // Topbar.jsx
 import { Navbar, Button, Dropdown } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaBell, FaCog } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 import './Topbar.css';
 
 export default function Topbar({ toggleSidebar, sidebarVisible }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
-  // Function to get page name from path
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+  
+
   const getPageName = (path) => {
     const pageMappings = {
       '': 'Início',
@@ -40,32 +49,47 @@ export default function Topbar({ toggleSidebar, sidebarVisible }) {
       </div>
 
       <Navbar.Collapse className="justify-content-end align-items-center">
-        <Navbar.Text className="me-3">
-          USERNAME
-        </Navbar.Text>
-
-        <Button
-          variant="outline-light"
-          className="topbar-icon-button me-2"
-        >
-          <FaBell />
-        </Button>
-
-        <Dropdown align="end">
-          <Dropdown.Toggle
-            variant="outline-light"
-            className="topbar-icon-button"
-            id="settings-dropdown"
-          >
-            <FaCog />
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            <Dropdown.Item as={Link} to="/login">Login</Dropdown.Item>
-            <Dropdown.Item as={Link} to="/registo">Registo</Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item as={Link} to="/opcoes">Opções</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+        {user ? (
+          <>
+            <Navbar.Text className="me-3">
+              {user.username || 'User'}
+            </Navbar.Text>
+            <Button
+              variant="outline-light"
+              className="topbar-icon-button me-2"
+            >
+              <FaBell />
+            </Button>
+            <Dropdown align="end">
+              <Dropdown.Toggle
+                variant="outline-light"
+                className="topbar-icon-button"
+                id="settings-dropdown"
+              >
+                <FaCog />
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item as={Link} to="/opcoes">Opções</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </>
+        ) : (
+          <Dropdown align="end">
+            <Dropdown.Toggle
+              variant="outline-light"
+              className="topbar-icon-button"
+              id="settings-dropdown"
+            >
+              <FaCog />
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item as={Link} to="/login">Login</Dropdown.Item>
+              <Dropdown.Item as={Link} to="/registo">Registo</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
       </Navbar.Collapse>
     </Navbar>
   );
