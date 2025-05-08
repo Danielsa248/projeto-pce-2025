@@ -46,9 +46,9 @@ export default function App() {
                         } />
                         
                         <Route path="historico" element={
-                            //<ProtectedRoute>
+                            <ProtectedRoute>
                                 <Historico />
-                            //</ProtectedRoute>
+                            </ProtectedRoute>
                         } />
                     </Route>
                 </Routes>

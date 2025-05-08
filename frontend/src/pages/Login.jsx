@@ -19,8 +19,7 @@ export default function Login() {
         setError('');
         
         try {
-            // For now, until backend is implemented, just simulate a successful login
-            // Remove this and use real backend call when ready
+            // mock user para teste
             const mockUser = { username, id: 1, name: 'Test User' };
             
             // Backend stuff que not done:
