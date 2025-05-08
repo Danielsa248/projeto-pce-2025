@@ -1,0 +1,72 @@
+/* Sidebar.css */
+
+/* === Container da Sidebar === */
+.sidebar-container {
+    width: 250px;
+    padding: 0;
+    background-color: #f8f9fa;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-container.hide {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-container.show {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* === Cabeçalho da Sidebar === */
+.sidebar-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0 1rem;
+    background-color: inherit;
+    /* border-bottom: 1px solid #ced4da; Se quisermos uma barra entre o header e os navlinks */
+    height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+/* === Navegação (NavLinks) === */
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-weight: 500;
+    border-radius: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    padding: 0.75rem 1rem;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+/* === Ícones === */
+.sidebar-icon {
+    font-size: 1.2rem;
+    color: inherit;
+}
+
+/* === Rota ativa (classe "active" do NavLink) === */
+.sidebar-nav .nav-link.active {
+    background-color: #e8ebee;
+    color: #218dff;
+}
+
+.sidebar-nav .nav-link.active .sidebar-icon {
+    color: #218dff;
+}

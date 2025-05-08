@@ -1,10 +1,12 @@
-/* Layout.css */.app-container {  display: flex;  flex-direction: column;  height: 100vh;  margin: 0;  padding: 0;}.content-container {  display: flex;  flex: 1;  overflow: hidden;  margin: 0;  padding: 0;}.main-content {  flex: 1;  padding: 20px;  overflow-y: auto;  transition: margin-left 0.3s ease;  margin: 0;  padding: 0;}.main-content.sidebar-open {  margin-left: 240px; /* Igual à largura da Sidebar */
-}
+/* Sidebar.css */
 
-.main-content.sidebar-closed {
-  margin-left: 0;
-}
-
-.content-transition {
-  transition: margin-left 0.3s ease, width 0.3s ease;
+/* === Container do Conteúdo Principal === */
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  padding-top: calc(1.5rem + 56px);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+  background-color: #e8ebee;
+  overflow-x: hidden;
 }

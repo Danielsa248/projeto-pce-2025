@@ -1,0 +1,82 @@
+/* Topbar */
+.topbar {
+    background-color: #218dff;
+    color: white;
+    display: flex;
+    align-items: center;
+    z-index: 900; /* inferior à sidebar */
+}
+
+/* Botão hamburger */
+.hamburger-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background-color: transparent;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    transition: all 0.3s ease;
+    z-index: 950; /* suficiente para ficar acima da Topbar, mas abaixo da Sidebar */
+    position: relative;
+}
+
+/* Mover para a direita quando sidebar está visível */
+.hamburger-button.sidebar-open {
+    margin-left: 250px; /* mesma largura da sidebar */
+}
+
+/* Restantes botões */
+.topbar-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background-color: transparent;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.2s ease;
+}
+
+/* Focus: branco */
+.hamburger-button:focus,
+.topbar-icon-button:focus {
+  color: #ffffff !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Hover: cinzento claro */
+.hamburger-button:hover,
+.topbar-icon-button:hover,
+.show > .btn-outline-light.dropdown-toggle {
+  color: #ced4da !important;
+  background-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Clique (active): cinzento mais escuro */
+.hamburger-button:active,
+.topbar-icon-button:active {
+  color: #adb5bd !important;
+  background-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Page name styling */
+.page-name-container {
+  color: white;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: margin-left 0.3s ease;
+}
+
+/* Move page name when sidebar is open */
+.sidebar-open + .page-name-container {
+  margin-left: 250px; /* same as sidebar width */
+}

@@ -13,12 +13,12 @@ export default function StyleManager() {
         // Check if previous path was a form page
         const wasOnFormPage = previousPath.current.includes('medicao-glicose') || 
                               previousPath.current.includes('medicao-insulina') ||
-                              previousPath.current.includes('register');
+                              previousPath.current.includes('registo');
         
         // Check if current path is not a form page
         const isLeavingFormPage = !currentPath.includes('medicao-glicose') && 
                                   !currentPath.includes('medicao-insulina') &&
-                                  !currentPath.includes('register');
+                                  !currentPath.includes('registo');
         
         // When leaving any form page, force a reload
         if (wasOnFormPage && isLeavingFormPage) {
