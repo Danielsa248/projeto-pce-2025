@@ -10,15 +10,6 @@ const PORT = 3000;
 app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
 
-// ISTO É SÓ UM TESTE PARA COMUNICAR COM O FRONTEND E PODE SER REMOVIDO
-app.get('/teste/:num', (req, res) => {
-    const num = parseInt(req.params.num);
-    if (isNaN(num)) {
-        return res.status(400).json({ error: 'Número inválido' });
-    }
-    res.json({ result: num * 2 });
-});
-
 
 // Rota para guardar na BD o json
 app.post("/api/compositions", async (req, res) => {
