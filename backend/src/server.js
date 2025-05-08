@@ -1,4 +1,5 @@
 import * as db from './bd.js';
+import * as info_trat from './info_trat.js';
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,16 +23,20 @@ app.post("/api/compositions", async (req, res) => {
     const data_registo = new Date()
 
     let sucesso;
-    
+
     try {
         if (type === "Medição de Insulina") {
             const tipo = "Insulina"
             const sucesso = await db.saveRegisto(tipo, id, data_registo, composition);
+            const info = info_trat.extractInsulinInfo(composition);
+            console.log("Informação do Form:", info);
 
         }
         else if (type === "Medição de Glicose") {
             const tipo = "Glucose"
             const sucesso = await db.saveRegisto(tipo, id, data_registo, composition);
+            const info = info_trat.extractGlucoseInfo(composition);
+            console.log("Informação do Form:", info);
         }
         else {
             const sucesso = await db.saveUtilizador(composition);
