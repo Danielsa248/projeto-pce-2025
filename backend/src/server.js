@@ -39,7 +39,30 @@ app.post("/api/compositions", async (req, res) => {
             console.log("Informação do Form:", info);
         }
         else {
-            const sucesso = await db.saveUtilizador(composition);
+            const userInfo = info_trat.extractUserInfo(composition);
+            console.log("Informação do Form:", userInfo);
+            
+            if (!userInfo.valid) {
+                return res.status(400).json({ 
+                    error: "Dados inválidos", 
+                    validationErrors: userInfo.errors 
+                });
+            }
+            
+            const result = await db.saveUtilizador(userInfo);
+            
+            if (result.success) {
+                sucesso = true;
+            } else {
+                if (result.error === 'duplicate_user') {
+                    return res.status(409).json({ 
+                        error: "Utilizador com esse número de utente já existe", 
+                        message: result.message 
+                    });
+                } else {
+                    sucesso = false;
+                }
+            }
         }
 
         if (sucesso) {
