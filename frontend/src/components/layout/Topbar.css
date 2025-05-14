@@ -5,6 +5,7 @@
     display: flex;
     align-items: center;
     z-index: 900; /* inferior à sidebar */
+    height: 56px;
 }
 
 /* Botão hamburger */

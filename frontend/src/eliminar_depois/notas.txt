@@ -21,3 +21,10 @@
     * Aplicação
     * Notificações
  */
+
+
+
+The main consideration would be security improvements like using HTTP-only cookies 
+rather than localStorage if your backend supports it, and 
+adding token refresh/expiration logic if you're using JWT authentication.
+ 

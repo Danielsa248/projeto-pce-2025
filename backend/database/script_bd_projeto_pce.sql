@@ -27,7 +27,7 @@ CREATE TABLE public.contacto (
 
 -- Tabela de morada
 CREATE TABLE public.morada (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     utilizador INTEGER NOT NULL,
     endereco TEXT NOT NULL,
     cidade TEXT NOT NULL,
@@ -60,3 +60,23 @@ CREATE TABLE public.agenda (
     CONSTRAINT fk_agenda_utilizador FOREIGN KEY (utilizador)
         REFERENCES public.utilizador (id) ON DELETE CASCADE
 );
+
+-- Trigger function to check if user ID already exists
+CREATE OR REPLACE FUNCTION check_user_id_exists()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM utilizador WHERE id = NEW.id) THEN
+        RAISE EXCEPTION 'Erro: Utilizador com ID % já existe no sistema.', NEW.id
+            USING HINT = 'Por favor, escolha outro número de utente.',
+                  ERRCODE = 'unique_violation';
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create the trigger
+CREATE TRIGGER check_user_id_exists_trigger
+BEFORE INSERT ON utilizador
+FOR EACH ROW
+EXECUTE FUNCTION check_user_id_exists();
