@@ -1,8 +1,8 @@
-CREATE TYPE sexo_tipo AS ENUM ('Masculino', 'Feminino', 'Outro');
+CREATE TYPE sexo_tipo AS ENUM ('M', 'F', 'O');
 
-CREATE TYPE contacto_tipo AS ENUM ('Telemovel', 'Email');
+CREATE TYPE contacto_tipo AS ENUM ('T', 'E');
 
-CREATE TYPE registo_tipo AS ENUM ('Insulina', 'Glucose');
+CREATE TYPE registo_tipo AS ENUM ('I', 'G');
 
 
 -- Tabela de utilizador
@@ -46,5 +46,17 @@ CREATE TABLE public.registos (
     tipo_registo registo_tipo NOT NULL,
     dados JSONB NOT NULL,
     CONSTRAINT fk_registo_utilizador FOREIGN KEY (utilizador)
+        REFERENCES public.utilizador (id) ON DELETE CASCADE
+);
+
+-- Tabela de registos agendados
+CREATE TABLE public.agenda (
+    id SERIAL PRIMARY KEY,
+    utilizador INTEGER NOT NULL,
+    tipo_registo registo_tipo NOT NULL,
+    data_evento TIMESTAMP NOT NULL,
+    notas TEXT,
+    realizado BOOLEAN DEFAULT FALSE,
+    CONSTRAINT fk_agenda_utilizador FOREIGN KEY (utilizador)
         REFERENCES public.utilizador (id) ON DELETE CASCADE
 );

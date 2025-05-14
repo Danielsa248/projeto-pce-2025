@@ -11,6 +11,9 @@ const PORT = 3000;
 app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
 
+const rotasAgenda = require('./agenda');
+app.use('/api/agenda', rotasAgenda);
+
 
 // Rota para guardar na BD o json
 app.post("/api/compositions", async (req, res) => {
