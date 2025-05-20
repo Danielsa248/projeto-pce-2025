@@ -33,3 +33,7 @@ mudar chatbot para o backend
 backend user autho com tokens
 
 fetch real data da database atravéz do backend
+
+
+-user: user
+-pass: password123

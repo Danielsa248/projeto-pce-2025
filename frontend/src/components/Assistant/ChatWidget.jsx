@@ -14,7 +14,7 @@ export default function ChatWidget() {
     const [isLoading, setIsLoading] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const messagesEndRef = useRef(null);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, getToken } = useAuth();
     
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,26 +31,38 @@ export default function ChatWidget() {
         setIsLoading(true);
         
         try {
-            // Call your Ollama API
-            const response = await fetch('http://localhost:11434/api/generate', {
+            // Get authentication token
+            const token = getToken();
+            
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+            
+            // Call backend API
+            const response = await fetch('http://localhost:3000/api/assistant/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    model: 'DiabetesAssistant',
-                    prompt: userQuestion,
-                    stream: false
+                    message: userQuestion
                 }),
             });
             
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error connecting to assistant');
+            }
+            
             const data = await response.json();
+            
             setMessages(prev => [...prev, { 
                 role: 'assistant', 
                 content: data.response
             }]);
         } catch (error) {
-            console.error('Error fetching from Ollama:', error);
+            console.error('Error with assistant API:', error);
             setMessages(prev => [...prev, { 
                 role: 'assistant', 
                 content: 'Sorry, I encountered an error. Please try again.' 

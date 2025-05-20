@@ -7,6 +7,7 @@ export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { login } = useAuth();
@@ -17,14 +18,11 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
         
         try {
-            // mock user para teste
-            const mockUser = { username, id: 1, name: 'Test User' };
-            
             // Backend stuff que not done:
-            /*
-            const response = await fetch('http://localhost:3000/api/login', {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,22 +30,23 @@ export default function Login() {
                 body: JSON.stringify({ username, password }),
             });
             
+            const data = await response.json();
+            
             if (!response.ok) {
-                throw new Error('Falha na autenticação');
+                throw new Error(data.message || 'Falha na autenticação');
             }
             
-            const data = await response.json();
-            login(data.user);
-            */
-            
-            login(mockUser);
+            // Login with user data and token
+            login(data.user, data.token);
             
 
             navigate(from, { replace: true });
             
         } catch (err) {
-            setError('Utilizador ou senha incorretos. Tente novamente.');
+            setError(err.message || 'Utilizador ou senha incorretos. Tente novamente.');
             console.error('Erro de login:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -84,8 +83,8 @@ export default function Login() {
                                     />
                                 </Form.Group>
                                 
-                                <Button variant="primary" type="submit" className="w-100">
-                                    Entrar
+                                <Button variant="primary" type="submit" className="w-100" disabled={isLoading}>
+                                    {isLoading ? 'A carregar...' : 'Entrar'}
                                 </Button>
                             </Form>
                             
