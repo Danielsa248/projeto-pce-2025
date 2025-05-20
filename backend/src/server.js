@@ -34,7 +34,6 @@ app.post("/api/compositions", authenticateToken, async (req, res) => {
     try {
         if (type === "Medição de Insulina") {
             const tipo = "Insulina"
-            // Use userId instead of hardcoded 1
             const sucesso = await db.saveRegisto(tipo, id, data_registo, composition, userId);
             const info = info_trat.extractInsulinInfo(composition);
             console.log("Informação do Form:", info);
@@ -42,7 +41,6 @@ app.post("/api/compositions", authenticateToken, async (req, res) => {
         }
         else if (type === "Medição de Glicose") {
             const tipo = "Glucose"
-            // Use userId instead of hardcoded 1
             const sucesso = await db.saveRegisto(tipo, id, data_registo, composition, userId);
             const info = info_trat.extractGlucoseInfo(composition);
             console.log("Informação do Form:", info);
@@ -86,7 +84,7 @@ app.post("/api/compositions", authenticateToken, async (req, res) => {
     }
 });
 
-// Add this route for the assistant chat
+// Chat Bot API
 app.post("/api/assistant/chat", authenticateToken, async (req, res) => {
     try {
         const { message } = req.body;
