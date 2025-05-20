@@ -7,7 +7,8 @@ import {
     BiInjection,
     BiCalendar,
     BiHistory,
-    BiCog
+    BiCog,
+    BiChart 
 } from 'react-icons/bi';
 import './Sidebar.css';
 
@@ -24,6 +25,9 @@ export default function Sidebar({ isVisible }) {
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/medicao-insulina">
                     <BiInjection className="sidebar-icon" /> Medição de Insulina
+                </Nav.Link>
+                <Nav.Link as={NavLink} to="/estatisticas"> 
+                    <BiChart className="sidebar-icon" /> Estatísticas
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/agenda">
                     <BiCalendar className="sidebar-icon" /> Agenda

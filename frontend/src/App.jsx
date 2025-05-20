@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import StyleManager from './StyleManager.jsx';
 import Historico from './pages/Historico.jsx';
+import Estatisticas from './pages/Estatisticas.jsx';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -42,6 +43,12 @@ export default function App() {
                                 <Suspense fallback={<div>Loading...</div>}>
                                     <FormRender key="insulina" type="insulina" />
                                 </Suspense>
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path='estatisticas' element={
+                            <ProtectedRoute>
+                                <Estatisticas />
                             </ProtectedRoute>
                         } />
                         
