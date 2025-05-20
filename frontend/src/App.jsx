@@ -9,7 +9,7 @@ import Historico from './pages/Historico.jsx';
 import Estatisticas from './pages/Estatisticas.jsx';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import ChatWidget from './components/Assistant/ChatWidget.jsx'; // Import the ChatWidget
+import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));
@@ -60,8 +60,6 @@ export default function App() {
                         } />
                     </Route>
                 </Routes>
-                
-                {/* Add the ChatWidget component outside of routes so it appears on every page */}
                 <ChatWidget />
             </Router>
         </AuthProvider>
