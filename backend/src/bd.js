@@ -134,4 +134,18 @@ export async function deleteUserById(id) {
 }
 
 
+export async function getRegistos(userId, tipo) {
+    try {
+        const result = await pool.query(
+            'SELECT id, data_registo, dados FROM registos WHERE utilizador = $1 AND tipo_registo = $2 ORDER BY data_registo DESC',
+            [userId, tipo]
+        );
+        return result;
+    } catch (error) {
+        console.error(`Error fetching ${tipo} records:`, error);
+        throw error;
+    }
+}
+
+
 

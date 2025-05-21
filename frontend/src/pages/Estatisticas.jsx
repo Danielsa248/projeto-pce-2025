@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,8 +13,10 @@ import {
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '../context/AuthContext';
+import { Spinner, Alert, Button } from 'react-bootstrap';
 
-
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -26,7 +28,7 @@ ChartJS.register(
   TimeScale
 );
 
-// Constantes
+// Constants
 const TIME_RANGES = {
   ALL: 'all',
   HOURS_24: '24hours',
@@ -41,6 +43,35 @@ const TIME_RANGE_LABELS = {
   [TIME_RANGES.DAYS_7]: '7 Dias',
   [TIME_RANGES.DAYS_14]: '14 Dias',
   [TIME_RANGES.DAYS_28]: '28 Dias',
+};
+
+const API_ENDPOINTS = {
+  glucose: 'http://localhost:3000/api/registos/Glucose',
+  insulin: 'http://localhost:3000/api/registos/Insulina',
+};
+
+const CHART_COLORS = {
+  glucose: {
+    border: 'rgba(54, 162, 235, 0.7)',
+    background: 'rgba(54, 162, 235, 0.2)',
+  },
+  insulin: {
+    border: 'rgba(255, 99, 132, 0.7)',
+    background: 'rgba(255, 99, 132, 0.2)',
+  }
+};
+
+const DATA_TYPE_LABELS = {
+  glucose: {
+    name: 'Glicose',
+    unit: 'mg/dL',
+    description: 'Histórico de medições de glicose',
+  },
+  insulin: {
+    name: 'Insulina',
+    unit: 'U',
+    description: 'Histórico de medições de insulina',
+  }
 };
 
 export default function Estatisticas() {
@@ -58,45 +89,22 @@ export default function Estatisticas() {
     glucose: 0,
     insulin: 0,
   });
+
+  const [data, setData] = useState({
+    glucose: [],
+    insulin: []
+  });
   
- 
-  const sampleData = useMemo(() => ({
-    glucose: [
-      { timestamp: new Date('2025-05-20T08:30:00'), value: 95 },
-      { timestamp: new Date('2025-05-20T13:30:00'), value: 105 },
-      { timestamp: new Date('2025-05-20T20:30:00'), value: 125 },
-      { timestamp: new Date('2025-05-19T08:30:00'), value: 105 },
-      { timestamp: new Date('2025-05-18T08:30:00'), value: 120 },
-      { timestamp: new Date('2025-05-17T08:30:00'), value: 110 },
-      { timestamp: new Date('2025-05-16T08:30:00'), value: 95 },
-      { timestamp: new Date('2025-05-15T08:30:00'), value: 100 },
-      { timestamp: new Date('2025-05-14T08:30:00'), value: 115 },
-      { timestamp: new Date('2025-05-13T08:30:00'), value: 125 },
-      { timestamp: new Date('2025-05-12T08:30:00'), value: 110 },
-      { timestamp: new Date('2025-05-11T08:30:00'), value: 105 },
-      { timestamp: new Date('2025-05-10T08:30:00'), value: 100 },
-      { timestamp: new Date('2025-05-09T08:30:00'), value: 95 },
-      { timestamp: new Date('2025-05-08T08:30:00'), value: 110 },
-      { timestamp: new Date('2025-05-07T08:30:00'), value: 120 },
-    ],
-    insulin: [
-      { timestamp: new Date('2025-05-20T08:30:00'), value: 10 },
-      { timestamp: new Date('2025-05-19T08:30:00'), value: 12 },
-      { timestamp: new Date('2025-05-18T08:30:00'), value: 15 },
-      { timestamp: new Date('2025-05-17T08:30:00'), value: 13 },
-      { timestamp: new Date('2025-05-16T08:30:00'), value: 10 },
-      { timestamp: new Date('2025-05-15T08:30:00'), value: 11 },
-      { timestamp: new Date('2025-05-14T08:30:00'), value: 14 },
-      { timestamp: new Date('2025-05-13T08:30:00'), value: 16 },
-      { timestamp: new Date('2025-05-12T08:30:00'), value: 13 },
-      { timestamp: new Date('2025-05-11T08:30:00'), value: 12 },
-      { timestamp: new Date('2025-05-10T08:30:00'), value: 11 },
-      { timestamp: new Date('2025-05-09T08:30:00'), value: 10 },
-      { timestamp: new Date('2025-05-08T08:30:00'), value: 12 },
-      { timestamp: new Date('2025-05-07T08:30:00'), value: 14 },
-    ],
-  }), []);
+  const [loadingState, setLoadingState] = useState({
+    glucose: true,
+    insulin: true,
+  });
   
+  const [error, setError] = useState(null);
+  
+
+  const { getToken } = useAuth();
+
 
   const chartOptions = useMemo(() => ({
     responsive: true,
@@ -113,7 +121,7 @@ export default function Estatisticas() {
         callbacks: {
           title: (tooltipItems) => {
             const date = new Date(tooltipItems[0].parsed.x);
-            return date.toLocaleString('pt-PT', { 
+            return date.toLocaleString('pt-BR', { 
               day: 'numeric', 
               month: 'long', 
               year: 'numeric',
@@ -154,14 +162,73 @@ export default function Estatisticas() {
     },
   }), []);
 
+ 
+  const fetchDataByType = useCallback(async (dataType) => {
+    try {
+      setLoadingState(prev => ({ ...prev, [dataType]: true }));
+      setError(null);
+      
+      const token = getToken();
+      if (!token) {
+        throw new Error('Não autenticado');
+      }
+      
+      const response = await fetch(API_ENDPOINTS[dataType], {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Falha ao obter dados de ${DATA_TYPE_LABELS[dataType].name.toLowerCase()}`);
+      }
+      
+      const responseData = await response.json();
+      
+      if (!responseData.success) {
+        throw new Error(responseData.message || `Erro ao processar dados de ${DATA_TYPE_LABELS[dataType].name.toLowerCase()}`);
+      }
+      
+      const parsedData = responseData.data.map(item => ({
+        ...item,
+        timestamp: new Date(item.timestamp)
+      }));
+      
+      setData(prev => ({
+        ...prev,
+        [dataType]: parsedData
+      }));
+      
+    } catch (error) {
+      console.error(`Erro ao obter dados de ${dataType}:`, error);
+      setError(`Falha ao carregar dados de ${DATA_TYPE_LABELS[dataType].name}. ${error.message}`);
+    } finally {
+      setLoadingState(prev => ({ ...prev, [dataType]: false }));
+    }
+  }, [getToken]);
+  
 
-  const filterDataByTimeRange = (data, timeRange) => {
-    if (!data || data.length === 0) {
+  const fetchAllData = useCallback(async () => {
+    setError(null);
+    await Promise.all([
+      fetchDataByType('glucose'),
+      fetchDataByType('insulin')
+    ]);
+  }, [fetchDataByType]);
+  
+
+  useEffect(() => {
+    fetchAllData();
+  }, [fetchAllData]);
+
+
+  const filterDataByTimeRange = useCallback((dataArray, timeRange) => {
+    if (!dataArray || dataArray.length === 0) {
       return [];
     }
     
-
-    const sortedData = [...data].sort((a, b) => 
+    const sortedData = [...dataArray].sort((a, b) => 
       new Date(a.timestamp) - new Date(b.timestamp)
     );
     
@@ -169,7 +236,6 @@ export default function Estatisticas() {
       return sortedData;
     }
     
-
     const now = new Date();
     let cutoffDate = new Date();
     
@@ -190,12 +256,15 @@ export default function Estatisticas() {
         cutoffDate.setDate(now.getDate() - 7);
     }
     
-    return sortedData.filter(item => new Date(item.timestamp) >= cutoffDate);
-  };
+    return sortedData.filter(item => {
+      const itemDate = item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp);
+      return itemDate >= cutoffDate;
+    });
+  }, []);
 
 
-  const prepareChartData = (dataType, timeRange) => {
-    const filteredData = filterDataByTimeRange(sampleData[dataType], timeRange);
+  const prepareChartData = useCallback((dataType, timeRange) => {
+    const filteredData = filterDataByTimeRange(data[dataType], timeRange);
     
     if (filteredData.length === 0) {
       return {
@@ -204,25 +273,23 @@ export default function Estatisticas() {
       };
     }
     
-
-    const total = filteredData.reduce((sum, item) => sum + item.value, 0);
-    const average = Math.round(total / filteredData.length);
+    const total = filteredData.reduce((sum, item) => {
+      const value = Number(item.value);
+      return sum + (isNaN(value) ? 0 : value);
+    }, 0);
     
-
+    const average = filteredData.length ? Math.round(total / filteredData.length) : 0;
+    
     const chartData = {
       datasets: [
         {
-          label: dataType === 'glucose' ? 'Glicose (mg/dL)' : 'Insulina (U)',
+          label: `${DATA_TYPE_LABELS[dataType].name} (${DATA_TYPE_LABELS[dataType].unit})`,
           data: filteredData.map(item => ({
-            x: new Date(item.timestamp),
-            y: item.value
+            x: item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp),
+            y: Number(item.value)
           })),
-          borderColor: dataType === 'glucose' 
-            ? 'rgba(54, 162, 235, 0.7)' 
-            : 'rgba(255, 99, 132, 0.7)',
-          backgroundColor: dataType === 'glucose' 
-            ? 'rgba(54, 162, 235, 0.2)' 
-            : 'rgba(255, 99, 132, 0.2)',
+          borderColor: CHART_COLORS[dataType].border,
+          backgroundColor: CHART_COLORS[dataType].background,
           tension: 0.2,
           pointStyle: 'circle',
           pointRadius: 5,
@@ -232,45 +299,136 @@ export default function Estatisticas() {
     };
     
     return { chartData, average };
-  };
+  }, [data, filterDataByTimeRange]);
 
-
+  // Update charts when data or time ranges change
   useEffect(() => {
-    const glucoseResults = prepareChartData('glucose', timeRanges.glucose);
-    const insulinResults = prepareChartData('insulin', timeRanges.insulin);
+    const isLoading = loadingState.glucose || loadingState.insulin;
     
-    setChartData({
-      glucose: glucoseResults.chartData,
-      insulin: insulinResults.chartData
-    });
-    
-    setAverages({
-      glucose: glucoseResults.average,
-      insulin: insulinResults.average
-    });
-  }, [timeRanges, sampleData]);
+    if (!isLoading && !error) {
+      const glucoseResults = prepareChartData('glucose', timeRanges.glucose);
+      const insulinResults = prepareChartData('insulin', timeRanges.insulin);
+      
+      setChartData({
+        glucose: glucoseResults.chartData,
+        insulin: insulinResults.chartData
+      });
+      
+      setAverages({
+        glucose: glucoseResults.average,
+        insulin: insulinResults.average
+      });
+    }
+  }, [timeRanges, data, loadingState, error, prepareChartData]);
 
-
-  const handleTimeRangeChange = (dataType, value) => {
+  // Handle time range change
+  const handleTimeRangeChange = useCallback((dataType, value) => {
     setTimeRanges(prev => ({
       ...prev,
       [dataType]: value
     }));
-  };
+  }, []);
 
-
-  const renderTimeRangeSelector = (dataType) => (
+  // Render time range selector
+  const renderTimeRangeSelector = useCallback((dataType) => (
     <select 
       className="form-select form-select-sm" 
       value={timeRanges[dataType]}
       onChange={(e) => handleTimeRangeChange(dataType, e.target.value)}
       style={{ width: 'auto', minWidth: '120px' }}
+      aria-label={`Selecionar período para ${DATA_TYPE_LABELS[dataType].name}`}
     >
       {Object.entries(TIME_RANGE_LABELS).map(([value, label]) => (
         <option key={value} value={value}>{label}</option>
       ))}
     </select>
-  );
+  ), [timeRanges, handleTimeRangeChange]);
+
+  // Render data card
+  const renderDataCard = useCallback((dataType) => (
+    <div className="col-md-6">
+      <div className="card bg-light border-0">
+        <div className="card-body text-center">
+          <h5>Média de {DATA_TYPE_LABELS[dataType].name}</h5>
+          {loadingState[dataType] ? (
+            <div className="d-flex justify-content-center">
+              <Spinner animation="border" size="sm" />
+            </div>
+          ) : (
+            <>
+              <div className={`display-5 fw-bold text-${dataType === 'glucose' ? 'primary' : 'danger'}`}>
+                {averages[dataType]}
+              </div>
+              <p className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  ), [averages, loadingState]);
+
+  // Render chart
+  const renderChart = useCallback((dataType) => (
+    <div className="col-md-6 mb-4">
+      <div className="card shadow">
+        <div className="card-header bg-white d-flex justify-content-between align-items-center">
+          <div>
+            <h5 className="mb-0">{DATA_TYPE_LABELS[dataType].name}</h5>
+            <p className="text-muted small mb-0">{DATA_TYPE_LABELS[dataType].description}</p>
+          </div>
+          <div>{renderTimeRangeSelector(dataType)}</div>
+        </div>
+        <div className="card-body">
+          <div style={{ height: '300px' }}>
+            {loadingState[dataType] ? (
+              <div className="d-flex align-items-center justify-content-center h-100">
+                <Spinner animation="border" />
+              </div>
+            ) : chartData[dataType] ? (
+              <Line data={chartData[dataType]} options={chartOptions} />
+            ) : (
+              <div className="d-flex align-items-center justify-content-center h-100">
+                <p className="text-muted">Nenhum dado disponível para o período selecionado</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  ), [chartData, chartOptions, loadingState, renderTimeRangeSelector]);
+
+  // Show error message if data fetching failed
+  if (error) {
+    return (
+      <div className="container mt-4">
+        <Alert variant="danger">
+          <Alert.Heading>Erro</Alert.Heading>
+          <p>{error}</p>
+          <div className="d-flex justify-content-end">
+            <Button 
+              variant="outline-danger" 
+              onClick={fetchAllData}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Show full-page loading only during initial load
+  const isInitialLoading = loadingState.glucose && loadingState.insulin && !chartData.glucose && !chartData.insulin;
+  if (isInitialLoading) {
+    return (
+      <div className="container mt-4 text-center">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">A carregar...</span>
+        </Spinner>
+        <p className="mt-2">A carregar dados...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-4">
@@ -286,24 +444,8 @@ export default function Estatisticas() {
             </div>
             <div className="card-body">
               <div className="row mb-4">
-                <div className="col-md-6">
-                  <div className="card bg-light border-0">
-                    <div className="card-body text-center">
-                      <h5>Média de Glicose</h5>
-                      <div className="display-5 fw-bold text-primary">{averages.glucose}</div>
-                      <p className="text-muted">mg/dL</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="card bg-light border-0">
-                    <div className="card-body text-center">
-                      <h5>Média de Insulina</h5>
-                      <div className="display-5 fw-bold text-danger">{averages.insulin}</div>
-                      <p className="text-muted">U</p>
-                    </div>
-                  </div>
-                </div>
+                {renderDataCard('glucose')}
+                {renderDataCard('insulin')}
               </div>
             </div>
           </div>
@@ -312,53 +454,8 @@ export default function Estatisticas() {
       
       {/* Charts */}
       <div className="row">
-        {/* Glucose Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card shadow">
-            <div className="card-header bg-white d-flex justify-content-between align-items-center">
-              <div>
-                <h5 className="mb-0">Glicose</h5>
-                <p className="text-muted small mb-0">Histórico de medições de glicose</p>
-              </div>
-              <div>{renderTimeRangeSelector('glucose')}</div>
-            </div>
-            <div className="card-body">
-              <div style={{ height: '300px' }}>
-                {chartData.glucose ? (
-                  <Line data={chartData.glucose} options={chartOptions} />
-                ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100">
-                    <p className="text-muted">Nenhum dado disponível para o período selecionado</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Insulin Chart */}
-        <div className="col-md-6 mb-4">
-          <div className="card shadow">
-            <div className="card-header bg-white d-flex justify-content-between align-items-center">
-              <div>
-                <h5 className="mb-0">Insulina</h5>
-                <p className="text-muted small mb-0">Histórico de medições de insulina</p>
-              </div>
-              <div>{renderTimeRangeSelector('insulin')}</div>
-            </div>
-            <div className="card-body">
-              <div style={{ height: '300px' }}>
-                {chartData.insulin ? (
-                  <Line data={chartData.insulin} options={chartOptions} />
-                ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100">
-                    <p className="text-muted">Nenhum dado disponível para o período selecionado</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        {renderChart('glucose')}
+        {renderChart('insulin')}
       </div>
     </div>
   );

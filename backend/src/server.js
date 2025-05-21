@@ -143,13 +143,10 @@ app.get("/api/registos/:tipo", authenticateToken, async (req, res) => {
       });
     }
     
-    // Query the database
-    const result = await pool.query(
-      'SELECT id, data_registo, dados FROM registos WHERE utilizador = $1 AND tipo_registo = $2 ORDER BY data_registo DESC',
-      [userId, tipo]
-    );
+    // Use the database helper function
+    const result = await db.getRegistos(userId, tipo);
     
-    // Process the results - dados now contains our clean processed data
+    // Process the results
     const processedData = result.rows.map(row => {
       const dados = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
       
