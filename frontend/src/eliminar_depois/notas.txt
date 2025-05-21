@@ -27,10 +27,6 @@
 The main consideration would be security improvements like using HTTP-only cookies 
 rather than localStorage if your backend supports it, and 
 adding token refresh/expiration logic if you're using JWT authentication.
- 
-mudar chatbot para o backend
-
-backend user autho com tokens
 
 fetch real data da database atravéz do backend
 
