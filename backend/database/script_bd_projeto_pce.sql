@@ -12,7 +12,9 @@ CREATE TABLE public.utilizador (
     data_nasc DATE NOT NULL,
     altura NUMERIC(5,2) NOT NULL,
     peso NUMERIC(5,2) NOT NULL,
-    genero SEXO_TIPO NOT NULL
+    genero SEXO_TIPO NOT NULL,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
 );
 
 -- Tabela de contato

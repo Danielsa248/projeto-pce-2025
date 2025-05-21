@@ -6,8 +6,10 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import StyleManager from './StyleManager.jsx';
 import Historico from './pages/Historico.jsx';
+import Estatisticas from './pages/Estatisticas.jsx';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));
@@ -44,6 +46,12 @@ export default function App() {
                                 </Suspense>
                             </ProtectedRoute>
                         } />
+
+                        <Route path='estatisticas' element={
+                            <ProtectedRoute>
+                                <Estatisticas />
+                            </ProtectedRoute>
+                        } />
                         
                         <Route path="historico" element={
                             <ProtectedRoute>
@@ -52,6 +60,7 @@ export default function App() {
                         } />
                     </Route>
                 </Routes>
+                <ChatWidget />
             </Router>
         </AuthProvider>
     );
