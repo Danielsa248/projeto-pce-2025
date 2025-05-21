@@ -5,29 +5,45 @@ import styleGlicose from './opt/style_glucose.json';
 import styleInsulina from './opt/style_insulina.json';
 import jdtIndividuo from './opt/jdt_individuo.json';
 import styleIndividuo from './opt/style_individuo.json';
-
-const saveComposition = async (values, type) => {
-    try {
-        const response = await fetch("http://localhost:3000/api/compositions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ type, composition: values }),
-        });
-
-        if (!response.ok) throw new Error("Erro ao guardar");
-
-        const result = await response.json();
-        console.log("Guardado com sucesso:", result);
-        return result;
-    } catch (err) {
-        console.error("Erro ao submeter composição:", err);
-        throw err;
-    }
-};
+import { useAuth } from './context/AuthContext'; // Add this import
 
 export default function FormRender({ type }) {
+    const { getToken } = useAuth();
+    
+    const saveComposition = async (values, formType) => {
+        try {
+            // Map component type to server expected type
+            const serverType = {
+                'glicose': 'Medição de Glicose',
+                'insulina': 'Medição de Insulina',
+                'individuo': 'Dados Individuais'
+            }[formType];
+            
+            const token = getToken();
+            
+            const response = await fetch("http://localhost:3000/api/compositions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ type: serverType, composition: values }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Erro ao guardar");
+            }
+
+            const result = await response.json();
+            console.log("Guardado com sucesso:", result);
+            return result;
+        } catch (err) {
+            console.error("Erro ao submeter composição:", err);
+            throw err;
+        }
+    };
+
     const formConfig = {
         glicose: {
             jdt: jdtGlicose,
