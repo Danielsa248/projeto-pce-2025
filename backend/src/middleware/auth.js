@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { pool } from '../bd.js';
 
+import env from '../config.js';
+
 export const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -13,7 +15,7 @@ export const authenticateToken = async (req, res, next) => {
     }
     
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, env.JWT_SECRET);
         
         // Check if user exists
         const result = await pool.query(

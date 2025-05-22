@@ -5,6 +5,8 @@ import { pool } from '../bd.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as info_trat from '../info_trat.js'; // Not from 'public/js/info_trat.js'
 
+import env from '../config.js';
+
 const router = express.Router();
 
 // Login endpoint
@@ -40,7 +42,7 @@ router.post('/login', async (req, res) => {
         // Create and sign JWT token
         const token = jwt.sign(
             { userId: user.id },
-            process.env.JWT_SECRET,
+            env.JWT_SECRET,
             { expiresIn: '24h' }
         );
         
@@ -173,7 +175,7 @@ router.post('/register', async (req, res) => {
             // Create and sign JWT token
             const token = jwt.sign(
                 { userId },
-                process.env.JWT_SECRET,
+                env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
             

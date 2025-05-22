@@ -1,11 +1,11 @@
 import { Pool } from 'pg'
-import { config } from 'dotenv';
 import { randomUUID } from 'crypto';
 
-config();
+import env from '../config.js';
+
 
 export const pool = new Pool({
-    connectionString: process.env.DB_URL,
+    connectionString: env.DB_URL,
 });
 
 // Testa a conexão à bd

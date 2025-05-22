@@ -3,15 +3,15 @@ import * as info_trat from './info_trat.js';
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import { authenticateToken } from './middleware/auth.js';
+
+// import env from '../config.js'; Usar este env caso seja preciso vars de ambiente
 
 
 const app = express();
 const PORT = 3000;
 
-dotenv.config();
 
 app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
