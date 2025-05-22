@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { pool } from '../bd.js';
 
-import env from '../config.js';
+import env from '../../config.js';
 
 export const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
