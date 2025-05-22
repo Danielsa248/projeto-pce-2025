@@ -21,7 +21,6 @@ export default function FormRender({ type, onSubmitComplete }) {
             
             // Special handling for registration flow
             if (formType === 'individuo' && onSubmitComplete) {
-                console.log("Submitting form data for registration:", values);
                 
                 // Call the parent's onSubmitComplete callback
                 await onSubmitComplete(values);

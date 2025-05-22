@@ -68,8 +68,6 @@ router.post('/register', async (req, res) => {
     const { username, password, composition } = req.body;
     
     try {
-        // Log for debugging
-        console.log('Registration data received:', { username, composition });
         
         // Check if username already exists
         const userCheck = await pool.query(
@@ -86,8 +84,6 @@ router.post('/register', async (req, res) => {
         
         // Process composition data
         const userInfo = info_trat.extractUserInfo(composition);
-        
-        console.log('Extracted user info:', userInfo);
         
         if (!userInfo || Object.keys(userInfo.errors || {}).length > 0) {
             return res.status(400).json({ 
@@ -194,7 +190,6 @@ router.post('/register', async (req, res) => {
             
         } catch (err) {
             await client.query('ROLLBACK');
-            console.error('Transaction error:', err);
             
             // Check if this is a unique_violation error from our trigger
             if (err.code === 'unique_violation' || err.message.includes('já existe no sistema')) {
@@ -209,7 +204,6 @@ router.post('/register', async (req, res) => {
             client.release();
         }
     } catch (error) {
-        console.error('Registration error:', error);
         return res.status(500).json({ 
             success: false, 
             message: 'Erro no servidor durante o registo' 

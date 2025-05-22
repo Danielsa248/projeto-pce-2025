@@ -31,9 +31,6 @@ export default function Register() {
             
             const credentials = JSON.parse(credentialsStr);
             
-            // Debug: print the form data
-            console.log("Form composition data:", formData);
-            
             // Process the form data using the backend's extractUserInfo
             // Send both credentials and form data to the server
             const response = await fetch('http://localhost:3000/api/auth/register', {
