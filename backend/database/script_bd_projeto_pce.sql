@@ -51,6 +51,18 @@ CREATE TABLE public.registos (
         REFERENCES public.utilizador (id) ON DELETE CASCADE
 );
 
+-- Tabela de registos agendados
+CREATE TABLE public.agenda (
+    id SERIAL PRIMARY KEY,
+    utilizador INTEGER NOT NULL,
+    tipo_registo registo_tipo NOT NULL,
+    data_evento TIMESTAMP NOT NULL,
+    notas TEXT,
+    realizado BOOLEAN DEFAULT FALSE,
+    CONSTRAINT fk_agenda_utilizador FOREIGN KEY (utilizador)
+        REFERENCES public.utilizador (id) ON DELETE CASCADE
+);
+
 
 -- Trigger function to check if user ID already exists
 CREATE OR REPLACE FUNCTION check_user_id_exists()
