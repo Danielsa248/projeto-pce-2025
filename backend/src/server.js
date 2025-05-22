@@ -32,66 +32,42 @@ app.post("/api/compositions", authenticateToken, async (req, res) => {
     let sucesso;
 
     try {
+        // Map to the correct tipo
+        let tipo = null;
         if (type === "Medição de Insulina") {
-            const tipo = "Insulina";
-            const processedData = info_trat.extractInsulinInfo(composition);
-            console.log("Informação processada:", processedData);
-            
-            // Only save to DB if we successfully processed the data
-            if (processedData) {
-                sucesso = await db.saveRegisto(tipo, id, data_registo, processedData, userId);
-            } else {
-                sucesso = false;
-            }
-        }
+            tipo = "Insulina";
+        } 
         else if (type === "Medição de Glicose") {
-            const tipo = "Glucose";
-            const processedData = info_trat.extractGlucoseInfo(composition);
-            console.log("Informação processada:", processedData);
-            
-            // Only save to DB if we successfully processed the data
-            if (processedData) {
-                sucesso = await db.saveRegisto(tipo, id, data_registo, processedData, userId);
-            } else {
-                sucesso = false;
-            }
+            tipo = "Glucose";
         }
         else {
-            const userInfo = info_trat.extractUserInfo(composition);
-            console.log("Informação do Form:", userInfo);
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Tipo de registo desconhecido' 
+            });
+        }
+        
+        // Store the raw composition data directly
+        sucesso = await db.saveRegisto(tipo, id, data_registo, composition, userId);
             
-            if (!userInfo.valid) {
-                return res.status(400).json({ 
-                    error: "Dados inválidos", 
-                    validationErrors: userInfo.errors 
-                });
-            }
-            
-            const result = await db.saveUtilizador(userInfo);
-            
-            if (result.success) {
-                sucesso = true;
-            } else {
-                if (result.error === 'duplicate_user') {
-                    return res.status(409).json({ 
-                        error: "Utilizador com esse número de utente já existe", 
-                        message: result.message 
-                    });
-                } else {
-                    sucesso = false;
-                }
-            }
+        if (!sucesso) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao guardar o registo' 
+            });
         }
 
-        if (sucesso) {
-            res.status(201).json({ message: "Guardado com sucesso!", id });
-        } else {
-            res.status(500).json({ error: "Erro ao guardar o registo" });
-        }
-
-    } catch (err) {
-        console.error("Erro ao guardar:", err);
-        res.status(500).json({ error: "Erro ao guardar a composition" });
+        return res.status(201).json({ 
+            success: true, 
+            message: 'Registo guardado com sucesso',
+            id: id
+        });
+    } catch (error) {
+        console.error('Erro ao processar registo:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno ao processar o registo' 
+        });
     }
 });
 
@@ -129,13 +105,12 @@ app.post("/api/assistant/chat", authenticateToken, async (req, res) => {
     }
 });
 
-// Endpoint to fetch glucose and insulin records
-app.get("/api/registos/:tipo", authenticateToken, async (req, res) => {
+// Rota para obter registos de um determinado tipo
+app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
+  const { tipo } = req.params;
+  const userId = req.user.id;
+  
   try {
-    const { tipo } = req.params;
-    const userId = req.user.id;
-    
-    // Validate tipo parameter
     if (!['Insulina', 'Glucose'].includes(tipo)) {
       return res.status(400).json({ 
         success: false, 
@@ -146,20 +121,39 @@ app.get("/api/registos/:tipo", authenticateToken, async (req, res) => {
     // Use the database helper function
     const result = await db.getRegistos(userId, tipo);
     
-    // Process the results
+    // Process the raw data when retrieving
     const processedData = result.rows.map(row => {
-      const dados = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
+      const rawData = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
+      
+      // Process the raw composition based on type
+      const processedInfo = tipo === 'Glucose' 
+        ? info_trat.extractGlucoseInfo(rawData) 
+        : info_trat.extractInsulinInfo(rawData);
       
       // Format date/time
       let timestamp = row.data_registo;
-      if (dados.DataMedicao && dados.HoraMedicao) {
-        timestamp = new Date(`${dados.DataMedicao}T${dados.HoraMedicao}`);
+      if (processedInfo && processedInfo.DataMedicao && processedInfo.HoraMedicao) {
+        timestamp = new Date(`${processedInfo.DataMedicao}T${processedInfo.HoraMedicao}`);
+      }
+      
+      // Extract the relevant value
+      const value = processedInfo ? 
+        parseFloat(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
+        null;
+      
+      // For Glucose readings, also include condition
+      const extraProps = {};
+      if (tipo === 'Glucose' && processedInfo) {
+        extraProps.condition = processedInfo.Regime;
+      } else if (tipo === 'Insulina' && processedInfo) {
+        extraProps.route = processedInfo.Routa;
       }
       
       return {
         id: row.id,
         timestamp: timestamp,
-        value: parseFloat(tipo === 'Glucose' ? dados.ValorGlicose : dados.ValorInsulina)
+        value: value,
+        ...extraProps
       };
     });
     
@@ -168,10 +162,10 @@ app.get("/api/registos/:tipo", authenticateToken, async (req, res) => {
       data: processedData
     });
   } catch (error) {
-    console.error(`Error fetching ${req.params.tipo} records:`, error);
+    console.error('Error fetching registos:', error);
     return res.status(500).json({ 
       success: false, 
-      message: 'Erro ao obter registos do servidor' 
+      message: 'Error retrieving data' 
     });
   }
 });
