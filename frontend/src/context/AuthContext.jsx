@@ -1,6 +1,9 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
+import { jwtDecode } from 'jwt-decode'; // You'll need to install this package
 
 const AuthContext = createContext(null);
+
+export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -14,16 +17,54 @@ export function AuthProvider({ children }) {
     
     if (storedUser && storedToken) {
       try {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
+        // Check if token is expired
+        const decodedToken = jwtDecode(storedToken);
+        const currentTime = Date.now() / 1000;
+        
+        if (decodedToken.exp < currentTime) {
+          // Token is expired, log the user out
+          console.log('Token expired, logging out...');
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          setUser(null);
+          setToken(null);
+        } else {
+          // Token is still valid
+          setUser(JSON.parse(storedUser));
+          setToken(storedToken);
+        }
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('Error parsing user data or token:', error);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
       }
     }
     setLoading(false);
   }, []);
+
+  // Function to get the auth token with expiration check
+  const getToken = () => {
+    if (!token) return null;
+    
+    try {
+      // Check if token is expired
+      const decodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      
+      if (decodedToken.exp < currentTime) {
+        // Token is expired, log the user out
+        console.log('Token expired when accessing protected resource, logging out...');
+        logout();
+        return null;
+      }
+      
+      return token;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      logout();
+      return null;
+    }
+  };
 
   const login = (userData, authToken) => {
     localStorage.setItem('user', JSON.stringify(userData));
@@ -38,9 +79,6 @@ export function AuthProvider({ children }) {
     setUser(null);
     setToken(null);
   };
-  
-  // Function to get the auth token
-  const getToken = () => token;
 
   return (
     <AuthContext.Provider value={{ 
@@ -55,5 +93,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(AuthContext);
