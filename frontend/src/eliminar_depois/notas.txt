@@ -33,3 +33,6 @@ fetch real data da database atravéz do backend
 
 -user: testuser
 -pass: password123
+
+-meter na bd compsition completa
+-tranformar em fhir e mandar para o mirth

@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout.jsx';
 import Inicio from './pages/Inicio.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import RegisterCredentials from './pages/RegisterCredentials.jsx'; // Add this import
 import StyleManager from './StyleManager.jsx';
 import Historico from './pages/Historico.jsx';
 import Estatisticas from './pages/Estatisticas.jsx';
@@ -23,7 +24,9 @@ export default function App() {
                     <Route path="/" element={<Layout />}>
 
                         <Route path="login" element={<Login />} />
-                        <Route path="registo" element={<Register />} />
+                        {/* Update registration routes */}
+                        <Route path="registo" element={<RegisterCredentials />} />
+                        <Route path="registo/info-pessoal" element={<Register />} />
                         
                         <Route path="/" element={
                             <ProtectedRoute>

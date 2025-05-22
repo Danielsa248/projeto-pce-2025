@@ -8,7 +8,7 @@ async function createTestUser() {
         await client.query('BEGIN');
         
         // Check if test user already exists
-        const checkResult = await client.query('SELECT id FROM utilizador WHERE username = $1', ['testuser']);
+        const checkResult = await client.query('SELECT id FROM utilizador WHERE username = $1', ['test']);
         
         if (checkResult.rows.length > 0) {
             console.log('Test user already exists!');
@@ -17,7 +17,7 @@ async function createTestUser() {
         }
         
         // Hash password
-        const passwordHash = await bcrypt.hash('password123', 10);
+        const passwordHash = await bcrypt.hash('password', 10);
         
         // Get next available ID
         const idResult = await client.query('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM utilizador');
@@ -26,13 +26,13 @@ async function createTestUser() {
         // Insert test user
         await client.query(
             'INSERT INTO utilizador (id, nome, data_nasc, altura, peso, genero, username, password_hash) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-            [nextId, 'Test User', '1990-01-01', 175.0, 70.0, 'O', 'testuser', passwordHash]
+            [nextId, 'Teste', '1990-01-01', 175.0, 70.0, 'O', 'test', passwordHash]
         );
         
         // Insert email for the test user
         await client.query(
             'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
-            [nextId, 'E', 'testuser@example.com']
+            [nextId, 'E', 'test@example.com']
         );
         
         // Insert test address
@@ -44,8 +44,8 @@ async function createTestUser() {
         
         await client.query('COMMIT');
         console.log('Test user created successfully!');
-        console.log('Username: testuser');
-        console.log('Password: password123');
+        console.log('Username: test');
+        console.log('Password: password');
         console.log('User ID:', nextId);
         
     } catch (err) {
