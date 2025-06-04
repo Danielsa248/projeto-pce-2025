@@ -439,7 +439,7 @@ export default function Estatisticas() {
     </select>
   ), [timeRanges, handleTimeRangeChange]);
 
-  // Render filter selector (meal state for glucose, route for insulin)
+  // Render filter selector for glucose and insulin
   const renderFilterSelector = useCallback((dataType) => {
     if (dataType === 'glucose') {
       return (
@@ -472,40 +472,52 @@ export default function Estatisticas() {
     }
   }, [mealStates, routeStates, handleMealStateChange, handleRouteStateChange]);
 
-  // Render data card
   const renderDataCard = useCallback((dataType) => (
     <div className="col-md-6">
       <div className="card bg-light border-0">
         <div className="card-body text-center">
-          <h5>Média de {DATA_TYPE_LABELS[dataType].name}</h5>
+          <h5 className="mb-4">Estatísticas de {DATA_TYPE_LABELS[dataType].name}</h5>
           {loadingState[dataType] ? (
             <div className="d-flex justify-content-center">
               <Spinner animation="border" size="sm" />
             </div>
           ) : (
             <>
-              <div className={`display-5 fw-bold text-${dataType === 'glucose' ? 'primary' : 'danger'}`}>
-                {averages[dataType]}
-              </div>
-              <p className="text-muted mb-2">{DATA_TYPE_LABELS[dataType].unit}</p>
-              
-              {/* Min/Max values */}
-              {minMaxValues[dataType].min !== null && minMaxValues[dataType].max !== null && (
-                <div className="row text-center mt-3">
-                  <div className="col-6">
-                    <small className="text-muted d-block">Mínimo</small>
-                    <span className={`fw-bold text-${dataType === 'glucose' ? 'success' : 'info'}`}>
-                      {minMaxValues[dataType].min} {DATA_TYPE_LABELS[dataType].unit}
-                    </span>
-                  </div>
-                  <div className="col-6">
-                    <small className="text-muted d-block">Máximo</small>
-                    <span className={`fw-bold text-${dataType === 'glucose' ? 'warning' : 'danger'}`}>
-                      {minMaxValues[dataType].max} {DATA_TYPE_LABELS[dataType].unit}
-                    </span>
+              {/* All three metrics side by side - Minimum, Average, Maximum */}
+              <div className="row">
+                {/* Minimum - Left */}
+                <div className="col-4">
+                  <div className="text-center">
+                    <small className="text-muted d-block mb-2">Mínimo</small>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'success' : 'info'}`}>
+                      {minMaxValues[dataType].min !== null ? minMaxValues[dataType].min : '0'}
+                    </div>
+                    <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
                   </div>
                 </div>
-              )}
+                
+                {/* Average - Middle */}
+                <div className="col-4">
+                  <div className="text-center">
+                    <small className="text-muted d-block mb-2">Média</small>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'primary' : 'danger'}`}>
+                      {averages[dataType]}
+                    </div>
+                    <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
+                  </div>
+                </div>
+                
+                {/* Maximum - Right */}
+                <div className="col-4">
+                  <div className="text-center">
+                    <small className="text-muted d-block mb-2">Máximo</small>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'warning' : 'danger'}`}>
+                      {minMaxValues[dataType].max !== null ? minMaxValues[dataType].max : '0'}
+                    </div>
+                    <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
