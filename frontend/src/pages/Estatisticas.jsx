@@ -129,6 +129,12 @@ export default function Estatisticas() {
     insulin: 0,
   });
 
+  // Add min/max state
+  const [minMaxValues, setMinMaxValues] = useState({
+    glucose: { min: null, max: null },
+    insulin: { min: null, max: null },
+  });
+  
   const [data, setData] = useState({
     glucose: [],
     insulin: []
@@ -324,16 +330,18 @@ export default function Estatisticas() {
     if (filteredData.length === 0) {
       return {
         chartData: null,
-        average: 0
+        average: 0,
+        min: null,
+        max: null
       };
     }
     
-    const total = filteredData.reduce((sum, item) => {
-      const value = Number(item.value);
-      return sum + (isNaN(value) ? 0 : value);
-    }, 0);
+    const values = filteredData.map(item => Number(item.value)).filter(val => !isNaN(val));
     
-    const average = filteredData.length ? Math.round(total / filteredData.length) : 0;
+    const total = values.reduce((sum, value) => sum + value, 0);
+    const average = values.length ? Math.round(total / values.length) : 0;
+    const min = values.length ? Math.min(...values) : null;
+    const max = values.length ? Math.max(...values) : null;
     
     const chartData = {
       datasets: [
@@ -353,7 +361,7 @@ export default function Estatisticas() {
       ],
     };
     
-    return { chartData, average };
+    return { chartData, average, min, max };
   }, [data, filterDataByTimeRange]);
 
   // Update charts when data, time ranges, or filter states change
@@ -382,6 +390,12 @@ export default function Estatisticas() {
       setAverages({
         glucose: glucoseResults.average,
         insulin: insulinResults.average
+      });
+      
+      // Add min/max values
+      setMinMaxValues({
+        glucose: { min: glucoseResults.min, max: glucoseResults.max },
+        insulin: { min: insulinResults.min, max: insulinResults.max }
       });
     }
   }, [timeRanges, mealStates, routeStates, data, loadingState, error, prepareChartData]);
@@ -473,13 +487,31 @@ export default function Estatisticas() {
               <div className={`display-5 fw-bold text-${dataType === 'glucose' ? 'primary' : 'danger'}`}>
                 {averages[dataType]}
               </div>
-              <p className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</p>
+              <p className="text-muted mb-2">{DATA_TYPE_LABELS[dataType].unit}</p>
+              
+              {/* Min/Max values */}
+              {minMaxValues[dataType].min !== null && minMaxValues[dataType].max !== null && (
+                <div className="row text-center mt-3">
+                  <div className="col-6">
+                    <small className="text-muted d-block">Mínimo</small>
+                    <span className={`fw-bold text-${dataType === 'glucose' ? 'success' : 'info'}`}>
+                      {minMaxValues[dataType].min} {DATA_TYPE_LABELS[dataType].unit}
+                    </span>
+                  </div>
+                  <div className="col-6">
+                    <small className="text-muted d-block">Máximo</small>
+                    <span className={`fw-bold text-${dataType === 'glucose' ? 'warning' : 'danger'}`}>
+                      {minMaxValues[dataType].max} {DATA_TYPE_LABELS[dataType].unit}
+                    </span>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
     </div>
-  ), [averages, loadingState]);
+  ), [averages, minMaxValues, loadingState]);
 
   // Render chart
   const renderChart = useCallback((dataType) => (
@@ -569,7 +601,7 @@ export default function Estatisticas() {
           <div className="card shadow">
             <div className="card-header bg-white">
               <h5 className="mb-0">Evolução das Medições ao Longo do Tempo</h5>
-              <p className="text-muted small mb-0">Visão geral das suas medições mais recentes</p>
+              <p className="text-muted small mb-0">Visão geral das medições mais recentes</p>
             </div>
             <div className="card-body">
               <div className="row mb-4">
