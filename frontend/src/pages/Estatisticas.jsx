@@ -74,10 +74,49 @@ const DATA_TYPE_LABELS = {
   }
 };
 
+const MEAL_STATES = {
+  ALL: 'all',
+  JEJUM: 'Jejum',
+  POS_PRANDIAL: 'Pós-prandial',
+  PRE_PRANDIAL: 'Pré-prandial',
+  ALEATORIO: 'Aleatório'
+};
+
+const MEAL_STATE_LABELS = {
+  [MEAL_STATES.ALL]: 'Todos os tipos',
+  [MEAL_STATES.JEJUM]: 'Jejum',
+  [MEAL_STATES.POS_PRANDIAL]: 'Pós-prandial',
+  [MEAL_STATES.PRE_PRANDIAL]: 'Pré-prandial',
+  [MEAL_STATES.ALEATORIO]: 'Aleatório'
+};
+
+// Add route constants for insulin
+const ROUTE_STATES = {
+  ALL: 'all',
+  SUBCUTANEA: 'Subcutânea',
+  INTRAVENOSA: 'Intravenosa'
+};
+
+const ROUTE_STATE_LABELS = {
+  [ROUTE_STATES.ALL]: 'Todas as vias',
+  [ROUTE_STATES.SUBCUTANEA]: 'Subcutânea',
+  [ROUTE_STATES.INTRAVENOSA]: 'Intravenosa'
+};
+
 export default function Estatisticas() {
   const [timeRanges, setTimeRanges] = useState({
     glucose: TIME_RANGES.DAYS_7,
     insulin: TIME_RANGES.DAYS_7,
+  });
+  
+  // Update meal state tracking to be more specific
+  const [mealStates, setMealStates] = useState({
+    glucose: MEAL_STATES.ALL,
+  });
+  
+  // Add separate route state for insulin
+  const [routeStates, setRouteStates] = useState({
+    insulin: ROUTE_STATES.ALL,
   });
   
   const [chartData, setChartData] = useState({
@@ -223,7 +262,7 @@ export default function Estatisticas() {
   }, [fetchAllData]);
 
 
-  const filterDataByTimeRange = useCallback((dataArray, timeRange) => {
+  const filterDataByTimeRange = useCallback((dataArray, timeRange, filterState = null, filterType = 'meal') => {
     if (!dataArray || dataArray.length === 0) {
       return [];
     }
@@ -232,39 +271,55 @@ export default function Estatisticas() {
       new Date(a.timestamp) - new Date(b.timestamp)
     );
     
-    if (timeRange === TIME_RANGES.ALL) {
-      return sortedData;
+    // Apply time range filtering
+    let filteredData = sortedData;
+    if (timeRange !== TIME_RANGES.ALL) {
+      const now = new Date();
+      let cutoffDate = new Date();
+      
+      switch(timeRange) {
+        case TIME_RANGES.HOURS_24:
+          cutoffDate.setHours(now.getHours() - 24);
+          break;
+        case TIME_RANGES.DAYS_7:
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case TIME_RANGES.DAYS_14:
+          cutoffDate.setDate(now.getDate() - 14);
+          break;
+        case TIME_RANGES.DAYS_28:
+          cutoffDate.setDate(now.getDate() - 28);
+          break;
+        default:
+          cutoffDate.setDate(now.getDate() - 7);
+      }
+      
+      filteredData = filteredData.filter(item => {
+        const itemDate = item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp);
+        return itemDate >= cutoffDate;
+      });
     }
     
-    const now = new Date();
-    let cutoffDate = new Date();
-    
-    switch(timeRange) {
-      case TIME_RANGES.HOURS_24:
-        cutoffDate.setHours(now.getHours() - 24);
-        break;
-      case TIME_RANGES.DAYS_7:
-        cutoffDate.setDate(now.getDate() - 7);
-        break;
-      case TIME_RANGES.DAYS_14:
-        cutoffDate.setDate(now.getDate() - 14);
-        break;
-      case TIME_RANGES.DAYS_28:
-        cutoffDate.setDate(now.getDate() - 28);
-        break;
-      default:
-        cutoffDate.setDate(now.getDate() - 7);
+    // Apply secondary filtering
+    if (filterState && filterState !== MEAL_STATES.ALL && filterState !== ROUTE_STATES.ALL) {
+      filteredData = filteredData.filter(item => {
+        if (filterType === 'meal') {
+          // For glucose, filter by condition (meal state)
+          return item.condition === filterState;
+        } else if (filterType === 'route') {
+          // For insulin, filter by route
+          return item.route === filterState;
+        }
+        return true;
+      });
     }
     
-    return sortedData.filter(item => {
-      const itemDate = item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp);
-      return itemDate >= cutoffDate;
-    });
+    return filteredData;
   }, []);
 
 
-  const prepareChartData = useCallback((dataType, timeRange) => {
-    const filteredData = filterDataByTimeRange(data[dataType], timeRange);
+  const prepareChartData = useCallback((dataType, timeRange, filterState, filterType) => {
+    const filteredData = filterDataByTimeRange(data[dataType], timeRange, filterState, filterType);
     
     if (filteredData.length === 0) {
       return {
@@ -301,13 +356,23 @@ export default function Estatisticas() {
     return { chartData, average };
   }, [data, filterDataByTimeRange]);
 
-  // Update charts when data or time ranges change
+  // Update charts when data, time ranges, or filter states change
   useEffect(() => {
     const isLoading = loadingState.glucose || loadingState.insulin;
     
     if (!isLoading && !error) {
-      const glucoseResults = prepareChartData('glucose', timeRanges.glucose);
-      const insulinResults = prepareChartData('insulin', timeRanges.insulin);
+      const glucoseResults = prepareChartData(
+        'glucose', 
+        timeRanges.glucose, 
+        mealStates.glucose, 
+        'meal'
+      );
+      const insulinResults = prepareChartData(
+        'insulin', 
+        timeRanges.insulin, 
+        routeStates.insulin, 
+        'route'
+      );
       
       setChartData({
         glucose: glucoseResults.chartData,
@@ -319,11 +384,27 @@ export default function Estatisticas() {
         insulin: insulinResults.average
       });
     }
-  }, [timeRanges, data, loadingState, error, prepareChartData]);
+  }, [timeRanges, mealStates, routeStates, data, loadingState, error, prepareChartData]);
 
   // Handle time range change
   const handleTimeRangeChange = useCallback((dataType, value) => {
     setTimeRanges(prev => ({
+      ...prev,
+      [dataType]: value
+    }));
+  }, []);
+
+  // Handle meal state change
+  const handleMealStateChange = useCallback((dataType, value) => {
+    setMealStates(prev => ({
+      ...prev,
+      [dataType]: value
+    }));
+  }, []);
+
+  // Handle route state change
+  const handleRouteStateChange = useCallback((dataType, value) => {
+    setRouteStates(prev => ({
       ...prev,
       [dataType]: value
     }));
@@ -343,6 +424,39 @@ export default function Estatisticas() {
       ))}
     </select>
   ), [timeRanges, handleTimeRangeChange]);
+
+  // Render filter selector (meal state for glucose, route for insulin)
+  const renderFilterSelector = useCallback((dataType) => {
+    if (dataType === 'glucose') {
+      return (
+        <select 
+          className="form-select form-select-sm" 
+          value={mealStates[dataType]}
+          onChange={(e) => handleMealStateChange(dataType, e.target.value)}
+          style={{ width: 'auto', minWidth: '140px' }}
+          aria-label={`Selecionar tipo de evento para ${DATA_TYPE_LABELS[dataType].name}`}
+        >
+          {Object.entries(MEAL_STATE_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      );
+    } else {
+      return (
+        <select 
+          className="form-select form-select-sm" 
+          value={routeStates[dataType]}
+          onChange={(e) => handleRouteStateChange(dataType, e.target.value)}
+          style={{ width: 'auto', minWidth: '140px' }}
+          aria-label={`Selecionar via de administração para ${DATA_TYPE_LABELS[dataType].name}`}
+        >
+          {Object.entries(ROUTE_STATE_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      );
+    }
+  }, [mealStates, routeStates, handleMealStateChange, handleRouteStateChange]);
 
   // Render data card
   const renderDataCard = useCallback((dataType) => (
@@ -371,12 +485,27 @@ export default function Estatisticas() {
   const renderChart = useCallback((dataType) => (
     <div className="col-md-6 mb-4">
       <div className="card shadow">
-        <div className="card-header bg-white d-flex justify-content-between align-items-center">
-          <div>
-            <h5 className="mb-0">{DATA_TYPE_LABELS[dataType].name}</h5>
-            <p className="text-muted small mb-0">{DATA_TYPE_LABELS[dataType].description}</p>
+        <div className="card-header bg-white">
+          <div className="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 className="mb-0">{DATA_TYPE_LABELS[dataType].name}</h5>
+              <p className="text-muted small mb-0">{DATA_TYPE_LABELS[dataType].description}</p>
+            </div>
+            <div className="d-flex align-items-center gap-3">
+              {/* Time range selector */}
+              <div className="d-flex align-items-center gap-2">
+                <small className="text-muted text-nowrap">Período:</small>
+                {renderTimeRangeSelector(dataType)}
+              </div>
+              {/* Filter selector */}
+              <div className="d-flex align-items-center gap-2">
+                <small className="text-muted text-nowrap">
+                  {dataType === 'glucose' ? 'Tipo:' : 'Via:'}
+                </small>
+                {renderFilterSelector(dataType)}
+              </div>
+            </div>
           </div>
-          <div>{renderTimeRangeSelector(dataType)}</div>
         </div>
         <div className="card-body">
           <div style={{ height: '300px' }}>
@@ -395,7 +524,7 @@ export default function Estatisticas() {
         </div>
       </div>
     </div>
-  ), [chartData, chartOptions, loadingState, renderTimeRangeSelector]);
+  ), [chartData, chartOptions, loadingState, renderTimeRangeSelector, renderFilterSelector]);
 
   // Show error message if data fetching failed
   if (error) {
