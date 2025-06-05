@@ -16,7 +16,7 @@ export function extractGlucoseInfo(composition) {
 
         const measurementTime = data["items.0.0.items.1.value.time"] || null;
 
-        const glucoseValue = data["items.0.0.items.2.items.0.value.value"] || null;
+        const glucoseValue = data["items.0.0.items.2.items.0.value.value"];
         
         const mealState = data["items.0.0.items.3.items.0.value"]?.text || null;
         
@@ -78,7 +78,7 @@ export function extractInsulinInfo(composition) {
             "DataMedicao": measurementDate,
             "HoraMedicao": measurementTime,
             "ValorInsulina": insulinValue,
-            "Routa": route,
+            "Rota": route,
         }
 
     } catch (error) {

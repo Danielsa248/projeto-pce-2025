@@ -605,8 +605,13 @@ export default function Estatisticas() {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Estatísticas</h2>
-      
+      <h1 className="display-6 fw-bold text-primary mb-1">
+        <i className="fas fa-line-chart me-3"></i>
+          Estatísticas
+      </h1>
+      <p className="text-muted mb-4">
+        Consulte as suas estatísticas globais
+      </p>
       {/* Summary cards */}
       <div className="row mb-4">
         <div className="col">

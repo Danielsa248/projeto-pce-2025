@@ -27,6 +27,7 @@ export default function Topbar({ toggleSidebar, sidebarVisible }) {
       'medicao-insulina': 'Medição de Insulina',
       'agenda': 'Agenda',
       'historico': 'Histórico',
+      'estatisticas': 'Estatísticas',
     };
     
     if (pageMappings[path.substring(1)]) {
