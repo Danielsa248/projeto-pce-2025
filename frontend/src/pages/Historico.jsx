@@ -23,19 +23,20 @@ export default function Historico() {
         const transformedGlucose = glucoseData.map(item => ({
             data_registo: item.timestamp,
             tipo: 'Glicose',
-            valor: `${item.value} mg/dL`,
-            regime: item.condition || 'Jejum',
-            calorias_refeicao: item.meal_calories || null,
-            tempo_ult_refeicao: item.meal_duration || null,
-            tempo_ult_exercicio: item.exercise_duration || null,
-            calorias_exercicio: item.exercise_calories || null,
-            peso: item.weight || null,
+            // CORRIGIDO: Use nullish coalescing (??) em vez de ||
+            valor: `${item.glucose_value ?? 0} mg/dL`,
+            regime: item.condition,
+            calorias_refeicao: item.meal_calories ?? null,
+            tempo_ult_refeicao: item.meal_duration ?? null,
+            tempo_ult_exercicio: item.exercise_duration ?? null,
+            calorias_exercicio: item.exercise_calories ?? null,
+            peso: item.weight ?? null,
         }));
         
         const transformedInsulin = insulinData.map(item => ({
             data_registo: item.timestamp,
             tipo: 'Insulina',
-            valor: `${item.value} U`,
+            valor: `${item.insulin_value ?? item.value ?? 0} U`,
             regime: item.route || 'Subcutânea',
         }));
         

@@ -121,6 +121,15 @@ app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
     // Use the database helper function
     const result = await db.getRegistos(userId, tipo);
     
+    // FUNÇÃO AUXILIAR para tratar valores numéricos
+    const parseValue = (value) => {
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? null : parsed;
+    };
+    
     // Process the raw data when retrieving
     const processedData = result.rows.map(row => {
       const rawData = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
@@ -136,9 +145,9 @@ app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
         timestamp = new Date(`${processedInfo.DataMedicao}T${processedInfo.HoraMedicao}`);
       }
       
-      // Extract the relevant value
+      // Extract the relevant value - CORRIGIDO
       const value = processedInfo ? 
-        parseFloat(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
+        parseValue(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
         null;
       
       // Base record structure
@@ -148,26 +157,26 @@ app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
         value: value
       };
       
-      // Add type-specific fields
+      // Add type-specific fields - CORRIGIDO
       if (tipo === 'Glucose' && processedInfo) {
         return {
           ...baseRecord,
+          glucose_value: parseValue(processedInfo.ValorGlicose),
           condition: processedInfo.Regime,
-          meal_calories: processedInfo.Calorias ? parseFloat(processedInfo.Calorias) : null,
+          meal_calories: parseValue(processedInfo.Calorias),
           meal_duration: processedInfo.TempoDesdeUltimaRefeicao || null,
-          exercise_calories: processedInfo.CaloriasExercicio ? parseFloat(processedInfo.Calorias) : null,
+          exercise_calories: parseValue(processedInfo.CaloriasExercicio),
           exercise_duration: processedInfo.TempoDesdeExercicio || null,
-          weight: processedInfo.PesoAtual ? parseFloat(processedInfo.PesoAtual) : null,
+          weight: parseValue(processedInfo.PesoAtual),
           notes: processedInfo.NomeRegisto || null
         };
       } else if (tipo === 'Insulina' && processedInfo) {
         return {
           ...baseRecord,
-          route: processedInfo.Routa,
-          product_type: processedInfo.TipoProduto || null,
-          injection_site: processedInfo.LocalAplicacao || null,
-          insulin_type: processedInfo.TipoInsulina || null,
-          notes: processedInfo.Notas || null
+          route: processedInfo.Rota,
+          insulin_value: parseValue(processedInfo.ValorInsulina),
+          date: processedInfo.DataMedicao || null,
+          time: processedInfo.HoraMedicao || null,
         };
       } else {
         return {
