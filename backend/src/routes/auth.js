@@ -106,18 +106,12 @@ router.post('/register', async (req, res) => {
             
             // Generate ID if not provided
             let userId = userInfo.NumeroUtente;
+            /*
             if (!userId) {
                 const idResult = await client.query('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM utilizador');
                 userId = idResult.rows[0].next_id;
             }
-            
-            // Convert gender from "Masculino" to "M", etc.
-            const genderMap = {
-                'Masculino': 'M',
-                'Feminino': 'F',
-                'Outro': 'O'
-            };
-            const genderCode = genderMap[userInfo.Genero] || 'O';
+            */
             
             // Insert user
             await client.query(
@@ -128,7 +122,7 @@ router.post('/register', async (req, res) => {
                     userInfo.DataNascimento, 
                     userInfo.Altura, 
                     userInfo.Peso, 
-                    genderCode, 
+                    userInfo.Genero,
                     username, 
                     passwordHash
                 ]
