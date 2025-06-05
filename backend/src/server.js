@@ -3,6 +3,7 @@ import * as info_trat from './info_trat.js';
 import express from 'express';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
+import agendaRoutes from './routes/agenda.js';
 import authRoutes from './routes/auth.js';
 import { authenticateToken } from './middleware/auth.js';
 
@@ -16,6 +17,7 @@ const PORT = 3000;
 app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/agenda', agendaRoutes);
 
 
 // Rota para guardar na BD o json
