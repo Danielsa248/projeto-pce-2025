@@ -141,20 +141,40 @@ app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
         parseFloat(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
         null;
       
-      // For Glucose readings, also include condition
-      const extraProps = {};
-      if (tipo === 'Glucose' && processedInfo) {
-        extraProps.condition = processedInfo.Regime;
-      } else if (tipo === 'Insulina' && processedInfo) {
-        extraProps.route = processedInfo.Routa;
-      }
-      
-      return {
+      // Base record structure
+      const baseRecord = {
         id: row.id,
         timestamp: timestamp,
-        value: value,
-        ...extraProps
+        value: value
       };
+      
+      // Add type-specific fields
+      if (tipo === 'Glucose' && processedInfo) {
+        return {
+          ...baseRecord,
+          condition: processedInfo.Regime,
+          meal_calories: processedInfo.Calorias ? parseFloat(processedInfo.Calorias) : null,
+          meal_duration: processedInfo.TempoDesdeUltimaRefeicao || null,
+          exercise_calories: processedInfo.CaloriasExercicio ? parseFloat(processedInfo.Calorias) : null,
+          exercise_duration: processedInfo.TempoDesdeExercicio || null,
+          weight: processedInfo.PesoAtual ? parseFloat(processedInfo.PesoAtual) : null,
+          notes: processedInfo.NomeRegisto || null
+        };
+      } else if (tipo === 'Insulina' && processedInfo) {
+        return {
+          ...baseRecord,
+          route: processedInfo.Routa,
+          product_type: processedInfo.TipoProduto || null,
+          injection_site: processedInfo.LocalAplicacao || null,
+          insulin_type: processedInfo.TipoInsulina || null,
+          notes: processedInfo.Notas || null
+        };
+      } else {
+        return {
+          ...baseRecord,
+          raw_composition: rawData
+        };
+      }
     });
     
     return res.json({
