@@ -1,77 +1,20 @@
-import * as db from './bd.js';
-import * as info_trat from './info_trat.js';
 import express from 'express';
 import cors from 'cors';
-import { v4 as uuidv4 } from 'uuid';
 import agendaRoutes from './routes/agenda.js';
 import authRoutes from './routes/auth.js';
+import dataBaseRoutes from './routes/db.js';
 import { authenticateToken } from './middleware/auth.js';
-
-// import env from '../config.js'; Usar este env caso seja preciso vars de ambiente
 
 
 const app = express();
 const PORT = 3000;
 
-
 app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/agenda', agendaRoutes);
+app.use('/api/bd', dataBaseRoutes)
 
-
-// Rota para guardar na BD o json
-app.post("/api/compositions", authenticateToken, async (req, res) => {
-    let { type, composition } = req.body;
-    if (typeof composition === "string") {
-        composition = JSON.parse(composition);
-    }
-
-    const id = uuidv4();
-    const data_registo = new Date()
-    const userId = req.user.id; // Use authenticated user ID
-
-    let sucesso;
-
-    try {
-        // Map to the correct tipo
-        let tipo = null;
-        if (type === "Medição de Insulina") {
-            tipo = "Insulina";
-        } 
-        else if (type === "Medição de Glicose") {
-            tipo = "Glucose";
-        }
-        else {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Tipo de registo desconhecido' 
-            });
-        }
-        
-        // Store the raw composition data directly
-        sucesso = await db.saveRegisto(tipo, id, data_registo, composition, userId);
-            
-        if (!sucesso) {
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao guardar o registo' 
-            });
-        }
-
-        return res.status(201).json({ 
-            success: true, 
-            message: 'Registo guardado com sucesso',
-            id: id
-        });
-    } catch (error) {
-        console.error('Erro ao processar registo:', error);
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Erro interno ao processar o registo' 
-        });
-    }
-});
 
 // Chat Bot API
 app.post("/api/assistant/chat", authenticateToken, async (req, res) => {
@@ -107,99 +50,6 @@ app.post("/api/assistant/chat", authenticateToken, async (req, res) => {
     }
 });
 
-// Rota para obter registos de um determinado tipo
-app.get('/api/registos/:tipo', authenticateToken, async (req, res) => {
-  const { tipo } = req.params;
-  const userId = req.user.id;
-  
-  try {
-    if (!['Insulina', 'Glucose'].includes(tipo)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Tipo inválido. Deve ser Insulina ou Glucose' 
-      });
-    }
-    
-    // Use the database helper function
-    const result = await db.getRegistos(userId, tipo);
-    
-    // FUNÇÃO AUXILIAR para tratar valores numéricos
-    const parseValue = (value) => {
-      if (value === null || value === undefined || value === '') {
-        return null;
-      }
-      const parsed = parseFloat(value);
-      return isNaN(parsed) ? null : parsed;
-    };
-    
-    // Process the raw data when retrieving
-    const processedData = result.rows.map(row => {
-      const rawData = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
-      
-      // Process the raw composition based on type
-      const processedInfo = tipo === 'Glucose' 
-        ? info_trat.extractGlucoseInfo(rawData) 
-        : info_trat.extractInsulinInfo(rawData);
-      
-      // Format date/time
-      let timestamp = row.data_registo;
-      if (processedInfo && processedInfo.DataMedicao && processedInfo.HoraMedicao) {
-        timestamp = new Date(`${processedInfo.DataMedicao}T${processedInfo.HoraMedicao}`);
-      }
-      
-      // Extract the relevant value - CORRIGIDO
-      const value = processedInfo ? 
-        parseValue(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
-        null;
-      
-      // Base record structure
-      const baseRecord = {
-        id: row.id,
-        timestamp: timestamp,
-        value: value
-      };
-      
-      // Add type-specific fields - CORRIGIDO
-      if (tipo === 'Glucose' && processedInfo) {
-        return {
-          ...baseRecord,
-          glucose_value: parseValue(processedInfo.ValorGlicose),
-          condition: processedInfo.Regime,
-          meal_calories: parseValue(processedInfo.Calorias),
-          meal_duration: processedInfo.TempoDesdeUltimaRefeicao || null,
-          exercise_calories: parseValue(processedInfo.CaloriasExercicio),
-          exercise_duration: processedInfo.TempoDesdeExercicio || null,
-          weight: parseValue(processedInfo.PesoAtual),
-          notes: processedInfo.NomeRegisto || null
-        };
-      } else if (tipo === 'Insulina' && processedInfo) {
-        return {
-          ...baseRecord,
-          route: processedInfo.Rota,
-          insulin_value: parseValue(processedInfo.ValorInsulina),
-          date: processedInfo.DataMedicao || null,
-          time: processedInfo.HoraMedicao || null,
-        };
-      } else {
-        return {
-          ...baseRecord,
-          raw_composition: rawData
-        };
-      }
-    });
-    
-    return res.json({
-      success: true,
-      data: processedData
-    });
-  } catch (error) {
-    console.error('Error fetching registos:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Error retrieving data' 
-    });
-  }
-});
 
 app.listen(PORT, () => {
     console.log(`Servidor a correr em http://localhost:${PORT}`);

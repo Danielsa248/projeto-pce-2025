@@ -23,7 +23,6 @@ export default function Historico() {
         const transformedGlucose = glucoseData.map(item => ({
             data_registo: item.timestamp,
             tipo: 'Glicose',
-            // CORRIGIDO: Use nullish coalescing (??) em vez de ||
             valor: `${item.glucose_value ?? 0} mg/dL`,
             regime: item.condition,
             calorias_refeicao: item.meal_calories ?? null,
@@ -54,13 +53,13 @@ export default function Historico() {
             }
             
             const [glucoseResponse, insulinResponse] = await Promise.all([
-                fetch('http://localhost:3000/api/registos/Glucose?include=all', {
+                fetch('http://localhost:3000/api/bd/registos/Glucose?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
                     }
                 }),
-                fetch('http://localhost:3000/api/registos/Insulina?include=all', {
+                fetch('http://localhost:3000/api/bd/registos/Insulina?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
