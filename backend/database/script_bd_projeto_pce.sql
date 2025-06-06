@@ -60,7 +60,8 @@ CREATE TABLE public.agenda (
     notas TEXT,
     realizado BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_agenda_utilizador FOREIGN KEY (utilizador)
-        REFERENCES public.utilizador (id) ON DELETE CASCADE
+        REFERENCES public.utilizador (id) ON DELETE CASCADE,
+    CONSTRAINT check_future_event CHECK (data_evento > NOW())
 );
 
 

@@ -70,7 +70,7 @@ const DATA_TYPE_LABELS = {
   insulin: {
     name: 'Insulina',
     unit: 'U',
-    description: 'Histórico de medições de insulina',
+    description: 'Histórico de administrações de insulina',
   }
 };
 
@@ -160,7 +160,7 @@ export default function Estatisticas() {
       },
       title: {
         display: true,
-        text: 'Medições ao Longo do Tempo',
+        text: 'Valores ao Longo do Tempo',
       },
       tooltip: {
         callbacks: {
