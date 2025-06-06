@@ -38,6 +38,8 @@ export default function Agenda() {
     const [formData, setFormData] = useState({
         tipo_registo: REGISTO_TYPES.GLUCOSE,
         data_evento: '',
+        date: '',
+        time: '',
         notas: ''
     });
 
@@ -61,6 +63,41 @@ export default function Agenda() {
     useEffect(() => {
         fetchMarcacoes();
     }, [fetchMarcacoes]);
+
+    // Open modal for new marcacao
+    const handleNewMarcacao = () => {
+        setEditingMarcacao(null);
+        
+        // Set smart defaults: today's date with next hour rounded up
+        const now = new Date();
+        const nextHour = new Date(now);
+        nextHour.setHours(now.getHours() + 1, 0, 0, 0); // Next hour, rounded to :00
+        
+        const defaultDate = nextHour.toISOString().slice(0, 10); // YYYY-MM-DD
+        const defaultTime = nextHour.toTimeString().slice(0, 5); // HH:MM
+        
+        setFormData({
+            tipo_registo: REGISTO_TYPES.GLUCOSE,
+            data_evento: nextHour.toISOString().slice(0, 16), // Keep for backend compatibility
+            date: defaultDate,
+            time: defaultTime,
+            notas: ''
+        });
+        setShowModal(true);
+    };
+
+    // Handle date/time changes and update combined datetime
+    const handleDateTimeChange = (field, value) => {
+        const newFormData = { ...formData, [field]: value };
+        
+        // Combine date and time into ISO string for backend
+        if (newFormData.date && newFormData.time) {
+            const combinedDateTime = `${newFormData.date}T${newFormData.time}`;
+            newFormData.data_evento = combinedDateTime;
+        }
+        
+        setFormData(newFormData);
+    };
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -93,6 +130,8 @@ export default function Agenda() {
             setFormData({
                 tipo_registo: REGISTO_TYPES.GLUCOSE,
                 data_evento: '',
+                date: '',
+                time: '',
                 notas: ''
             });
             fetchMarcacoes();
@@ -115,7 +154,7 @@ export default function Agenda() {
 
     // Handle deletion
     const handleDelete = async (id) => {
-        if (!window.confirm('Tem certeza que deseja apagar esta marcação?')) return;
+        if (!window.confirm('Tem a certeza que deseja apagar esta marcação?')) return;
         
         try {
             await agendaApi.apagarMarcacao(id);
@@ -153,9 +192,9 @@ export default function Agenda() {
         return marcacoes.map(marcacao => ({
             ...marcacao,
             data_evento: new Date(marcacao.data_evento),
-            isOverdue: new Date(marcacao.data_evento) < today && !marcacao.realizado,
+            isOverdue: new Date(marcacao.data_evento) < now && !marcacao.realizado,
             isToday: new Date(marcacao.data_evento).toDateString() === today.toDateString(),
-            isUpcoming: new Date(marcacao.data_evento) > today && !marcacao.realizado
+            isUpcoming: new Date(marcacao.data_evento) > now && !marcacao.realizado
         }));
     }, [marcacoes]);
 
@@ -203,20 +242,6 @@ export default function Agenda() {
     const overdueMarcacoes = useMemo(() => 
         getFilteredMarcacoes.filter(m => m.isOverdue)
     , [getFilteredMarcacoes]);
-
-    // Open modal for new marcacao
-    const handleNewMarcacao = () => {
-        setEditingMarcacao(null);
-        // Set default datetime to current time to prevent past dates
-        const now = new Date();
-        const defaultDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-        setFormData({
-            tipo_registo: REGISTO_TYPES.GLUCOSE,
-            data_evento: defaultDateTime,
-            notas: ''
-        });
-        setShowModal(true);
-    };
 
     // Format date for display
     const formatDisplayDate = () => {
@@ -461,17 +486,39 @@ export default function Agenda() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Data e Hora</Form.Label>
+                            <Form.Label>Data</Form.Label>
                             <Form.Control
-                                type="datetime-local"
-                                value={formData.data_evento}
-                                onChange={(e) => setFormData({...formData, data_evento: e.target.value})}
-                                min={new Date().toISOString().slice(0, 16)}
+                                type="date"
+                                value={formData.date || ''}
+                                onChange={(e) => handleDateTimeChange('date', e.target.value)}
+                                min={new Date().toISOString().slice(0, 10)}
                                 required
                             />
-                            <Form.Text className="text-muted">
-                                Só é possível agendar eventos para datas futuras.
-                            </Form.Text>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Hora</Form.Label>
+                            <Form.Control
+                                type="time"
+                                value={formData.time || ''}
+                                onChange={(e) => handleDateTimeChange('time', e.target.value)}
+                                required
+                            />
+                            <div className="mt-2">
+                                <small className="text-muted d-block mb-2">Horários comuns:</small>
+                                <div className="d-flex gap-2 flex-wrap">
+                                    {['08:00', '12:00', '18:00', '20:00', '22:00'].map(time => (
+                                        <Button
+                                            key={time}
+                                            variant="outline-secondary"
+                                            size="sm"
+                                            onClick={() => handleDateTimeChange('time', time)}
+                                        >
+                                            {time}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
