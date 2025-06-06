@@ -536,13 +536,13 @@ export default function Historico() {
     return (
         <Container fluid className="py-4">
             <div className="mb-4">
-                <div className="d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-start justify-content-between">
                     <div>
                         <h1 className="display-6 fw-bold text-primary mb-1">
                             <i className="fas fa-history me-3"></i>
                             Histórico de Registos
                         </h1>
-                        <p className="text-muted mb-0">
+                        <p className="text-muted mb-1">
                             Consulte o seu histórico de medições de glicose e administrações de insulina
                         </p>
                     </div>

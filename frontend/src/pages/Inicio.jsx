@@ -13,6 +13,7 @@ export default function Inicio() {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [hoveredPoint, setHoveredPoint] = useState(null);
     const { getToken } = useAuth();
 
     useEffect(() => {
@@ -57,7 +58,7 @@ export default function Inicio() {
                     lastInsulin: insulinData.data[0] || null,
                     glucoseStats: calculateGlucoseStats(glucoseData.data),
                     insulinStats: calculateInsulinStats(insulinData.data),
-                    weightStats: calculateWeightStats(glucoseData.data) // Peso vem dos registos de glicose
+                    weightStats: calculateWeightStats(glucoseData.data) 
                 };
 
                 setDashboardData(processedData);
@@ -210,7 +211,7 @@ export default function Inicio() {
     }
 
     return (
-        <main className="dashboard-container">
+        <main className="container py-4">
             <div className="dashboard-header mb-4 text-start">
                 <div>
                     <h1 className="display-6 fw-bold text-primary mb-1">
@@ -245,25 +246,47 @@ export default function Inicio() {
                                             
                                         </div>
                                     </div>
-                                    
-                                    <div className="mb-3">
-                                        <small className="text-muted">
-                                            <i className="fas fa-clock me-1"></i>
-                                            {formatDate(dashboardData.lastGlucose.timestamp)}
-                                        </small>
-                                    </div>
-                                    
-                                    <div className="mb-2">
-                                        <small className="text-muted fw-semibold">Regime:</small>
-                                        <span className="ms-2">{dashboardData.lastGlucose.condition}</span>
-                                    </div>
-                                    
-                                    {dashboardData.lastGlucose.meal_calories && (
-                                        <div className="mb-2">
-                                            <small className="text-muted fw-semibold">Calorias da refeição:</small>
-                                            <span className="ms-2">{dashboardData.lastGlucose.meal_calories} kcal</span>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <div className="detail-item mb-0">
+                                            <h6 className="text-primary mb-2 fw-bold">
+                                                <i className="fas fa-calendar-alt me-2"></i>
+                                                Data e Hora
+                                            </h6>
+                                            <p className="mb-0 fs-6 fw-semibold text-dark">
+                                                {new Date(dashboardData.lastGlucose.timestamp).toLocaleString('pt-PT', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
                                         </div>
-                                    )}
+                                                                        
+                                        <div className="detail-item mb-0">
+                                            <h6 className="text-primary mb-2 fw-bold">
+                                                <i className="fas fa-utensils me-2"></i>
+                                                Regime
+                                            </h6>
+                                            <p className="mb-0 fs-6 fw-semibold text-dark">
+                                                {dashboardData.lastGlucose.condition}
+                                            </p>
+                                        </div>
+
+                                        {/* Peso */}
+                                        <div className="detail-item mb-0">
+                                            <h6 className="text-primary mb-2 fw-bold">
+                                                <i className="fas fa-weight me-2"></i>
+                                                Peso Corporal
+                                            </h6>
+                                            <p className="mb-0 fs-6 fw-semibold text-dark">
+                                                {dashboardData.lastGlucose.weight ? 
+                                                    `${dashboardData.lastGlucose.weight} kg` : 
+                                                    <span className="text-muted">-</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
                                 </>
                             ) : (
                                 <div className="text-center py-4">
@@ -294,16 +317,34 @@ export default function Inicio() {
                                                 <small className="text-muted"> U</small>
                                             </h2>
                                         </div>
-                                        <Badge bg="info" className="fs-6 px-3 py-2">
-                                            {dashboardData.lastInsulin.route || 'Subcutânea'}
-                                        </Badge>
                                     </div>
                                     
-                                    <div className="mb-3">
-                                        <small className="text-muted">
-                                            <i className="fas fa-clock me-1"></i>
-                                            {formatDate(dashboardData.lastInsulin.timestamp)}
-                                        </small>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <div className="detail-item mb-0">
+                                            <h6 className="text-danger mb-2 fw-bold">
+                                                <i className="fas fa-calendar-alt me-2"></i>
+                                                Data e Hora
+                                            </h6>
+                                            <p className="mb-0 fs-6 fw-semibold text-dark">
+                                                {new Date(dashboardData.lastInsulin.timestamp).toLocaleString('pt-PT', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
+                                        </div>
+                                                                        
+                                        <div className="detail-item mb-0">
+                                            <h6 className="text-danger mb-2 fw-bold">
+                                                <i className="fas fa-route me-2"></i>
+                                                Rota de Administração
+                                            </h6>
+                                            <Badge bg="danger" className="fs-6 px-3 py-2">
+                                                {dashboardData.lastInsulin.route}
+                                            </Badge>
+                                        </div>
                                     </div>
                                 </>
                             ) : (
@@ -403,7 +444,7 @@ export default function Inicio() {
                     </Card>
                 </Col>
 
-                {/* NOVO CARD: Gráfico de Peso */}
+                {/* ATUALIZADO: Gráfico de Peso com Hover */}
                 <Col lg={12}>
                     <Card className="h-100 shadow-sm border-0">
                         <Card.Header className="bg-success text-white">
@@ -437,8 +478,8 @@ export default function Inicio() {
                                         </Col>
                                     </Row>
 
-                                    {/* Gráfico de Linha SVG */}
-                                    <div className="weight-graph-container mb-3">
+                                    {/* Gráfico de Linha SVG com Hover */}
+                                    <div className="weight-graph-container mb-3" style={{ position: 'relative' }}>
                                         <svg width="100%" height="120" viewBox="0 0 280 100" className="weight-graph">
                                             {/* Linhas de grade horizontais */}
                                             {[20, 40, 60, 80].map((y, index) => (
@@ -465,7 +506,7 @@ export default function Inicio() {
                                                 className="weight-line"
                                             />
                                             
-                                            {/* Pontos do gráfico */}
+                                            {/* Pontos do gráfico com Hover */}
                                             {dashboardData.weightStats.data.map((point, index) => {
                                                 const weights = dashboardData.weightStats.data.map(d => d.weight);
                                                 const minWeight = Math.min(...weights);
@@ -476,17 +517,75 @@ export default function Inicio() {
                                                 const y = 80 - ((point.weight - minWeight) / weightRange) * 60;
                                                 
                                                 return (
-                                                    <circle
-                                                        key={index}
-                                                        cx={x}
-                                                        cy={y}
-                                                        r="4"
-                                                        fill="#198754"
-                                                        className="weight-point"
-                                                    />
+                                                    <g key={index}>
+                                                        {/* Área invisível maior para melhor hover */}
+                                                        <circle
+                                                            cx={x}
+                                                            cy={y}
+                                                            r="8"
+                                                            fill="transparent"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onMouseEnter={() => setHoveredPoint({
+                                                                index,
+                                                                weight: point.weight,
+                                                                date: point.date,
+                                                                x: x,
+                                                                y: y
+                                                            })}
+                                                            onMouseLeave={() => setHoveredPoint(null)}
+                                                        />
+                                                        {/* Ponto visível */}
+                                                        <circle
+                                                            cx={x}
+                                                            cy={y}
+                                                            r={hoveredPoint?.index === index ? "6" : "4"}
+                                                            fill="#198754"
+                                                            className="weight-point"
+                                                            style={{
+                                                                transition: 'all 0.2s ease',
+                                                                filter: hoveredPoint?.index === index ? 
+                                                                    'drop-shadow(0 3px 6px rgba(25, 135, 84, 0.4))' : 
+                                                                    'none'
+                                                            }}
+                                                        />
+                                                    </g>
                                                 );
                                             })}
                                         </svg>
+
+                                        {/* Tooltip de Hover */}
+                                        {hoveredPoint && (
+                                            <div
+                                                className="weight-tooltip"
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: `${(hoveredPoint.x / 280) * 100}%`,
+                                                    top: `${(hoveredPoint.y / 100) * 100 - 10}%`,
+                                                    transform: 'translate(-50%, -100%)',
+                                                    background: 'rgba(0, 0, 0, 0.8)',
+                                                    color: 'white',
+                                                    padding: '8px 12px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: '500',
+                                                    whiteSpace: 'nowrap',
+                                                    zIndex: 10,
+                                                    pointerEvents: 'none',
+                                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                                }}
+                                            >
+                                                <div className="text-center">
+                                                    <div className="fw-bold">{hoveredPoint.weight} kg</div>
+                                                    <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                                                        {hoveredPoint.date.toLocaleDateString('pt-PT', { 
+                                                            day: '2-digit', 
+                                                            month: '2-digit',
+                                                            year: '2-digit'
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Datas do gráfico */}
