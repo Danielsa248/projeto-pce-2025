@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Alert, Badge } from 'react-bootstrap';
+import { Card, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import './Inicio.css';
 
@@ -172,6 +172,18 @@ export default function Inicio() {
         }).join(' ');
 
         return points;
+    };
+
+    // Formatar data
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-PT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     // Render do loading
