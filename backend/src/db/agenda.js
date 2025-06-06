@@ -1,5 +1,6 @@
 import { pool } from '../routes/db.js'
 
+
 // Listar marcações da agenda por utilizador
 export async function listarAgenda(utilizadorId) {
     const res = await pool.query(
