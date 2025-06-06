@@ -20,11 +20,11 @@ export async function criarMarcacao({ utilizador, tipo_registo, data_evento, not
     return res.rows[0];
 }
 
-// Marcar como realizado
-export async function marcarRealizado(id) {
+// Marcar como realizado ou não realizado
+export async function alterarStatusRealizado(id, realizado) {
     const res = await pool.query(
-        `UPDATE agenda SET realizado = TRUE WHERE id = $1 RETURNING *`,
-        [id]
+        `UPDATE agenda SET realizado = $1 WHERE id = $2 RETURNING *`,
+        [realizado, id]
     );
     return res.rows[0];
 }

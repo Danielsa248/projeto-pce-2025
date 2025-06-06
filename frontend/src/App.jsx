@@ -11,6 +11,7 @@ import Estatisticas from './pages/Estatisticas.jsx';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
+import Agenda from './pages/Agenda.jsx';
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));
@@ -53,6 +54,12 @@ export default function App() {
                         <Route path='estatisticas' element={
                             <ProtectedRoute>
                                 <Estatisticas />
+                            </ProtectedRoute>
+                        } />
+
+                        <Route path="agenda" element={
+                            <ProtectedRoute>
+                                <Agenda />
                             </ProtectedRoute>
                         } />
                         

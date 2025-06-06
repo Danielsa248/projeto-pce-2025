@@ -16,11 +16,13 @@ export async function criarMarcacao({ utilizador, tipo_registo, data_evento, not
     return res.json();
 }
 
-export async function marcarComoRealizado(id) {
-    const res = await fetch(`${BACKEND_URL}/api/agenda/${id}/realizado`, {
-        method: 'PATCH'
+export async function alterarStatusMarcacao(id, realizado) {
+    const res = await fetch(`${BACKEND_URL}/api/agenda/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ realizado })
     });
-    if (!res.ok) throw new Error('Erro ao marcar como realizado');
+    if (!res.ok) throw new Error('Erro ao alterar status da marcação');
     return res.json();
 }
 
