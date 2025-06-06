@@ -350,9 +350,13 @@ export default function Agenda() {
                 <div className="col-md-4">
                     <Card className="border-info" style={{ backgroundColor: 'rgba(23, 162, 184, 0.05)' }}>
                         <Card.Body className="text-center py-3">
-                            <h6 className="mb-2 text-info fw-bold">Hoje</h6>
+                            <h6 className="mb-2 text-info fw-bold">Glicose Hoje</h6>
                             <div className="fs-3 fw-bold text-info">
-                                {getFilteredMarcacoes.filter(m => m.isToday && !m.realizado).length}
+                                {getFilteredMarcacoes.filter(m => 
+                                    m.isToday && 
+                                    !m.realizado && 
+                                    m.tipo_registo === REGISTO_TYPES.GLUCOSE
+                                ).length}
                             </div>
                         </Card.Body>
                     </Card>
@@ -360,8 +364,14 @@ export default function Agenda() {
                 <div className="col-md-4">
                     <Card className="border-primary" style={{ backgroundColor: 'rgba(13, 110, 253, 0.05)' }}>
                         <Card.Body className="text-center py-3">
-                            <h6 className="mb-2 text-primary fw-bold">Próximas</h6>
-                            <div className="fs-3 fw-bold text-primary">{upcomingMarcacoes.length}</div>
+                            <h6 className="mb-2 text-primary fw-bold">Insulina Hoje</h6>
+                            <div className="fs-3 fw-bold text-primary">
+                                {getFilteredMarcacoes.filter(m => 
+                                    m.isToday && 
+                                    !m.realizado && 
+                                    m.tipo_registo === REGISTO_TYPES.INSULIN
+                                ).length}
+                            </div>
                         </Card.Body>
                     </Card>
                 </div>
