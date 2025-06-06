@@ -211,7 +211,7 @@ export default function Inicio() {
     }
 
     return (
-        <main className="container py-4">
+        <main className="container-gluid py-4">
             <div className="dashboard-header mb-4 text-start">
                 <div>
                     <h1 className="display-6 fw-bold text-primary mb-1">

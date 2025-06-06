@@ -604,7 +604,7 @@ export default function Estatisticas() {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4">
       <h1 className="display-6 fw-bold text-primary mb-1">
         <i className="fas fa-line-chart me-3"></i>
           Estatísticas
