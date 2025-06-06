@@ -3,7 +3,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    /* ADICIONAR: Corrigir corte das letras */
     line-height: 1.4 !important;
     margin-bottom: 0.5rem !important;
     padding-bottom: 0.2rem !important;

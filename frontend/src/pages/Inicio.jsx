@@ -189,7 +189,7 @@ export default function Inicio() {
     // Render do loading
     if (isLoading) {
         return (
-            <main className="dashboard-container">
+            <main className="container py-4">
                 <div className="text-center">
                     <Spinner animation="border" variant="primary" />
                     <p className="mt-3">A carregar dashboard...</p>
@@ -201,7 +201,7 @@ export default function Inicio() {
     // Render do erro
     if (error) {
         return (
-            <main className="dashboard-container">
+            <main className="container py-4">
                 <Alert variant="danger">
                     <Alert.Heading>Erro ao carregar dashboard</Alert.Heading>
                     <p>{error}</p>
@@ -211,7 +211,7 @@ export default function Inicio() {
     }
 
     return (
-        <main className="container-gluid py-4">
+        <main className="container py-4">
             <div className="dashboard-header mb-4 text-start">
                 <div>
                     <h1 className="display-6 fw-bold text-primary mb-1">

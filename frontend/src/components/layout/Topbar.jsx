@@ -28,6 +28,7 @@ export default function Topbar({ toggleSidebar, sidebarVisible }) {
       'agenda': 'Agenda',
       'historico': 'Histórico',
       'estatisticas': 'Estatísticas',
+      'perfil': 'Perfil',
     };
     
     if (pageMappings[path.substring(1)]) {
