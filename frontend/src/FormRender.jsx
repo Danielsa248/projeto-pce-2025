@@ -33,7 +33,7 @@ export default function FormRender({ type, onSubmitComplete }) {
                     throw new Error("Não autenticado. Por favor, faça login novamente.");
                 }
                 
-                const response = await fetch('http://localhost:3000/api/compositions', {
+                const response = await fetch('http://localhost:3000/api/bd/compositions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

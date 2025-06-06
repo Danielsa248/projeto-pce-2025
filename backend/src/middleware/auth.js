@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { pool } from '../bd.js';
+import { pool } from '../routes/db.js';
 
 import env from '../../config.js';
 

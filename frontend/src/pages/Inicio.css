@@ -1,1 +1,211 @@
 /* Inicio.css */
+
+.dashboard-container {
+    padding: 2rem;
+    background: white;
+    min-height: calc(100vh - 80px);
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.dashboard-header {
+    text-align: left;
+    margin-bottom: 2rem;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.dashboard-header h1 {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 0;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border-radius: 15px !important;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none !important;
+    padding: 1.25rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.badge {
+    border-radius: 10px;
+}
+
+.btn-outline-primary {
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+}
+
+/* ALTERADO: Gráfico de Peso - Menor */
+.weight-graph-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 15px; /* REDUZIDO: de 15px para 10px */
+    border: 1px solid #e9ecef;
+    position: relative;
+    max-width: 400px; /* ADICIONAR: largura máxima */
+    margin: 0 auto; /* ADICIONAR: centralizar */
+}
+
+.weight-graph {
+    width: 100%;
+    height: 100px; /* REDUZIDO: altura fixa menor */
+    max-height: 100px; /* ADICIONAR: altura máxima */
+}
+
+.weight-line {
+    filter: drop-shadow(0 2px 4px rgba(25, 135, 84, 0.2));
+    transition: all 0.3s ease;
+}
+
+.weight-point {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Tooltip mais próximo do ponto */
+.weight-tooltip {
+    animation: tooltip-appear 0.2s ease-out;
+    margin-top: -8px !important;
+    font-size: 0.75rem; /* REDUZIDO: fonte menor */
+    padding: 4px 8px; /* REDUZIDO: padding menor */
+}
+
+@keyframes tooltip-appear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -100%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -100%) scale(1);
+    }
+}
+
+/* Seta do tooltip mais próxima */
+.weight-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 3px solid transparent; /* REDUZIDO: de 4px para 3px */
+    border-top-color: rgba(0, 0, 0, 0.8);
+    margin-top: -1px;
+}
+
+/* Hover effect no card */
+.weight-graph-container:hover .weight-line {
+    stroke-width: 3; /* REDUZIDO: de 4 para 3 */
+}
+
+/* Melhorar interatividade dos pontos */
+.weight-point:hover {
+    filter: drop-shadow(0 2px 4px rgba(25, 135, 84, 0.4)); /* REDUZIDO: sombra menor */
+}
+
+.weight-date {
+    flex: 1;
+    max-width: 60px; /* REDUZIDO: de 80px para 60px */
+    font-size: 0.65rem; /* REDUZIDO: fonte menor */
+}
+
+/* Animação do gráfico */
+.weight-line {
+    stroke-dasharray: 600; /* REDUZIDO: de 1000 para 600 */
+    stroke-dashoffset: 600;
+    animation: weight-draw 1.5s ease-in-out forwards; /* REDUZIDO: de 2s para 1.5s */
+}
+
+@keyframes weight-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.weight-point {
+    opacity: 0;
+    animation: weight-point-appear 0.4s ease-in-out forwards; /* REDUZIDO: de 0.5s para 0.4s */
+}
+
+.weight-point:nth-child(3) { animation-delay: 0.1s; } /* REDUZIDO: delays */
+.weight-point:nth-child(4) { animation-delay: 0.2s; }
+.weight-point:nth-child(5) { animation-delay: 0.3s; }
+.weight-point:nth-child(6) { animation-delay: 0.4s; }
+.weight-point:nth-child(7) { animation-delay: 0.5s; }
+.weight-point:nth-child(8) { animation-delay: 0.6s; }
+.weight-point:nth-child(9) { animation-delay: 0.7s; }
+
+@keyframes weight-point-appear {
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .weight-date {
+        font-size: 0.6rem; /* REDUZIDO: ainda menor em mobile */
+        max-width: 50px; /* REDUZIDO: largura menor */
+    }
+    
+    .weight-graph-container {
+        padding: 8px; /* REDUZIDO: padding ainda menor */
+        max-width: 100%; /* ADICIONAR: largura total em mobile */
+    }
+    
+    .weight-graph {
+        height: 60px; /* REDUZIDO: altura menor em mobile */
+    }
+    
+    /* Tooltip responsivo mais próximo */
+    .weight-tooltip {
+        font-size: 0.65rem !important; /* REDUZIDO: fonte menor */
+        padding: 3px 6px !important; /* REDUZIDO: padding menor */
+        margin-top: -6px !important;
+    }
+}

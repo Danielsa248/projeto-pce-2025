@@ -1,11 +1,22 @@
-/* Historico.css */
-
-/* Page Header Styling */
 .display-6 {
     background: linear-gradient(135deg, #007bff, #0056b3);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    /* ADICIONAR: Corrigir corte das letras */
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.2rem !important;
+    overflow: visible !important;
+}
+
+.text-muted.mb-1 {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+.mb-4 .d-flex div:first-child {
+    overflow: visible !important;
 }
 
 /* Stats Cards */

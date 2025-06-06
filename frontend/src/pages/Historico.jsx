@@ -23,7 +23,6 @@ export default function Historico() {
         const transformedGlucose = glucoseData.map(item => ({
             data_registo: item.timestamp,
             tipo: 'Glicose',
-            // CORRIGIDO: Use nullish coalescing (??) em vez de ||
             valor: `${item.glucose_value ?? 0} mg/dL`,
             regime: item.condition,
             calorias_refeicao: item.meal_calories ?? null,
@@ -54,13 +53,13 @@ export default function Historico() {
             }
             
             const [glucoseResponse, insulinResponse] = await Promise.all([
-                fetch('http://localhost:3000/api/registos/Glucose?include=all', {
+                fetch('http://localhost:3000/api/bd/registos/Glucose?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
                     }
                 }),
-                fetch('http://localhost:3000/api/registos/Insulina?include=all', {
+                fetch('http://localhost:3000/api/bd/registos/Insulina?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -537,13 +536,13 @@ export default function Historico() {
     return (
         <Container fluid className="py-4">
             <div className="mb-4">
-                <div className="d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-start justify-content-between">
                     <div>
                         <h1 className="display-6 fw-bold text-primary mb-1">
                             <i className="fas fa-history me-3"></i>
                             Histórico de Registos
                         </h1>
-                        <p className="text-muted mb-0">
+                        <p className="text-muted mb-1">
                             Consulte o seu histórico de medições de glicose e administrações de insulina
                         </p>
                     </div>

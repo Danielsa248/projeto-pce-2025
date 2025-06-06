@@ -46,8 +46,8 @@ const TIME_RANGE_LABELS = {
 };
 
 const API_ENDPOINTS = {
-  glucose: 'http://localhost:3000/api/registos/Glucose',
-  insulin: 'http://localhost:3000/api/registos/Insulina',
+  glucose: 'http://localhost:3000/api/bd/registos/Glucose',
+  insulin: 'http://localhost:3000/api/bd/registos/Insulina',
 };
 
 const CHART_COLORS = {

@@ -1,4 +1,5 @@
-import { pool } from '../bd.js'
+import { pool } from '../routes/db.js'
+
 
 // Listar marcações da agenda por utilizador
 export async function listarAgenda(utilizadorId) {
