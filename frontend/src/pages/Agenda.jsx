@@ -50,7 +50,7 @@ export default function Agenda() {
         try {
             setLoading(true);
             setError(null);
-            const data = await agendaApi.obterMarcacoes(user.id);
+            const data = await agendaApi.obterMarcacoes();
             setMarcacoes(data);
         } catch (err) {
             console.error('Erro ao carregar agenda:', err);
@@ -99,51 +99,57 @@ export default function Agenda() {
         setFormData(newFormData);
     };
 
+    // Add this helper function at the top of your component, after the constants
+    const triggerAgendaUpdate = () => {
+        // Trigger both storage event (for other tabs) and custom event (same tab)
+        localStorage.setItem('agenda_updated', Date.now().toString());
+        localStorage.removeItem('agenda_updated');
+        window.dispatchEvent(new CustomEvent('agendaUpdated'));
+    };
+
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Ensure data_evento is up-to-date by recombining date and time
-        let eventDateTime = formData.data_evento;
-        if (formData.date && formData.time) {
-            eventDateTime = `${formData.date}T${formData.time}`;
-        }
-        
-        // Validate that the event date is not in the past
-        const eventDate = new Date(eventDateTime);
-        const now = new Date();
-        
-        if (eventDate < now) {
-            setError('Não é possível agendar eventos para datas que já passaram.');
+        setError(null);
+
+        if (!formData.date || !formData.time) {
+            setError('Por favor, preencha a data e hora.');
             return;
         }
-        
+
         try {
+            const eventDateTime = `${formData.date}T${formData.time}:00`;
+            
             if (editingMarcacao) {
-                // For editing, we would need an update endpoint (not available in current API)
-                console.log('Edit functionality would go here');
-            } else {
-                await agendaApi.criarMarcacao({
-                    utilizador: user.id,
+                // Update existing marcacao
+                await agendaApi.alterarStatusMarcacao(editingMarcacao.id, {
                     tipo_registo: formData.tipo_registo,
-                    data_evento: eventDateTime, // Use the recalculated datetime
+                    data_evento: eventDateTime,
+                    notas: formData.notas
+                });
+            } else {
+                // Create new marcacao
+                await agendaApi.criarMarcacao({
+                    tipo_registo: formData.tipo_registo,
+                    data_evento: eventDateTime,
                     notas: formData.notas
                 });
             }
+
+            await fetchMarcacoes(); // Refresh local data
+            triggerAgendaUpdate(); // Add this line
             
             setShowModal(false);
             setEditingMarcacao(null);
             setFormData({
                 tipo_registo: REGISTO_TYPES.GLUCOSE,
-                data_evento: '',
                 date: '',
                 time: '',
                 notas: ''
             });
-            fetchMarcacoes();
-        } catch (err) {
-            console.error('Erro ao salvar marcação:', err);
-            setError('Erro ao salvar marcação. ' + err.message);
+        } catch (error) {
+            console.error('Erro ao guardar marcação:', error);
+            setError('Falha ao guardar a marcação. ' + error.message);
         }
     };
 
@@ -151,23 +157,29 @@ export default function Agenda() {
     const handleToggleCompleted = async (id, currentStatus) => {
         try {
             await agendaApi.alterarStatusMarcacao(id, !currentStatus);
-            fetchMarcacoes();
-        } catch (err) {
-            console.error('Erro ao alterar status da marcação:', err);
-            setError('Erro ao alterar status da marcação. ' + err.message);
+            await fetchMarcacoes(); // Refresh local data
+            triggerAgendaUpdate(); // Add this line
+            
+        } catch (error) {
+            console.error('Erro ao alterar status:', error);
+            setError('Falha ao alterar o status da marcação. ' + error.message);
         }
     };
 
     // Handle deletion
     const handleDelete = async (id) => {
-        if (!window.confirm('Tem a certeza que deseja apagar esta marcação?')) return;
-        
+        if (!window.confirm('Tem a certeza que deseja eliminar esta marcação?')) {
+            return;
+        }
+
         try {
             await agendaApi.apagarMarcacao(id);
-            fetchMarcacoes();
-        } catch (err) {
-            console.error('Erro ao apagar marcação:', err);
-            setError('Erro ao apagar marcação. ' + err.message);
+            await fetchMarcacoes(); // Refresh local data
+            triggerAgendaUpdate(); // Add this line
+            
+        } catch (error) {
+            console.error('Erro ao eliminar marcação:', error);
+            setError('Falha ao eliminar a marcação. ' + error.message);
         }
     };
 
@@ -334,6 +346,29 @@ export default function Agenda() {
             </Card.Body>
         </Card>
     );
+
+    // Add this test component to your agenda page for testing
+    const TestNotifications = () => {
+        const testNotification = () => {
+            if (Notification.permission === 'granted') {
+                new Notification('Teste - Glicose em 5 minutos', {
+                    body: 'Esta é uma notificação de teste do sistema',
+                    icon: '/favicon.ico',
+                    tag: 'test-notification',
+                    requireInteraction: true
+                });
+            } else {
+                alert('Notificações não estão ativadas');
+            }
+        };
+
+        return (
+            <Button variant="outline-secondary" size="sm" onClick={testNotification}>
+                <i className="fas fa-bell me-2"></i>
+                Testar Notificação
+            </Button>
+        );
+    };
 
     if (loading) {
         return (
@@ -551,6 +586,19 @@ export default function Agenda() {
                     </Modal.Footer>
                 </Form>
             </Modal>
+
+            {/* Test Notifications Component - For Development Only */}
+            <div className="mt-4">
+                <h5 className="mb-3">
+                    <i className="fas fa-bell me-2"></i>
+                    Testar Notificações
+                </h5>
+                <p className="text-muted mb-3">
+                    Utilize o botão abaixo para enviar uma notificação de teste para o seu navegador. 
+                    Certifique-se de que as notificações estão permitidas para este site.
+                </p>
+                <TestNotifications />
+            </div>
         </div>
     );
 }

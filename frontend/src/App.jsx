@@ -4,7 +4,7 @@ import Layout from './components/layout/Layout.jsx';
 import Inicio from './pages/Inicio.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import RegisterCredentials from './pages/RegisterCredentials.jsx'; // Add this import
+import RegisterCredentials from './pages/RegisterCredentials.jsx';
 import StyleManager from './StyleManager.jsx';
 import Historico from './pages/Historico.jsx';
 import Estatisticas from './pages/Estatisticas.jsx';
@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
 import Agenda from './pages/Agenda.jsx';
 import Perfil from './pages/Perfil.jsx';
+import NotificationManager from './components/NotificationManager.jsx'; // Add this
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));
@@ -22,11 +23,10 @@ export default function App() {
         <AuthProvider>
             <Router>
                 <StyleManager />
+                <NotificationManager /> {/* Add this line */}
                 <Routes>
                     <Route path="/" element={<Layout />}>
-
                         <Route path="login" element={<Login />} />
-                        {/* Update registration routes */}
                         <Route path="registo" element={<RegisterCredentials />} />
                         <Route path="registo/info-pessoal" element={<Register />} />
                         
@@ -69,6 +69,7 @@ export default function App() {
                                 <Historico />
                             </ProtectedRoute>
                         } />
+                        
                         <Route path="perfil" element={
                             <ProtectedRoute>
                                 <Perfil />

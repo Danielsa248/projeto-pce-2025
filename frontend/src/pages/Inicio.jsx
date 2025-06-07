@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Alert, Badge } from 'react-bootstrap';
+import { Card, Row, Col, Alert, Badge, Button } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
+import NotificationService from '../services/NotificationService';
 
 export default function Inicio() {
     const [dashboardData, setDashboardData] = useState({
