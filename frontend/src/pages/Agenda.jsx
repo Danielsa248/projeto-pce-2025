@@ -103,8 +103,14 @@ export default function Agenda() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // Ensure data_evento is up-to-date by recombining date and time
+        let eventDateTime = formData.data_evento;
+        if (formData.date && formData.time) {
+            eventDateTime = `${formData.date}T${formData.time}`;
+        }
+        
         // Validate that the event date is not in the past
-        const eventDate = new Date(formData.data_evento);
+        const eventDate = new Date(eventDateTime);
         const now = new Date();
         
         if (eventDate < now) {
@@ -120,7 +126,7 @@ export default function Agenda() {
                 await agendaApi.criarMarcacao({
                     utilizador: user.id,
                     tipo_registo: formData.tipo_registo,
-                    data_evento: formData.data_evento,
+                    data_evento: eventDateTime, // Use the recalculated datetime
                     notas: formData.notas
                 });
             }
@@ -216,8 +222,11 @@ export default function Agenda() {
             case VIEW_MODES.WEEK:
                 const weekStart = new Date(currentDate);
                 weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+                weekStart.setHours(0, 0, 0, 0); // Start of first day
+                
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 6);
+                weekEnd.setHours(23, 59, 59, 999); // End of last day
                 
                 return filtered.filter(m => 
                     m.data_evento >= weekStart && m.data_evento <= weekEnd
