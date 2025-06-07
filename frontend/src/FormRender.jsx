@@ -1,4 +1,7 @@
 import { Form } from "protected-aidaforms";
+import { useState } from 'react';
+import { Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import jdtGlicose from './opt/jdt_glucose.json';
 import jdtInsulina from './opt/jdt_insulina.json';
 import styleGlicose from './opt/style_glucose.json';
@@ -9,10 +12,15 @@ import { useAuth } from './context/AuthContext';
 
 export default function FormRender({ type, onSubmitComplete }) {
     const { getToken } = useAuth();
+    const navigate = useNavigate();
+    const [success, setSuccess] = useState(null);
+    const [error, setError] = useState(null);
 
     const saveComposition = async (values, formType) => {
         try {
-            // Map component type to server expected type
+            setError(null);
+            setSuccess(null);
+
             const serverType = {
                 'glicose': 'Medição de Glicose',
                 'insulina': 'Medição de Insulina',
@@ -21,12 +29,10 @@ export default function FormRender({ type, onSubmitComplete }) {
             
             // Special handling for registration flow
             if (formType === 'individuo' && onSubmitComplete) {
-                
-                // Call the parent's onSubmitComplete callback
                 await onSubmitComplete(values);
                 return { success: true };
             }
-            // Normal flow for authenticated forms
+            // Normal flow for authenticated forms (glucose/insulin)
             else {
                 const token = getToken();
                 if (!token) {
@@ -44,16 +50,26 @@ export default function FormRender({ type, onSubmitComplete }) {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || "Erro ao guardar dados");
+                    throw new Error(errorData.message || "Erro ao guardar dados");
                 }
 
                 const result = await response.json();
                 console.log("Guardado com sucesso:", result);
                 
+                if (formType === 'glicose' || formType === 'insulina') {
+                    const formName = formType === 'glicose' ? 'Glicose' : 'Insulina';
+                    setSuccess(`Medição de ${formName} registada com sucesso!`);
+                    
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 2000);
+                }
+                
                 return result;
             }
         } catch (err) {
             console.error("Erro ao submeter composição:", err);
+            setError(err.message || "Erro ao guardar dados");
             throw err;
         }
     };
@@ -77,6 +93,29 @@ export default function FormRender({ type, onSubmitComplete }) {
 
     return (
         <div className="p-3">
+            {/* Success Alert */}
+            {success && (
+                <Alert variant="success" className="mb-3">
+                    <div className="d-flex align-items-center">
+                        <i className="fas fa-check-circle me-2"></i>
+                        {success}
+                    </div>
+                    <div className="mt-2">
+                        <small>A redirecionar para o dashboard...</small>
+                    </div>
+                </Alert>
+            )}
+
+            {/* Error Alert */}
+            {error && (
+                <Alert variant="danger" className="mb-3" dismissible onClose={() => setError(null)}>
+                    <div className="d-flex align-items-center">
+                        <i className="fas fa-exclamation-triangle me-2"></i>
+                        {error}
+                    </div>
+                </Alert>
+            )}
+
             <Form
                 template={jdt}
                 formDesign={JSON.stringify(formDesign)}
