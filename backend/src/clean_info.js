@@ -4,30 +4,25 @@ export function extractGlucoseInfo(composition) {
 
         let notesText = "";
         try {
-            const richText = JSON.parse(data["items.0.0.items.0.value"]);
-            if (richText.blocks && richText.blocks.length > 0) {
-                notesText = richText.blocks.map(block => block.text).join('\n');
+            const richTextValue = data["items.0.0.items.0.value"];
+            if (richTextValue && richTextValue !== "undefined" && richTextValue !== null) {
+                const richText = JSON.parse(richTextValue);
+                if (richText && richText.blocks && richText.blocks.length > 0) {
+                    notesText = richText.blocks.map(block => block.text).join('\n');
+                }
             }
         } catch (error) {
-            console.error("Error parsing rich text:", error);
+            console.error("Error parsing rich text for notes:", error);
         }
 
         const measurementDate = data["items.0.0.items.1.value.date"] || null;
-
         const measurementTime = data["items.0.0.items.1.value.time"] || null;
-
-        const glucoseValue = data["items.0.0.items.2.items.0.value.value"];
-        
+        const glucoseValue = data["items.0.0.items.2.items.0.value.value"] || null;
         const mealState = data["items.0.0.items.3.items.0.value"]?.text || null;
-        
         const mealCalories = data["items.0.0.items.3.items.1.value.value"] || null;
-        
         const timeSinceMeal = data["items.0.0.items.3.items.2.value"] || [];
-
         const exDuration = data["items.0.0.items.4.items.0.value"] || [];
-        
         const exCalories = data["items.0.0.items.4.items.1.value.value"] || null;
-
         const weight = data["items.0.0.items.5.items.0.value.value"] || null;
         
         return {
@@ -41,10 +36,10 @@ export function extractGlucoseInfo(composition) {
             "TempoDesdeExercicio": exDuration,
             "CaloriasExercicio": exCalories,
             "PesoAtual": weight
-        }
+        };
 
     } catch (error) {
-        console.error("Error parsing JSON:", error);
+        console.error("Error parsing glucose composition:", error);
         return null;
     }   
 }
@@ -56,22 +51,21 @@ export function extractInsulinInfo(composition) {
 
         let notesText = "";
         try {
-            const richText = JSON.parse(data["items.0.0.items.0.value"]);
-            if (richText.blocks && richText.blocks.length > 0) {
-                notesText = richText.blocks.map(block => block.text).join('\n');
+            const richTextValue = data["items.0.0.items.0.value"];
+            if (richTextValue && richTextValue !== "undefined" && richTextValue !== null) {
+                const richText = JSON.parse(richTextValue);
+                if (richText && richText.blocks && richText.blocks.length > 0) {
+                    notesText = richText.blocks.map(block => block.text).join('\n');
+                }
             }
         } catch (error) {
-            console.error("Error parsing rich text:", error);
+            console.error("Error parsing rich text for notes:", error);
         }
 
         const measurementDate = data["items.0.0.items.1.value.date"] || null;
-
         const measurementTime = data["items.0.0.items.1.value.time"] || null;
-
         const insulinValue = data["items.0.0.items.2.items.0.value.value"] || null;
-        
         const route = data["items.0.0.items.3.items.0.value"]?.text || null;
-        
         
         return {
             "NomeRegisto": notesText,
@@ -79,10 +73,10 @@ export function extractInsulinInfo(composition) {
             "HoraMedicao": measurementTime,
             "ValorInsulina": insulinValue,
             "Rota": route,
-        }
+        };
 
     } catch (error) {
-        console.error("Error parsing JSON:", error);
+        console.error("Error parsing insulin composition:", error);
         return null;
     }   
 }

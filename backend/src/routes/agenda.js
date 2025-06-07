@@ -1,13 +1,13 @@
 import express from 'express';
 import * as bd from '../db/agenda.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/agenda?utilizador=1
-router.get('/', async (req, res) => {
-    const utilizadorId = parseInt(req.query.utilizador, 10);
-    if (!utilizadorId) return res.status(400).json({ erro: 'Utilizador inválido' });
-
+// GET /api/agenda
+router.get('/', authenticateToken, async (req, res) => {
+    const utilizadorId = req.user.id;
+    
     try {
         const agenda = await bd.listarAgenda(utilizadorId);
         res.json(agenda);
@@ -18,13 +18,14 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/agenda
-router.post('/', async (req, res) => {
-    const { utilizador, tipo_registo, data_evento, notas } = req.body;
-    if (!utilizador || !tipo_registo || !data_evento) {
+router.post('/', authenticateToken, async (req, res) => {
+    const utilizador = req.user.id; // Obter do token
+    const { tipo_registo, data_evento, notas } = req.body;
+    
+    if (!tipo_registo || !data_evento) {
         return res.status(400).json({ erro: 'Dados em falta' });
     }
 
-    // Validate that the event date is not in the past
     const eventDate = new Date(data_evento);
     const now = new Date();
     
@@ -44,15 +45,23 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH /api/agenda/:id/status
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', authenticateToken, async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const { realizado } = req.body;
+    const utilizadorId = req.user.id;
 
     if (typeof realizado !== 'boolean') {
         return res.status(400).json({ erro: 'Status deve ser true ou false' });
     }
 
     try {
+        const agenda = await bd.listarAgenda(utilizadorId);
+        const marcacao = agenda.find(item => item.id === id);
+        
+        if (!marcacao) {
+            return res.status(404).json({ erro: 'Marcação não encontrada' });
+        }
+
         const atualizada = await bd.alterarStatusRealizado(id, realizado);
         res.json(atualizada);
     } catch (err) {
@@ -62,10 +71,18 @@ router.patch('/:id/status', async (req, res) => {
 });
 
 // DELETE /api/agenda/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     const id = parseInt(req.params.id, 10);
+    const utilizadorId = req.user.id;
 
     try {
+        const agenda = await bd.listarAgenda(utilizadorId);
+        const marcacao = agenda.find(item => item.id === id);
+        
+        if (!marcacao) {
+            return res.status(404).json({ erro: 'Marcação não encontrada' });
+        }
+
         await bd.apagarMarcacao(id);
         res.status(204).end();
     } catch (err) {

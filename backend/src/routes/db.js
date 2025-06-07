@@ -12,6 +12,7 @@ export const pool = new Pool({
     connectionString: env.DB_URL,
 });
 
+
 // Testa a conexão à bd
 pool.connect((error, client, release) => {
     if (error) {
@@ -181,6 +182,7 @@ export async function getRegistos(userId, tipo) {
     }
 }
 
+
 // Rota para guardar na BD o json
 router.post("/compositions", authenticateToken, async (req, res) => {
     let { type, composition } = req.body;
@@ -255,51 +257,67 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
     };
     
     const processedData = result.rows.map(row => {
-      const rawData = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
-      
-      const processedInfo = tipo === 'Glucose' 
-        ? info_trat.extractGlucoseInfo(rawData) 
-        : info_trat.extractInsulinInfo(rawData);
-      
-      let timestamp = row.data_registo;
-      if (processedInfo && processedInfo.DataMedicao && processedInfo.HoraMedicao) {
-        timestamp = new Date(`${processedInfo.DataMedicao}T${processedInfo.HoraMedicao}`);
-      }
-      
-      const value = processedInfo ? 
-        parseValue(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
-        null;
-      
-      const baseRecord = {
-        id: row.id,
-        timestamp: timestamp,
-        value: value
-      };
-      
-      if (tipo === 'Glucose' && processedInfo) {
-        return {
-          ...baseRecord,
-          glucose_value: parseValue(processedInfo.ValorGlicose),
-          condition: processedInfo.Regime,
-          meal_calories: parseValue(processedInfo.Calorias),
-          meal_duration: processedInfo.TempoDesdeUltimaRefeicao || null,
-          exercise_calories: parseValue(processedInfo.CaloriasExercicio),
-          exercise_duration: processedInfo.TempoDesdeExercicio || null,
-          weight: parseValue(processedInfo.PesoAtual),
-          notes: processedInfo.NomeRegisto || null
+      try {
+        const rawData = typeof row.dados === 'string' ? JSON.parse(row.dados) : row.dados;
+    
+        let processedInfo = null;
+        try {
+          processedInfo = tipo === 'Glucose' 
+            ? info_trat.extractGlucoseInfo(rawData) 
+            : info_trat.extractInsulinInfo(rawData);
+        } catch (extractError) {
+          console.error(`Error extracting ${tipo} info for record ${row.id}:`, extractError);
+        }
+        
+        let timestamp = row.data_registo;
+        if (processedInfo && processedInfo.DataMedicao && processedInfo.HoraMedicao) {
+          timestamp = new Date(`${processedInfo.DataMedicao}T${processedInfo.HoraMedicao}`);
+        }
+        
+        const value = processedInfo ? 
+          parseValue(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
+          null;
+        
+        const baseRecord = {
+          id: row.id,
+          timestamp: timestamp,
+          value: value
         };
-      } else if (tipo === 'Insulina' && processedInfo) {
+        
+        if (tipo === 'Glucose' && processedInfo) {
+          return {
+            ...baseRecord,
+            glucose_value: parseValue(processedInfo.ValorGlicose),
+            condition: processedInfo.Regime,
+            meal_calories: parseValue(processedInfo.Calorias),
+            meal_duration: processedInfo.TempoDesdeUltimaRefeicao || null,
+            exercise_calories: parseValue(processedInfo.CaloriasExercicio),
+            exercise_duration: processedInfo.TempoDesdeExercicio || null,
+            weight: parseValue(processedInfo.PesoAtual),
+            notes: processedInfo.NomeRegisto || null
+          };
+        } else if (tipo === 'Insulina' && processedInfo) {
+          return {
+            ...baseRecord,
+            route: processedInfo.Rota,
+            insulin_value: parseValue(processedInfo.ValorInsulina),
+            date: processedInfo.DataMedicao || null,
+            time: processedInfo.HoraMedicao || null,
+          };
+        } else {
+          return {
+            ...baseRecord,
+            processing_error: true,
+            raw_data: rawData
+          };
+        }
+      } catch (rowError) {
+        console.error(`Error processing record ${row.id}:`, rowError);
         return {
-          ...baseRecord,
-          route: processedInfo.Rota,
-          insulin_value: parseValue(processedInfo.ValorInsulina),
-          date: processedInfo.DataMedicao || null,
-          time: processedInfo.HoraMedicao || null,
-        };
-      } else {
-        return {
-          ...baseRecord,
-          raw_composition: rawData
+          id: row.id,
+          timestamp: row.data_registo,
+          value: null,
+          error: true
         };
       }
     });
@@ -316,6 +334,7 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
     });
   }
 });
+
 
 // Obter perfil do utilizador autenticado
 router.get('/perfil', authenticateToken, async (req, res) => {
@@ -344,6 +363,7 @@ router.get('/perfil', authenticateToken, async (req, res) => {
         });
     }
 });
+
 
 // Rota para atualizar perfil do utilizador
 router.put('/perfil', authenticateToken, async (req, res) => {

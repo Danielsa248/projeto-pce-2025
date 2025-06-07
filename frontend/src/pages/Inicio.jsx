@@ -7,7 +7,9 @@ export default function Inicio() {
         lastGlucose: null,
         lastInsulin: null,
         glucoseStats: null,
-        insulinStats: null
+        insulinStats: null,
+        nextGlucoseEvent: null,
+        nextInsulinEvent: null
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +28,7 @@ export default function Inicio() {
                 throw new Error('Token não encontrado');
             }
 
-            const [glucoseResponse, insulinResponse] = await Promise.all([
+            const [glucoseResponse, insulinResponse, agendaResponse] = await Promise.all([
                 fetch('http://localhost:3000/api/bd/registos/Glucose?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -38,22 +40,37 @@ export default function Inicio() {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
                     }
+                }),
+                fetch('http://localhost:3000/api/agenda/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
                 })
             ]);
 
-            if (!glucoseResponse.ok || !insulinResponse.ok) {
-                throw new Error('Erro ao carregar dados');
+            if (!glucoseResponse.ok) {
+                console.error('Erro na resposta de glicose:', glucoseResponse.status);
+            }
+            if (!insulinResponse.ok) {
+                console.error('Erro na resposta de insulina:', insulinResponse.status);
+            }
+            if (!agendaResponse.ok) {
+                console.error('Erro na resposta da agenda:', agendaResponse.status, await agendaResponse.text());
             }
 
             const glucoseData = await glucoseResponse.json();
             const insulinData = await insulinResponse.json();
+            const agendaData = await agendaResponse.json();
 
             if (glucoseData.success && insulinData.success) {
                 const processedData = {
                     lastGlucose: glucoseData.data[0] || null,
                     lastInsulin: insulinData.data[0] || null,
                     glucoseStats: calculateGlucoseStats(glucoseData.data),
-                    insulinStats: calculateInsulinStats(insulinData.data)
+                    insulinStats: calculateInsulinStats(insulinData.data),
+                    nextGlucoseEvent: getNextEvent(agendaData, 'Glucose'),
+                    nextInsulinEvent: getNextEvent(agendaData, 'Insulina')
                 };
 
                 setDashboardData(processedData);
@@ -109,6 +126,60 @@ export default function Inicio() {
             weeklyTotal: total.toFixed(1),
             count: values.length
         };
+    };
+
+    // Função para obter próximo evento por tipo
+    const getNextEvent = (agendaData, tipo) => {
+        if (!Array.isArray(agendaData) || agendaData.length === 0) {
+            console.log('Agenda data is empty or not an array:', agendaData);
+            return null;
+        }
+        
+        const now = new Date();
+        
+        try {
+            const upcomingEvents = agendaData
+                .filter(event => {
+                    if (!event.data_evento || !event.tipo_registo) {
+                        console.log('Invalid event data:', event);
+                        return false;
+                    }
+                    
+                    const eventDate = new Date(event.data_evento);
+                    const isValidDate = !isNaN(eventDate.getTime());
+                    const isFutureEvent = eventDate > now;
+                    const isCorrectType = event.tipo_registo === tipo;
+                    const isNotCompleted = !event.realizado;
+                    
+                    return isValidDate && isFutureEvent && isCorrectType && isNotCompleted;
+                })
+                .sort((a, b) => new Date(a.data_evento) - new Date(b.data_evento));
+            
+            return upcomingEvents.length > 0 ? upcomingEvents[0] : null;
+        } catch (error) {
+            console.error('Error filtering events:', error);
+            return null;
+        }
+    };
+
+    const getTimeUntilEvent = (eventDate) => {
+        const now = new Date();
+        const eventTime = new Date(eventDate);
+        const diffInMs = eventTime - now;
+
+        if (diffInMs <= 0) return 'Agora';
+
+        const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+        if (diffInMinutes < 60) {
+            return `${diffInMinutes} min${diffInMinutes !== 1 ? 's' : ''} para o evento`;
+        } else if (diffInHours < 24) {
+            return `${diffInHours} h${diffInHours !== 1 ? 's' : ''} para o evento`;
+        } else {
+            return `${diffInDays} dia${diffInDays !== 1 ? 's' : ''} para o evento`;
+        }
     };
 
     if (isLoading) {
@@ -366,7 +437,123 @@ export default function Inicio() {
                         </Card.Body>
                     </Card>
                 </Col>
-            </Row>
+                
+                {/* Próximo Evento de Glicose */}
+                <Col lg={6}>
+                    <Card className="h-100 shadow-sm border-0">
+                        <Card.Header className="bg-success text-white">
+                            <h5 className="mb-0">
+                                <i className="fas fa-calendar-plus me-2"></i>
+                                Próxima Medição de Glicose
+                            </h5>
+                        </Card.Header>
+                        <Card.Body>
+                            {dashboardData.nextGlucoseEvent ? (
+                                <>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h4 className="fw-bold text-success mb-1">
+                                                {new Date(dashboardData.nextGlucoseEvent.data_evento).toLocaleDateString('pt-PT', {
+                                                    weekday: 'long',
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </h4>
+                                            <h5 className="text-muted mb-0">
+                                                às {new Date(dashboardData.nextGlucoseEvent.data_evento).toLocaleTimeString('pt-PT', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </h5>
+                                        </div>
+                                        <div className="text-end">
+                                            <Badge bg="success" className="fs-6">
+                                                {getTimeUntilEvent(dashboardData.nextGlucoseEvent.data_evento)}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    
+                                    {dashboardData.nextGlucoseEvent.notas && (
+                                        <div className="mt-3">
+                                            <h6 className="text-success mb-2 fw-bold">
+                                                <i className="fas fa-sticky-note me-2"></i>
+                                                Notas
+                                            </h6>
+                                            <p className="mb-0 text-muted">
+                                                {dashboardData.nextGlucoseEvent.notas}
+                                            </p>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <i className="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                                    <p className="text-muted">Nenhuma medição agendada</p>
+                                </div>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+
+                {/* Próximo Evento de Insulina */}
+                <Col lg={6}>
+                    <Card className="h-100 shadow-sm border-0">
+                        <Card.Header className="bg-warning text-dark">
+                            <h5 className="mb-0">
+                                <i className="fas fa-calendar-plus me-2"></i>
+                                Próxima Administração de Insulina
+                            </h5>
+                        </Card.Header>
+                        <Card.Body>
+                            {dashboardData.nextInsulinEvent ? (
+                                <>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h4 className="fw-bold text-warning mb-1">
+                                                {new Date(dashboardData.nextInsulinEvent.data_evento).toLocaleDateString('pt-PT', {
+                                                    weekday: 'long',
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </h4>
+                                            <h5 className="text-muted mb-0">
+                                                às {new Date(dashboardData.nextInsulinEvent.data_evento).toLocaleTimeString('pt-PT', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </h5>
+                                        </div>
+                                        <div className="text-end">
+                                            <Badge bg="warning" text="dark" className="fs-6">
+                                                {getTimeUntilEvent(dashboardData.nextInsulinEvent.data_evento)}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    
+                                    {dashboardData.nextInsulinEvent.notas && (
+                                        <div className="mt-3">
+                                            <h6 className="text-warning mb-2 fw-bold">
+                                                <i className="fas fa-sticky-note me-2"></i>
+                                                Notas
+                                            </h6>
+                                            <p className="mb-0 text-muted">
+                                                {dashboardData.nextInsulinEvent.notas}
+                                            </p>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <i className="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                                    <p className="text-muted">Nenhuma administração agendada</p>
+                                </div>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>   
         </main>
     );
 }
