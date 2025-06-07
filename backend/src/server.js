@@ -3,6 +3,7 @@ import cors from 'cors';
 import agendaRoutes from './routes/agenda.js';
 import authRoutes from './routes/auth.js';
 import dataBaseRoutes from './routes/db.js';
+import fhirRoutes from './routes/fhir.js';
 import { authenticateToken } from './middleware/auth.js';
 
 
@@ -13,7 +14,8 @@ app.use(cors()); // Permitir requisições do frontend
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/agenda', agendaRoutes);
-app.use('/api/bd', dataBaseRoutes)
+app.use('/api/bd', dataBaseRoutes);
+app.use('/api/fhir', fhirRoutes);
 
 
 // Chat Bot API

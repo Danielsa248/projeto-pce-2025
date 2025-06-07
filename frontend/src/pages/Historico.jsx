@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Container, Spinner, Alert, Badge, Modal, Card, Button } from 'react-bootstrap';
+import { Container, Spinner, Alert, Badge, Modal, Card, Button, Toast, ToastContainer } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import $ from 'jquery';
 import 'datatables.net-bs5';
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 import { useAuth } from '../context/AuthContext';
+import { sendRecordToFHIR, sendBulkRecordsToFHIR } from '../api/fhir';
 import './Historico.css';
 
 export default function Historico() {
@@ -13,6 +14,13 @@ export default function Historico() {
     const [data, setData] = useState([]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [selectedRecords, setSelectedRecords] = useState(new Set());
+    const [showFhirModal, setShowFhirModal] = useState(false);
+    const [fhirStatus, setFhirStatus] = useState({});
+    const [fhirLoading, setFhirLoading] = useState(new Set());
+    // Add states for FHIR alerts
+    const [fhirAlert, setFhirAlert] = useState({ show: false, variant: '', message: '', recordId: null });
+    const [showFhirToasts, setShowFhirToasts] = useState([]);
     const tableRef = useRef(null);
     const dataTableRef = useRef(null);
     const tableInitializedRef = useRef(false);
@@ -20,7 +28,8 @@ export default function Historico() {
     const { getToken } = useAuth();
 
     const transformData = (glucoseData, insulinData) => {
-        const transformedGlucose = glucoseData.map(item => ({
+        const transformedGlucose = glucoseData.map((item, index) => ({
+            id: item.id, // Use the actual database ID
             data_registo: item.timestamp,
             tipo: 'Glicose',
             valor: `${item.glucose_value ?? 0} mg/dL`,
@@ -30,13 +39,16 @@ export default function Historico() {
             tempo_ult_exercicio: item.exercise_duration ?? null,
             calorias_exercicio: item.exercise_calories ?? null,
             peso: item.weight ?? null,
+            raw_data: item // Keep the original data for reference
         }));
         
-        const transformedInsulin = insulinData.map(item => ({
+        const transformedInsulin = insulinData.map((item, index) => ({
+            id: item.id, // Use the actual database ID
             data_registo: item.timestamp,
             tipo: 'Insulina',
             valor: `${item.insulin_value ?? item.value ?? 0} U`,
             regime: item.route || 'Subcutânea',
+            raw_data: item // Keep the original data for reference
         }));
         
         return [...transformedGlucose, ...transformedInsulin];
@@ -146,6 +158,15 @@ export default function Historico() {
         };
         
         const columns = [
+            {
+                data: null,
+                title: '<input type="checkbox" id="select-all">',
+                render: function(data, type, row, meta) {
+                    return `<input type="checkbox" class="record-checkbox" data-id="${row.id}">`;
+                },
+                orderable: false,
+                width: '5%'
+            },
             { 
                 data: 'data_registo', 
                 title: '<i class="fas fa-calendar-alt me-2"></i>Data/Hora',
@@ -208,7 +229,7 @@ export default function Historico() {
                 orderable: false,
                 searchable: false,
                 render: function(data, type, row, meta) {
-                    const registoId = row.raw_data?.id || `${row.tipo}-${meta.row}`;
+                    const registoId = row.id || `${row.tipo}-${meta.row}`;
                     return `
                         <button 
                             class="btn btn-outline-primary btn-sm details-btn" 
@@ -221,7 +242,29 @@ export default function Historico() {
                         </button>
                     `;
                 },
-                width: '10%',
+                width: '12%',
+                className: 'text-center'
+            },
+            {
+                data: null,
+                title: '<i class="fas fa-fire me-2"></i>FHIR',
+                render: function(data, type, row) {
+                    const recordId = row.id;
+                    const isLoading = fhirLoading.has(recordId);
+                    
+                    if (isLoading) {
+                        return `<button class="btn btn-sm btn-outline-primary" disabled>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    Enviando...
+                                </button>`;
+                    }
+                    
+                    // Always show the send button - success/error will be shown via alerts
+                    return `<button class="btn btn-sm btn-outline-primary send-fhir-btn" data-id="${recordId}">
+                                <i class="fas fa-share-alt me-1"></i>Enviar
+                            </button>`;
+                },
+                width: '12%',
                 className: 'text-center'
             }
         ];
@@ -232,7 +275,7 @@ export default function Historico() {
             pageLength: 10,
             lengthChange: true,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']], // Sort by date column (index 1)
             language: {
                 paginate: {
                     previous: '<i class="fas fa-chevron-left"></i>',
@@ -254,7 +297,7 @@ export default function Historico() {
             },
             responsive: true,
             autoWidth: false,
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+            dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             drawCallback: function() {
@@ -268,11 +311,32 @@ export default function Historico() {
                     const tipo = $(this).data('tipo');
                     handleViewDetails(registoId, tipo);
                 });
+                
+                // FHIR send button handlers
+                $('.send-fhir-btn').off('click').on('click', function(e) {
+                    e.preventDefault();
+                    const recordId = $(this).data('id');
+                    handleSendSingleRecord(recordId);
+                });
+                
+                // Checkbox handlers
+                $('.record-checkbox').off('change').on('change', function() {
+                    const recordId = $(this).data('id');
+                    if (this.checked) {
+                        setSelectedRecords(prev => new Set([...prev, recordId]));
+                    } else {
+                        setSelectedRecords(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(recordId);
+                            return newSet;
+                        });
+                    }
+                });
             }
         });
         
         tableInitializedRef.current = true;
-    }, [handleViewDetails]);
+    }, [handleViewDetails, fhirLoading]); // Removed fhirStatus from dependencies
     
     // Split the effects - first for data fetching
     useEffect(() => {
@@ -533,8 +597,156 @@ export default function Historico() {
         );
     };
     
+    // Helper function to add toast notifications
+    const addFhirToast = (variant, message, recordId = null) => {
+        const toastId = Date.now();
+        const newToast = {
+            id: toastId,
+            variant,
+            message,
+            recordId,
+            timestamp: new Date()
+        };
+        
+        setShowFhirToasts(prev => [...prev, newToast]);
+        
+        // Auto-remove toast after 5 seconds
+        setTimeout(() => {
+            setShowFhirToasts(prev => prev.filter(toast => toast.id !== toastId));
+        }, 5000);
+    };
+
+    // FHIR sending function with improved feedback
+    const handleSendSingleRecord = async (recordId) => {
+        if (!recordId) {
+            console.error('No record ID provided');
+            return;
+        }
+
+        // Find the record to get its type for better messaging
+        const record = data.find(item => item.id === recordId);
+        const recordType = record ? record.tipo : 'registo';
+
+        // Add to loading state
+        setFhirLoading(prev => new Set([...prev, recordId]));
+        
+        try {
+            const result = await sendRecordToFHIR(recordId);
+            
+            if (result.success) {
+                setFhirStatus(prev => ({ ...prev, [recordId]: 'sent' }));
+                console.log('FHIR data sent successfully:', result);
+                
+                // Show success toast
+                addFhirToast(
+                    'success', 
+                    `${recordType} enviado com sucesso para o Mirth Connect!`, 
+                    recordId
+                );
+            } else {
+                throw new Error('Failed to send FHIR data');
+            }
+        } catch (error) {
+            console.error('Error sending FHIR data:', error);
+            setFhirStatus(prev => ({ ...prev, [recordId]: 'error' }));
+            
+            // Show error toast
+            addFhirToast(
+                'danger', 
+                `Erro ao enviar ${recordType}: ${error.message}`, 
+                recordId
+            );
+        } finally {
+            // Remove from loading state
+            setFhirLoading(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(recordId);
+                return newSet;
+            });
+            
+            // Refresh table to show updated status
+            if (dataTableRef.current) {
+                dataTableRef.current.draw(false);
+            }
+        }
+    };
+
+    const handleSendBulkRecords = async () => {
+        if (selectedRecords.size === 0) {
+            console.error('No records selected');
+            return;
+        }
+
+        // Show initial alert
+        setFhirAlert({
+            show: true,
+            variant: 'info',
+            message: `A enviar ${selectedRecords.size} registos para o Mirth Connect...`,
+            recordId: null
+        });
+
+        try {
+            const recordIds = Array.from(selectedRecords);
+            const result = await sendBulkRecordsToFHIR(recordIds);
+            
+            if (result.success) {
+                // Update status for all sent records
+                const newStatus = {};
+                result.results.forEach(res => {
+                    if (res.success) {
+                        newStatus[res.recordId] = 'sent';
+                    } else {
+                        newStatus[res.recordId] = 'error';
+                    }
+                });
+                
+                setFhirStatus(prev => ({ ...prev, ...newStatus }));
+                setShowFhirModal(false);
+                setSelectedRecords(new Set());
+                
+                // Show success alert
+                setFhirAlert({
+                    show: true,
+                    variant: 'success',
+                    message: `${result.processed} registos enviados com sucesso! ${result.errors > 0 ? `${result.errors} registos falharam.` : ''}`,
+                    recordId: null
+                });
+                
+                // Refresh table
+                if (dataTableRef.current) {
+                    dataTableRef.current.draw(false);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending bulk FHIR data:', error);
+            
+            // Show error alert
+            setFhirAlert({
+                show: true,
+                variant: 'danger',
+                message: `Erro ao enviar registos em lote: ${error.message}`,
+                recordId: null
+            });
+        }
+    };
+
     return (
         <Container className="py-4">
+            {/* FHIR Alert for bulk operations */}
+            {fhirAlert.show && (
+                <Alert 
+                    variant={fhirAlert.variant} 
+                    onClose={() => setFhirAlert({ show: false, variant: '', message: '', recordId: null })} 
+                    dismissible
+                    className="mb-4"
+                >
+                    <div className="d-flex align-items-center">
+                        <i className={`fas ${fhirAlert.variant === 'success' ? 'fa-check-circle' : fhirAlert.variant === 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2`}></i>
+                        {fhirAlert.message}
+                    </div>
+                </Alert>
+            )}
+
             <div className="mb-4">
                 <div className="d-flex align-items justify-content-between">
                     <div>
@@ -545,19 +757,38 @@ export default function Historico() {
                         <p className="text-muted mb-1">
                             Consulte o seu histórico de medições de glicose e administrações de insulina
                         </p>
+                        {selectedRecords.size > 0 && (
+                            <Badge bg="info" className="ms-2">
+                                {selectedRecords.size} selecionados
+                            </Badge>
+                        )}
                     </div>
-                    {data.length > 0 && (
-                        <div className="stats-cards d-none d-lg-flex">
-                            <div className="stat-card me-3">
-                                <div className="stat-number">{data.filter(d => d.tipo === 'Glicose').length}</div>
-                                <div className="stat-label">Glicose</div>
+                    
+                    <div className="d-flex align-items-center">
+                        {data.length > 0 && (
+                            <div className="stats-cards d-none d-lg-flex me-3">
+                                <div className="stat-card me-3">
+                                    <div className="stat-number">{data.filter(d => d.tipo === 'Glicose').length}</div>
+                                    <div className="stat-label">Glicose</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">{data.filter(d => d.tipo === 'Insulina').length}</div>
+                                    <div className="stat-label">Insulina</div>
+                                </div>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-number">{data.filter(d => d.tipo === 'Insulina').length}</div>
-                                <div className="stat-label">Insulina</div>
-                            </div>
-                        </div>
-                    )}
+                        )}
+                        
+                        {selectedRecords.size > 0 && (
+                            <Button 
+                                variant="success" 
+                                onClick={() => setShowFhirModal(true)}
+                                className="ms-2"
+                            >
+                                <i className="fas fa-share-alt me-2"></i>
+                                Enviar FHIR ({selectedRecords.size})
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
             
@@ -598,6 +829,55 @@ export default function Historico() {
 
             {/* Modal para detalhes do registo */}
             <DetailsModal />
+
+            {/* FHIR Confirmation Modal */}
+            <Modal show={showFhirModal} onHide={() => setShowFhirModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Enviar Dados FHIR</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Pretende enviar {selectedRecords.size} registos para o Mirth Connect em formato FHIR?</p>
+                    <Alert variant="info">
+                        <i className="fas fa-info-circle me-2"></i>
+                        Os dados serão convertidos automaticamente para o formato FHIR antes do envio.
+                    </Alert>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowFhirModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button variant="success" onClick={handleSendBulkRecords}>
+                        <i className="fas fa-share-alt me-2"></i>
+                        Enviar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Toast Container for individual FHIR notifications - moved to bottom-start */}
+            <ToastContainer position="bottom-start" className="p-3" style={{ zIndex: 9999 }}>
+                {showFhirToasts.map((toast) => (
+                    <Toast
+                        key={toast.id}
+                        show={true}
+                        onClose={() => setShowFhirToasts(prev => prev.filter(t => t.id !== toast.id))}
+                        delay={5000}
+                        autohide
+                        bg={toast.variant}
+                        className={`text-white ${toast.variant === 'success' ? 'border-success' : 'border-danger'}`}
+                    >
+                        <Toast.Header>
+                            <i className={`fas ${toast.variant === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-danger'} me-2`}></i>
+                            <strong className="me-auto">
+                                {toast.variant === 'success' ? 'Sucesso' : 'Erro'} FHIR
+                            </strong>
+                            <small>{toast.timestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</small>
+                        </Toast.Header>
+                        <Toast.Body>
+                            {toast.message}
+                        </Toast.Body>
+                    </Toast>
+                ))}
+            </ToastContainer>
         </Container>
     );
 }
