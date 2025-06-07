@@ -113,7 +113,8 @@ export default function Inicio() {
 
     if (isLoading) {
         return (
-            <main className="container-fluid py-4">
+
+            <main className="container py-4">
                 <div className="text-center">
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">A carregar...</span>
@@ -126,7 +127,8 @@ export default function Inicio() {
 
     if (error) {
         return (
-            <main className="container-fluid py-4">
+
+            <main className="container py-4">
                 <Alert variant="danger">
                     <Alert.Heading>Erro ao carregar dashboard</Alert.Heading>
                     <p>{error}</p>
@@ -136,7 +138,8 @@ export default function Inicio() {
     }
 
     return (
-        <main className="container-fluid py-4">
+
+        <main className="container py-4">
             <div className="dashboard-header mb-4 text-start">
                 <div>
                     <h1 className="display-6 fw-bold text-primary mb-1">

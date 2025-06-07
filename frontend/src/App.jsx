@@ -12,6 +12,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
 import Agenda from './pages/Agenda.jsx';
+import Perfil from './pages/Perfil.jsx';
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));
@@ -66,6 +67,11 @@ export default function App() {
                         <Route path="historico" element={
                             <ProtectedRoute>
                                 <Historico />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="perfil" element={
+                            <ProtectedRoute>
+                                <Perfil />
                             </ProtectedRoute>
                         } />
                     </Route>

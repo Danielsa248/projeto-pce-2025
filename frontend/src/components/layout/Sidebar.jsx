@@ -8,7 +8,8 @@ import {
     BiCalendar,
     BiHistory,
     BiCog,
-    BiChart 
+    BiChart, 
+    BiUser
 } from 'react-icons/bi';
 import './Sidebar.css';
 
@@ -34,6 +35,9 @@ export default function Sidebar({ isVisible }) {
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/historico">
                     <BiHistory className="sidebar-icon" /> Histórico
+                </Nav.Link>
+                <Nav.Link as={NavLink} to="/perfil">
+                    <BiUser className="sidebar-icon" /> Perfil
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/opcoes">
                     <BiCog className="sidebar-icon" /> Opções
