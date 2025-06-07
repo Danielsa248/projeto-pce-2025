@@ -182,6 +182,35 @@ export async function getRegistos(userId, tipo) {
     }
 }
 
+export async function getRecordById(recordId, userId) {
+    try {
+        const result = await pool.query(
+            'SELECT id, data_registo, dados, tipo_registo, utilizador FROM registos WHERE id = $1 AND utilizador = $2',
+            [recordId, userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return null;
+        }
+        
+        const record = result.rows[0];
+        
+        // Parse dados if it's a string
+        if (typeof record.dados === 'string') {
+            try {
+                record.dados = JSON.parse(record.dados);
+            } catch (parseError) {
+                console.error('Error parsing record data:', parseError);
+                // Keep original data if parsing fails
+            }
+        }
+        
+        return record;
+    } catch (error) {
+        console.error('Error fetching record by ID:', error);
+        throw error;
+    }
+}
 
 // Rota para guardar na BD o json
 router.post("/compositions", authenticateToken, async (req, res) => {

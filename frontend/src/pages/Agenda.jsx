@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Badge, Card } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
-import * as agendaApi from '../api/agenda.jsx';
+import * as agendaApi from '../api/agenda.js';
 
 // Constants
 const REGISTO_TYPES = {
