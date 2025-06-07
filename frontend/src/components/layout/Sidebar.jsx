@@ -21,11 +21,11 @@ export default function Sidebar({ isVisible }) {
                 <Nav.Link as={NavLink} to="/" >
                     <BiHomeAlt className="sidebar-icon" /> Início
                 </Nav.Link>
-                <Nav.Link as={NavLink} to="/medicao-glicose">
-                    <BiDroplet className="sidebar-icon" /> Medição de Glicose
+                <Nav.Link as={NavLink} to="/glicose">
+                    <BiDroplet className="sidebar-icon" /> Glicose
                 </Nav.Link>
-                <Nav.Link as={NavLink} to="/medicao-insulina">
-                    <BiInjection className="sidebar-icon" /> Medição de Insulina
+                <Nav.Link as={NavLink} to="/insulina">
+                    <BiInjection className="sidebar-icon" /> Insulina
                 </Nav.Link>
                 <Nav.Link as={NavLink} to="/estatisticas"> 
                     <BiChart className="sidebar-icon" /> Estatísticas

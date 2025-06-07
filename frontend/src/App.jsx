@@ -36,7 +36,7 @@ export default function App() {
                             </ProtectedRoute>
                         } index />
                         
-                        <Route path="medicao-glicose/" element={
+                        <Route path="glicose/" element={
                             <ProtectedRoute>
                                 <Suspense fallback={<div>Loading...</div>}>
                                     <FormRender key="glicose" type="glicose" />
@@ -44,7 +44,7 @@ export default function App() {
                             </ProtectedRoute>
                         } />
                         
-                        <Route path="medicao-insulina/" element={
+                        <Route path="insulina/" element={
                             <ProtectedRoute>
                                 <Suspense fallback={<div>Loading...</div>}>
                                     <FormRender key="insulina" type="insulina" />
