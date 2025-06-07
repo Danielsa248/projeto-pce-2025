@@ -58,6 +58,10 @@ const CHART_COLORS = {
   insulin: {
     border: 'rgba(255, 99, 132, 0.7)',
     background: 'rgba(255, 99, 132, 0.2)',
+  },
+  weight: {
+    border: 'rgba(25, 135, 84, 0.7)',
+    background: 'rgba(25, 135, 84, 0.2)',
   }
 };
 
@@ -71,6 +75,11 @@ const DATA_TYPE_LABELS = {
     name: 'Insulina',
     unit: 'U',
     description: 'Histórico de administrações de insulina',
+  },
+  weight: {
+    name: 'Peso',
+    unit: 'kg',
+    description: 'Evolução do peso corporal',
   }
 };
 
@@ -109,12 +118,10 @@ export default function Estatisticas() {
     insulin: TIME_RANGES.DAYS_7,
   });
   
-  // Update meal state tracking to be more specific
   const [mealStates, setMealStates] = useState({
     glucose: MEAL_STATES.ALL,
   });
   
-  // Add separate route state for insulin
   const [routeStates, setRouteStates] = useState({
     insulin: ROUTE_STATES.ALL,
   });
@@ -122,17 +129,19 @@ export default function Estatisticas() {
   const [chartData, setChartData] = useState({
     glucose: null,
     insulin: null,
+    weight: null,
   });
   
   const [averages, setAverages] = useState({
     glucose: 0,
     insulin: 0,
+    weight: 0,
   });
 
-  // Add min/max state
   const [minMaxValues, setMinMaxValues] = useState({
     glucose: { min: null, max: null },
     insulin: { min: null, max: null },
+    weight: { min: null, max: null },
   });
   
   const [data, setData] = useState({
@@ -146,7 +155,6 @@ export default function Estatisticas() {
   });
   
   const [error, setError] = useState(null);
-  
 
   const { getToken } = useAuth();
 
@@ -325,7 +333,9 @@ export default function Estatisticas() {
 
 
   const prepareChartData = useCallback((dataType, timeRange, filterState, filterType) => {
-    const filteredData = filterDataByTimeRange(data[dataType], timeRange, filterState, filterType);
+    let sourceData = data[dataType === 'weight' ? 'glucose' : dataType];
+    
+    const filteredData = filterDataByTimeRange(sourceData, timeRange, filterState, filterType);
     
     if (filteredData.length === 0) {
       return {
@@ -336,18 +346,46 @@ export default function Estatisticas() {
       };
     }
     
-    const values = filteredData.map(item => Number(item.value)).filter(val => !isNaN(val));
+    let values, chartDataPoints;
+    
+    if (dataType === 'weight') {
+      // Filter glucose data for weight values
+      const weightData = filteredData
+        .filter(item => item.weight && !isNaN(parseFloat(item.weight)))
+        .map(item => ({
+          timestamp: item.timestamp,
+          value: parseFloat(item.weight)
+        }));
+      
+      if (weightData.length === 0) {
+        return {
+          chartData: null,
+          average: 0,
+          min: null,
+          max: null
+        };
+      }
+      
+      values = weightData.map(item => item.value);
+      chartDataPoints = weightData;
+    } else {
+      values = filteredData.map(item => Number(item.value)).filter(val => !isNaN(val));
+      chartDataPoints = filteredData.map(item => ({
+        timestamp: item.timestamp,
+        value: Number(item.value)
+      }));
+    }
     
     const total = values.reduce((sum, value) => sum + value, 0);
-    const average = values.length ? Math.round(total / values.length) : 0;
-    const min = values.length ? Math.min(...values) : null;
-    const max = values.length ? Math.max(...values) : null;
+    const average = values.length ? (dataType === 'weight' ? (total / values.length).toFixed(1) : Math.round(total / values.length)) : 0;
+    const min = values.length ? (dataType === 'weight' ? Math.min(...values).toFixed(1) : Math.min(...values)) : null;
+    const max = values.length ? (dataType === 'weight' ? Math.max(...values).toFixed(1) : Math.max(...values)) : null;
     
     const chartData = {
       datasets: [
         {
           label: `${DATA_TYPE_LABELS[dataType].name} (${DATA_TYPE_LABELS[dataType].unit})`,
-          data: filteredData.map(item => ({
+          data: chartDataPoints.map(item => ({
             x: item.timestamp instanceof Date ? item.timestamp : new Date(item.timestamp),
             y: Number(item.value)
           })),
@@ -381,21 +419,30 @@ export default function Estatisticas() {
         routeStates.insulin, 
         'route'
       );
+      // Weight chart uses glucose time range
+      const weightResults = prepareChartData(
+        'weight', 
+        timeRanges.glucose, 
+        null, 
+        null
+      );
       
       setChartData({
         glucose: glucoseResults.chartData,
-        insulin: insulinResults.chartData
+        insulin: insulinResults.chartData,
+        weight: weightResults.chartData
       });
       
       setAverages({
         glucose: glucoseResults.average,
-        insulin: insulinResults.average
+        insulin: insulinResults.average,
+        weight: weightResults.average
       });
       
-      // Add min/max values
       setMinMaxValues({
         glucose: { min: glucoseResults.min, max: glucoseResults.max },
-        insulin: { min: insulinResults.min, max: insulinResults.max }
+        insulin: { min: insulinResults.min, max: insulinResults.max },
+        weight: { min: weightResults.min, max: weightResults.max }
       });
     }
   }, [timeRanges, mealStates, routeStates, data, loadingState, error, prepareChartData]);
@@ -472,46 +519,43 @@ export default function Estatisticas() {
     }
   }, [mealStates, routeStates, handleMealStateChange, handleRouteStateChange]);
 
+  // Updated renderDataCard to handle weight
   const renderDataCard = useCallback((dataType) => (
-    <div className="col-md-6">
+    <div className="col-md-4">
       <div className="card bg-light border-0">
         <div className="card-body text-center">
           <h5 className="mb-4">Estatísticas de {DATA_TYPE_LABELS[dataType].name}</h5>
-          {loadingState[dataType] ? (
+          {(dataType === 'weight' ? loadingState.glucose : loadingState[dataType]) ? (
             <div className="d-flex justify-content-center">
               <Spinner animation="border" size="sm" />
             </div>
           ) : (
             <>
-              {/* All three metrics side by side - Minimum, Average, Maximum */}
               <div className="row">
-                {/* Minimum - Left */}
                 <div className="col-4">
                   <div className="text-center">
                     <small className="text-muted d-block mb-2">Mínimo</small>
-                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'success' : 'info'}`}>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'success' : dataType === 'insulin' ? 'info' : 'success'}`}>
                       {minMaxValues[dataType].min !== null ? minMaxValues[dataType].min : '0'}
                     </div>
                     <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
                   </div>
                 </div>
                 
-                {/* Average - Middle */}
                 <div className="col-4">
                   <div className="text-center">
                     <small className="text-muted d-block mb-2">Média</small>
-                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'primary' : 'danger'}`}>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'primary' : dataType === 'insulin' ? 'danger' : 'success'}`}>
                       {averages[dataType]}
                     </div>
                     <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
                   </div>
                 </div>
                 
-                {/* Maximum - Right */}
                 <div className="col-4">
                   <div className="text-center">
                     <small className="text-muted d-block mb-2">Máximo</small>
-                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'warning' : 'danger'}`}>
+                    <div className={`display-6 fw-bold text-${dataType === 'glucose' ? 'warning' : dataType === 'insulin' ? 'danger' : 'warning'}`}>
                       {minMaxValues[dataType].max !== null ? minMaxValues[dataType].max : '0'}
                     </div>
                     <small className="text-muted">{DATA_TYPE_LABELS[dataType].unit}</small>
@@ -525,35 +569,40 @@ export default function Estatisticas() {
     </div>
   ), [averages, minMaxValues, loadingState]);
 
-  // Render chart
+  // Updated renderChart to handle weight (no filter selectors for weight)
   const renderChart = useCallback((dataType) => (
-    <div className="col-md-6 mb-4">
+    <div className={`col-md-${dataType === 'weight' ? '12' : '6'} mb-4`}>
       <div className="card shadow">
         <div className="card-header bg-white">
           <div className="d-flex justify-content-between align-items-start">
             <div>
               <h5 className="mb-0">{DATA_TYPE_LABELS[dataType].name}</h5>
-              <p className="text-muted small mb-0">{DATA_TYPE_LABELS[dataType].description}</p>
+              <p className="text-muted small mb-0">
+                {dataType === 'weight' 
+                  ? `${DATA_TYPE_LABELS[dataType].description} (baseado no período de glicose)`
+                  : DATA_TYPE_LABELS[dataType].description
+                }
+              </p>
             </div>
-            <div className="d-flex align-items-center gap-3">
-              {/* Time range selector */}
-              <div className="d-flex align-items-center gap-2">
-                <small className="text-muted text-nowrap">Período:</small>
-                {renderTimeRangeSelector(dataType)}
+            {dataType !== 'weight' && (
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-2">
+                  <small className="text-muted text-nowrap">Período:</small>
+                  {renderTimeRangeSelector(dataType)}
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <small className="text-muted text-nowrap">
+                    {dataType === 'glucose' ? 'Tipo:' : 'Via:'}
+                  </small>
+                  {renderFilterSelector(dataType)}
+                </div>
               </div>
-              {/* Filter selector */}
-              <div className="d-flex align-items-center gap-2">
-                <small className="text-muted text-nowrap">
-                  {dataType === 'glucose' ? 'Tipo:' : 'Via:'}
-                </small>
-                {renderFilterSelector(dataType)}
-              </div>
-            </div>
+            )}
           </div>
         </div>
         <div className="card-body">
           <div style={{ height: '300px' }}>
-            {loadingState[dataType] ? (
+            {(dataType === 'weight' ? loadingState.glucose : loadingState[dataType]) ? (
               <div className="d-flex align-items-center justify-content-center h-100">
                 <Spinner animation="border" />
               </div>
@@ -561,7 +610,12 @@ export default function Estatisticas() {
               <Line data={chartData[dataType]} options={chartOptions} />
             ) : (
               <div className="d-flex align-items-center justify-content-center h-100">
-                <p className="text-muted">Nenhum dado disponível para o período selecionado</p>
+                <p className="text-muted">
+                  {dataType === 'weight' 
+                    ? 'Nenhum dado de peso disponível para o período selecionado'
+                    : 'Nenhum dado disponível para o período selecionado'
+                  }
+                </p>
               </div>
             )}
           </div>
@@ -607,11 +661,12 @@ export default function Estatisticas() {
     <div className="container mt-4">
       <h1 className="display-6 fw-bold text-primary mb-1">
         <i className="fas fa-line-chart me-3"></i>
-          Estatísticas
+        Estatísticas
       </h1>
       <p className="text-muted mb-4">
         Consulte as suas estatísticas globais
       </p>
+      
       {/* Summary cards */}
       <div className="row mb-4">
         <div className="col">
@@ -624,6 +679,7 @@ export default function Estatisticas() {
               <div className="row mb-4">
                 {renderDataCard('glucose')}
                 {renderDataCard('insulin')}
+                {renderDataCard('weight')}
               </div>
             </div>
           </div>
@@ -634,6 +690,11 @@ export default function Estatisticas() {
       <div className="row">
         {renderChart('glucose')}
         {renderChart('insulin')}
+      </div>
+      
+      {/* Weight chart full width */}
+      <div className="row">
+        {renderChart('weight')}
       </div>
     </div>
   );
