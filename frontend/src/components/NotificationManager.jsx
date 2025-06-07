@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import NotificationService from '../services/NotificationService';
-import * as agendaApi from '../api/agenda.jsx';
+import * as agendaApi from '../api/agenda.js';
 
 export default function NotificationManager() {
     const { isAuthenticated } = useAuth();

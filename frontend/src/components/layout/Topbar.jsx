@@ -4,7 +4,7 @@ import { FaBars, FaBell, FaCog } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 import NotificationService from '../../services/NotificationService';
-import * as agendaApi from '../../api/agenda.jsx';
+import * as agendaApi from '../../api/agenda.js';
 import './Topbar.css';
 
 // ============================================
