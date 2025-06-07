@@ -36,7 +36,6 @@ export async function saveRegisto(tipo, id, data_registo, composition, userId) {
 // Toda a informação de um utilizador por ID
 export async function getUserByIdComplete(id) {
     try {
-        // Buscar utilizador
         const userResult = await pool.query('SELECT * FROM utilizador WHERE id = $1', [id]);
         
         if (!userResult.rows[0]) {
@@ -85,6 +84,8 @@ export async function getUserByIdComplete(id) {
 
         return {
             ...userResult.rows[0],
+            email: userResult.rows[0].email || contactos.emails[0]?.valor || null,
+            telefone: userResult.rows[0].telefone || contactos.telefones[0]?.valor || null,
             emails: contactos.emails,
             telefones: contactos.telefones,
             morada: moradaObject
@@ -109,77 +110,54 @@ export async function deleteUserById(id) {
 // Atualizar perfil do utilizador
 export async function updateUserProfile(userId, profileData) {
     try {
-        // ALTERADO: Apenas campos editáveis (email, telefone, altura, peso)
-        const { email, telefone, altura, peso } = profileData;
-
-        // Iniciar transação
+        const { emails, telefones, altura, peso } = profileData;
         await pool.query('BEGIN');
 
         try {
-            // 1. Atualizar altura e peso na tabela utilizador
-            const userResult = await pool.query(`
+            await pool.query(`
                 UPDATE utilizador SET 
                     altura = COALESCE($2, altura),
-                    peso = COALESCE($3, peso),
-                    updated_at = CURRENT_TIMESTAMP
+                    peso = COALESCE($3, peso)
                 WHERE id = $1
-                RETURNING *
             `, [userId, altura, peso]);
 
-            // 2. Atualizar ou inserir email na tabela contacto
-            if (email !== undefined && email !== null && email !== '') {
-                // Verificar se já existe email para este utilizador
-                const existingEmail = await pool.query(
-                    'SELECT * FROM contacto WHERE utilizador = $1 AND tipo_contacto = $2 LIMIT 1', 
+            if (emails && Array.isArray(emails)) {
+                await pool.query(
+                    'DELETE FROM contacto WHERE utilizador = $1 AND tipo_contacto = $2',
                     [userId, 'E']
                 );
-
-                if (existingEmail.rows.length > 0) {
-                    // Atualizar email existente
-                    await pool.query(
-                        'UPDATE contacto SET contacto = $1 WHERE utilizador = $2 AND tipo_contacto = $3',
-                        [email, userId, 'E']
-                    );
-                } else {
-                    // Inserir novo email
-                    await pool.query(
-                        'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
-                        [userId, 'E', email]
-                    );
+                
+                for (const email of emails) {
+                    if (email.valor && email.valor.trim() !== '') {
+                        await pool.query(
+                            'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
+                            [userId, 'E', email.valor.trim()]
+                        );
+                    }
                 }
             }
 
-            // 3. Atualizar ou inserir telefone na tabela contacto  
-            if (telefone !== undefined && telefone !== null && telefone !== '') {
-                // Verificar se já existe telefone para este utilizador
-                const existingTelefone = await pool.query(
-                    'SELECT * FROM contacto WHERE utilizador = $1 AND tipo_contacto = $2 LIMIT 1', 
+            if (telefones && Array.isArray(telefones)) {
+                await pool.query(
+                    'DELETE FROM contacto WHERE utilizador = $1 AND tipo_contacto = $2',
                     [userId, 'T']
                 );
-
-                if (existingTelefone.rows.length > 0) {
-                    // Atualizar telefone existente
-                    await pool.query(
-                        'UPDATE contacto SET contacto = $1 WHERE utilizador = $2 AND tipo_contacto = $3',
-                        [telefone, userId, 'T']
-                    );
-                } else {
-                    // Inserir novo telefone
-                    await pool.query(
-                        'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
-                        [userId, 'T', telefone]
-                    );
+                
+                for (const telefone of telefones) {
+                    if (telefone.valor && telefone.valor.trim() !== '') {
+                        await pool.query(
+                            'INSERT INTO contacto (utilizador, tipo_contacto, contacto) VALUES ($1, $2, $3)',
+                            [userId, 'T', telefone.valor.trim()]
+                        );
+                    }
                 }
             }
 
-            // Confirmar transação
             await pool.query('COMMIT');
 
-            // Retornar dados atualizados
             return await getUserByIdComplete(userId);
 
         } catch (error) {
-            // Desfazer transação em caso de erro
             await pool.query('ROLLBACK');
             throw error;
         }
@@ -367,7 +345,7 @@ router.get('/perfil', authenticateToken, async (req, res) => {
     }
 });
 
-// ADICIONAR: Rota para atualizar perfil do utilizador
+// Rota para atualizar perfil do utilizador
 router.put('/perfil', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -382,7 +360,6 @@ router.put('/perfil', authenticateToken, async (req, res) => {
             });
         }
 
-        // Remover informações sensíveis
         const { password, ...safeProfile } = updatedProfile;
         
         return res.json({
@@ -394,7 +371,7 @@ router.put('/perfil', authenticateToken, async (req, res) => {
         console.error('Erro ao atualizar perfil:', error);
         return res.status(500).json({
             success: false,
-            message: 'Erro interno do servidor'
+            message: 'A informação do perfil não pode ser atualizada',
         });
     }
 });

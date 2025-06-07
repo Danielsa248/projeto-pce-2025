@@ -1,7 +1,80 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, Badge, Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import './Perfil.css';
+
+
+const MultiContactDisplay = ({ 
+    title, 
+    contacts = [], 
+    primaryValue,
+    isEditing, 
+    onEditPrimary, 
+    onContactChange,
+    type,
+    icon 
+}) => {
+    return (
+        <Form.Group>
+            <Form.Label className="fw-bold text-primary">
+                <i className={`fas ${icon} me-2`}></i>
+                {title} {isEditing && <i className="fas fa-edit text-success ms-1"></i>}
+            </Form.Label>
+            
+            {isEditing ? (
+                <div>
+                    {contacts.map((contact, index) => (
+                        <div key={`${title}-${index}`} className="d-flex align-items-center mb-2">
+                            <Form.Control
+                                type={type}
+                                value={contact.valor || ''}
+                                onChange={(e) => onContactChange(index, e.target.value)}
+                                className="border-success me-2"
+                                placeholder={type === 'email' ? 'exemplo@email.com' : 'Ex: +351 912 345 678'}
+                            />
+                            {index === 0 && (
+                                <Badge bg="primary" className="me-2">Principal</Badge>
+                            )}
+                            {contacts.length > 1 && (
+                                <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() => onContactChange(index, null)}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </Button>
+                            )}
+                        </div>
+                    ))}
+                    
+                    <Button
+                        size="sm"
+                        variant="outline-success"
+                        onClick={() => onContactChange(-1, '')}
+                    >
+                        <i className="fas fa-plus me-1"></i>
+                        Adicionar {title.slice(0, -1)}
+                    </Button>
+                </div>
+            ) : (
+                <div>
+                    {contacts.length > 0 ? (
+                        contacts.map((contact, index) => (
+                            <div key={`view-${index}`} className="d-flex align-items-center mb-1">
+                                <span>{contact.valor}</span>
+                                {index === 0 && (
+                                    <Badge bg="primary" className="ms-2">Principal</Badge>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <p className="mb-0 text-muted">-</p>
+                    )}
+                </div>
+            )}
+        </Form.Group>
+    );
+};
 
 export default function Perfil() {
     const { getToken } = useAuth();
@@ -17,6 +90,16 @@ export default function Perfil() {
     useEffect(() => {
         fetchProfileData();
     }, []);
+
+    useEffect(() => {
+        if (profile) {
+            setEditedProfile({
+                ...profile,
+                emails: profile.emails || [],
+                telefones: profile.telefones || []
+            });
+        }
+    }, [profile]);
 
     const fetchProfileData = async () => {
         try {
@@ -60,6 +143,11 @@ export default function Perfil() {
 
     const handleEdit = () => {
         setIsEditing(true);
+        setEditedProfile({
+            ...profile,
+            emails: profile.emails || [],
+            telefones: profile.telefones || []
+        });
         setError(null);
         setSuccess(null);
     };
@@ -78,13 +166,14 @@ export default function Perfil() {
             
             const token = getToken();
             
-            // ALTERADO: Enviar apenas os campos editáveis
             const editableFields = {
-                email: editedProfile.email,
-                telefone: editedProfile.telefone,
                 altura: editedProfile.altura,
-                peso: editedProfile.peso
+                peso: editedProfile.peso,
+                emails: editedProfile.emails?.filter(email => email.valor && email.valor.trim() !== ''),
+                telefones: editedProfile.telefones?.filter(telefone => telefone.valor && telefone.valor.trim() !== '')
             };
+            
+            console.log('Enviando dados:', editableFields);
             
             const response = await fetch('http://localhost:3000/api/bd/perfil', {
                 method: 'PUT',
@@ -121,6 +210,52 @@ export default function Perfil() {
         }));
     };
 
+    const handleEmailChange = useCallback((index, newValue) => {
+        if (newValue === null) {
+            const newEmails = editedProfile.emails.filter((_, i) => i !== index);
+            setEditedProfile(prev => ({
+                ...prev,
+                emails: newEmails
+            }));
+        } else if (index === -1) {
+            const newEmails = [...(editedProfile.emails || []), { valor: '' }];
+            setEditedProfile(prev => ({
+                ...prev,
+                emails: newEmails
+            }));
+        } else {
+            const newEmails = [...(editedProfile.emails || [])];
+            newEmails[index] = { valor: newValue };
+            setEditedProfile(prev => ({
+                ...prev,
+                emails: newEmails
+            }));
+        }
+    }, [editedProfile]);
+
+    const handlePhoneChange = useCallback((index, newValue) => {
+        if (newValue === null) {
+            const newPhones = editedProfile.telefones.filter((_, i) => i !== index);
+            setEditedProfile(prev => ({
+                ...prev,
+                telefones: newPhones
+            }));
+        } else if (index === -1) {
+            const newPhones = [...(editedProfile.telefones || []), { valor: '' }];
+            setEditedProfile(prev => ({
+                ...prev,
+                telefones: newPhones
+            }));
+        } else {
+            const newPhones = [...(editedProfile.telefones || [])];
+            newPhones[index] = { valor: newValue };
+            setEditedProfile(prev => ({
+                ...prev,
+                telefones: newPhones
+            }));
+        }
+    }, [editedProfile]);
+
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('pt-PT');
@@ -140,17 +275,7 @@ export default function Perfil() {
         return age;
     };
 
-    const getDiabetesTypeBadge = (type) => {
-        const variants = {
-            'Tipo 1': 'danger',
-            'Tipo 2': 'warning',
-            'Gestacional': 'info',
-            'MODY': 'secondary'
-        };
-        return variants[type] || 'secondary';
-    };
-
-    
+    // Funções para obter emails e telefones   
     const getAllEmails = (profile) => {
         return profile?.emails || [];
     };
@@ -160,55 +285,11 @@ export default function Perfil() {
     };
 
     const getPrimaryEmail = (profile) => {
-        // Primeiro email do array ou email da tabela utilizador
         return profile?.email || profile?.emails?.[0]?.valor || '';
     };
 
-    const getPrimaryPhone = (profile) => {
-        // Primeiro telefone do array ou telefone da tabela utilizador  
+    const getPrimaryPhone = (profile) => { 
         return profile?.telefone || profile?.telefones?.[0]?.valor || '';
-    };
-
-    // VERSÃO MAIS SIMPLES: Componente básico
-    const MultiContactDisplay = ({ 
-        title, 
-        contacts = [], 
-        primaryValue,
-        isEditing, 
-        onEditPrimary, 
-        type,
-        icon 
-    }) => {
-        return (
-            <Form.Group>
-                <Form.Label className="fw-bold text-primary">
-                    <i className={`fas ${icon} me-2`}></i>
-                    {title} {isEditing && <i className="fas fa-edit text-success ms-1"></i>}
-                </Form.Label>
-                
-                {isEditing ? (
-                    <Form.Control
-                        type={type}
-                        value={primaryValue || ''}
-                        onChange={onEditPrimary}
-                        className="border-success"
-                        placeholder={type === 'email' ? 'exemplo@email.com' : 'Ex: +351 912 345 678'}
-                    />
-                ) : (
-                    <div>
-                        {contacts.length > 0 ? (
-                            contacts.map((contact, index) => (
-                                <p key={index} className="mb-1">
-                                    {contact.valor}
-                            </p>
-                            ))
-                        ) : (
-                            <p className="mb-0 text-muted">-</p>
-                        )}
-                    </div>
-                )}
-            </Form.Group>
-        );
     };
 
     if (isLoading) {
@@ -297,7 +378,7 @@ export default function Perfil() {
 
             <Row className="g-4">
                 {/* Informações Pessoais */}
-                <Col lg={6}>
+                <Col lg={12}>
                     <Card className="h-100 shadow-sm border-0">
                         <Card.Header className="bg-primary text-white">
                             <h5 className="mb-0">
@@ -350,10 +431,10 @@ export default function Perfil() {
                                 <Col md={6}>
                                     <MultiContactDisplay
                                         title="Emails"
-                                        contacts={getAllEmails(profile)}
+                                        contacts={isEditing ? editedProfile.emails || [] : getAllEmails(profile)}
                                         primaryValue={getPrimaryEmail(profile)}
                                         isEditing={isEditing}
-                                        onEditPrimary={(e) => handleInputChange('email', e.target.value)}
+                                        onContactChange={handleEmailChange}
                                         type="email"
                                         icon="fa-envelope"
                                     />
@@ -363,10 +444,10 @@ export default function Perfil() {
                                 <Col md={6}>
                                     <MultiContactDisplay
                                         title="Telefones"
-                                        contacts={getAllPhones(profile)}
+                                        contacts={isEditing ? editedProfile.telefones || [] : getAllPhones(profile)}
                                         primaryValue={getPrimaryPhone(profile)}
                                         isEditing={isEditing}
-                                        onEditPrimary={(e) => handleInputChange('telefone', e.target.value)}
+                                        onContactChange={handlePhoneChange}
                                         type="tel"
                                         icon="fa-phone"
                                     />
@@ -407,9 +488,10 @@ export default function Perfil() {
                         </Card.Body>
                     </Card>
                 </Col>
-
+            </Row>
+            <Row className="g-4 mt-4">
                 {/* Informações Médicas */}
-                <Col lg={6}>
+                <Col lg={12}>
                     <Card className="h-100 shadow-sm border-0">
                         <Card.Header className="bg-danger text-white">
                             <h5 className="mb-0">
@@ -420,7 +502,7 @@ export default function Perfil() {
                         <Card.Body>
                             <Row className="g-3">
                                 {/* Altura */}
-                                <Col md={6}>
+                                <Col lg={4} md={6} sm={12}>
                                     <Form.Group>
                                         <Form.Label className="fw-bold text-danger">
                                             Altura (cm) {isEditing && <i className="fas fa-edit text-success ms-1"></i>}
@@ -445,7 +527,7 @@ export default function Perfil() {
                                 </Col>
 
                                 {/* Peso */}
-                                <Col md={6}>
+                                <Col lg={4} md={6} sm={12}>
                                     <Form.Group>
                                         <Form.Label className="fw-bold text-danger">
                                             Peso (kg) {isEditing && <i className="fas fa-edit text-success ms-1"></i>}
@@ -464,13 +546,50 @@ export default function Perfil() {
                                         ) : (
                                             <p className="mb-0">
                                                 {profile?.peso ? `${profile.peso} kg` : '-'}
-                                                {profile?.altura && profile?.peso && (
-                                                    <Badge bg="secondary" className="ms-2">
-                                                        IMC: {((profile.peso / Math.pow(profile.altura / 100, 2)).toFixed(1))}
-                                                    </Badge>
-                                                )}
                                             </p>
                                         )}
+                                    </Form.Group>
+                                </Col>
+
+                                {/* IMC */}
+                                <Col lg={4} md={6} sm={12}>
+                                    <Form.Group>
+                                        <Form.Label className="fw-bold text-danger">IMC</Form.Label>
+                                        <div className="mb-0">
+                                            {profile?.peso && profile?.altura ? (
+                                                (() => {
+                                                    const imc = (profile.peso / Math.pow(profile.altura / 100, 2));
+                                                    let variant = 'secondary';
+                                                    let interpretation = '';
+                                                    
+                                                    if (imc < 18.5) {
+                                                        variant = 'info';
+                                                        interpretation = 'Peso Baixo';
+                                                    } else if (imc >= 18.5 && imc < 25) {
+                                                        variant = 'success';
+                                                        interpretation = 'Normal';
+                                                    } else if (imc >= 25 && imc < 30) {
+                                                        variant = 'warning';
+                                                        interpretation = 'Sobrepeso';
+                                                    } else {
+                                                        variant = 'danger';
+                                                        interpretation = 'Obesidade';
+                                                    }
+                                                    
+                                                    return (
+                                                        <div>
+                                                            <Badge bg={variant} className="mb-1">
+                                                                IMC: {imc.toFixed(1)}
+                                                            </Badge>
+                                                            <br />
+                                                            <small className="text-muted">{interpretation}</small>
+                                                        </div>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <span className="text-muted">-</span>
+                                            )}
+                                        </div>
                                     </Form.Group>
                                 </Col>
                             </Row>
