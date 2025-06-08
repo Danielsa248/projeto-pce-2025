@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Row, Col, Alert, Badge, Button } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import NotificationService from '../services/NotificationService';
+import { getGlucoseStatus, loadGlucoseThresholds } from '../utils/glucoseUtils';
 
 export default function Inicio() {
     const [dashboardData, setDashboardData] = useState({
@@ -14,10 +15,30 @@ export default function Inicio() {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [glucoseThresholds, setGlucoseThresholds] = useState(null);
     const { getToken } = useAuth();
 
     useEffect(() => {
         fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+        const thresholds = loadGlucoseThresholds();
+        setGlucoseThresholds(thresholds);
+    }, []);
+
+    // Add this useEffect to listen for threshold updates
+    useEffect(() => {
+        const handleThresholdsUpdate = (event) => {
+            console.log('🔄 Glucose thresholds updated, reloading...');
+            setGlucoseThresholds(event.detail);
+        };
+
+        window.addEventListener('glucoseThresholdsUpdated', handleThresholdsUpdate);
+        
+        return () => {
+            window.removeEventListener('glucoseThresholdsUpdated', handleThresholdsUpdate);
+        };
     }, []);
 
     const fetchDashboardData = async () => {
@@ -238,13 +259,68 @@ export default function Inicio() {
                             {dashboardData.lastGlucose ? (
                                 <>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h2 className="display-4 fw-bold text-primary mb-0">
+                                        <div className="d-flex align-items-center">
+                                            <h2 className="display-4 fw-bold text-primary mb-0 me-3">
                                                 {dashboardData.lastGlucose.glucose_value}
                                                 <small className="text-muted"> mg/dL</small>
                                             </h2>
+                                            
+                                            {/* Glucose Status Indicator */}
+                                            {glucoseThresholds && (() => {
+                                                const status = getGlucoseStatus(
+                                                    dashboardData.lastGlucose.glucose_value,
+                                                    dashboardData.lastGlucose.condition,
+                                                    glucoseThresholds
+                                                );
+                                                
+                                                return status.showAlert && (
+                                                    <div className="d-flex flex-column align-items-center">
+                                                        <div className={`badge ${status.bgColor} ${status.textColor} p-2 mb-1`}>
+                                                            <i className={`${status.icon} me-1`}></i>
+                                                            <span className="small fw-bold">{status.message}</span>
+                                                        </div>
+                                                        {status.level.includes('very') && (
+                                                            <small className="text-danger fw-bold">
+                                                                <i className="fas fa-exclamation-circle me-1"></i>
+                                                                Contacte o médico
+                                                            </small>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
+                                    
+                                    {/* Glucose Status Alert */}
+                                    {glucoseThresholds && (() => {
+                                        const status = getGlucoseStatus(
+                                            dashboardData.lastGlucose.glucose_value,
+                                            dashboardData.lastGlucose.condition,
+                                            glucoseThresholds
+                                        );
+                                        
+                                        return status.showAlert && (
+                                            <Alert variant={status.alertType} className="mb-3">
+                                                <div className="d-flex align-items-center">
+                                                    <i className={`${status.icon} me-2`}></i>
+                                                    <div>
+                                                        <strong>{status.message}</strong>
+                                                        <div className="small mt-1">
+                                                            Valor: {dashboardData.lastGlucose.glucose_value} mg/dL | 
+                                                            Regime: {dashboardData.lastGlucose.condition}
+                                                        </div>
+                                                        {status.level.includes('very') && (
+                                                            <div className="small text-danger mt-1">
+                                                                <i className="fas fa-phone me-1"></i>
+                                                                Recomenda-se contacto médico imediato
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Alert>
+                                        );
+                                    })()}
+
                                     <div className="d-flex justify-content-between align-items-center mb-2">
                                         <div className="detail-item mb-0">
                                             <h6 className="text-primary mb-2 fw-bold">
@@ -269,6 +345,17 @@ export default function Inicio() {
                                             </h6>
                                             <p className="mb-0 fs-6 fw-semibold text-dark">
                                                 {dashboardData.lastGlucose.condition}
+                                                {glucoseThresholds && (
+                                                    <small className="d-block text-muted">
+                                                        Normal: {(() => {
+                                                            const normalizedRegime = dashboardData.lastGlucose.condition?.toLowerCase().includes('jejum') ? 'jejum' :
+                                                                dashboardData.lastGlucose.condition?.toLowerCase().includes('pós') ? 'posPrandial' :
+                                                                dashboardData.lastGlucose.condition?.toLowerCase().includes('pré') ? 'prePrandial' : 'aleatorio';
+                                                            const threshold = glucoseThresholds[normalizedRegime];
+                                                            return `${threshold.min}-${threshold.max} mg/dL`;
+                                                        })()}
+                                                    </small>
+                                                )}
                                             </p>
                                         </div>
 
