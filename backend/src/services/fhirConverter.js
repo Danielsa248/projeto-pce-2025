@@ -48,10 +48,10 @@ export class FHIRConverter {
                 }] : []
             };
             
-            console.log(`✅ Generated Glucose FHIR resource for patient ${userId}`);
+            console.log(`Generated Glucose FHIR resource for patient ${userId}`);
             return fhirResource;
         } catch (error) {
-            console.error(`❌ Error converting Glucose to FHIR:`, error);
+            console.error(`Error converting Glucose to FHIR:`, error);
             throw error;
         }
     }
@@ -95,10 +95,10 @@ export class FHIRConverter {
                 }
             };
             
-            console.log(`✅ Generated Insulin FHIR resource for patient ${userId} (${processed.ValorInsulina} units)`);
+            console.log(`Generated Insulin FHIR resource for patient ${userId} (${processed.ValorInsulina} units)`);
             return fhirResource;
         } catch (error) {
-            console.error(`❌ Error converting Insulin to FHIR:`, error);
+            console.error(`Error converting Insulin to FHIR:`, error);
             throw error;
         }
     }
