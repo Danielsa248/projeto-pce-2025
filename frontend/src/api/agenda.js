@@ -15,7 +15,6 @@ const getAuthHeaders = () => {
     };
 };
 
-
 export async function obterMarcacoes() {
     const token = getToken();
     
@@ -38,7 +37,6 @@ export async function obterMarcacoes() {
     
     return res.json();
 }
-
 
 export async function criarMarcacao({ tipo_registo, data_evento, notas }) {
     const res = await fetch(`${BACKEND_URL}/api/agenda`, {

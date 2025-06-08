@@ -5,7 +5,7 @@ import $ from 'jquery';
 import 'datatables.net-bs5';
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 import { useAuth } from '../context/AuthContext';
-import { sendRecordToFHIR, sendBulkRecordsToFHIR } from '../api/fhir';
+import { sendRecordToFHIR, sendBulkRecordsToFHIR, testMirthConnection } from '../api/fhir';
 import './Historico.css';
 
 export default function Historico() {
@@ -18,7 +18,9 @@ export default function Historico() {
     const [showFhirModal, setShowFhirModal] = useState(false);
     const [fhirStatus, setFhirStatus] = useState({});
     const [fhirLoading, setFhirLoading] = useState(new Set());
-    // Add states for FHIR alerts
+    const [connectionStatus, setConnectionStatus] = useState(null);
+    const [testingConnection, setTestingConnection] = useState(false);
+    const [sendingAllRecords, setSendingAllRecords] = useState(false);
     const [fhirAlert, setFhirAlert] = useState({ show: false, variant: '', message: '', recordId: null });
     const [showFhirToasts, setShowFhirToasts] = useState([]);
     const tableRef = useRef(null);
@@ -248,6 +250,8 @@ export default function Historico() {
             {
                 data: null,
                 title: '<i class="fas fa-fire me-2"></i>FHIR',
+                orderable: false,
+                searchable: false,
                 render: function(data, type, row) {
                     const recordId = row.id;
                     const isLoading = fhirLoading.has(recordId);
@@ -730,6 +734,103 @@ export default function Historico() {
         }
     };
 
+    const handleTestConnection = async () => {
+        setTestingConnection(true);
+        try {
+            const result = await testMirthConnection();
+            if (result.success && result.connected) {
+                // Show success toast instead of connectionStatus alert
+                addFhirToast(
+                    'success', 
+                    '✅ Conexão estabelecida com sucesso!'
+                );
+            } else {
+                // Show error toast instead of connectionStatus alert
+                addFhirToast(
+                    'danger', 
+                    `❌ Falha na conexão: ${result.error || 'Mirth Connect não está acessível'}`
+                );
+            }
+        } catch (error) {
+            // Show error toast instead of connectionStatus alert
+            addFhirToast(
+                'danger', 
+                `❌ Erro de conexão: ${error.message}`
+            );
+        } finally {
+            setTestingConnection(false);
+            // Remove setTimeout since we're usando toasts agora
+        }
+    };
+
+    const handleSendAllRecords = async () => {
+        setSendingAllRecords(true);
+        
+        // Show initial toast for bulk operation start
+        addFhirToast(
+            'info',
+            `A enviar todos os ${data.length} registos para o Mirth Connect...`
+        );
+        
+        try {
+            const allRecordIds = data.map(record => record.id);
+            const result = await sendBulkRecordsToFHIR(allRecordIds);
+            
+            // Check if the operation actually succeeded
+            if (result.success && result.processed > 0) {
+                // Update status for all records
+                const newStatus = {};
+                result.results.forEach(res => {
+                    if (res.success) {
+                        newStatus[res.recordId] = 'sent';
+                    } else {
+                        newStatus[res.recordId] = 'error';
+                    }
+                });
+                
+                setFhirStatus(prev => ({ ...prev, ...newStatus }));
+                
+                // Show detailed success/error toast
+                if (result.errors > 0) {
+                    addFhirToast(
+                        'warning', 
+                        `⚠️ Enviados ${result.processed} de ${allRecordIds.length} registos. ${result.errors} falharam.`
+                    );
+                } else {
+                    addFhirToast(
+                        'success', 
+                        `✅ Todos os ${result.processed} registos enviados com sucesso!`
+                    );
+                }
+                
+                // Refresh table
+                if (dataTableRef.current) {
+                    dataTableRef.current.draw(false);
+                }
+            } else if (result.success && result.processed === 0) {
+                // This means the request succeeded but nothing was actually sent (like when Mirth is down)
+                addFhirToast(
+                    'danger', 
+                    `❌ Falha total no envio: 0 de ${allRecordIds.length} registos enviados. Verifique se o Mirth Connect está ligado.`
+                );
+            } else {
+                // Complete failure from the backend
+                addFhirToast(
+                    'danger', 
+                    `❌ Falha no envio: ${result.error || 'Erro desconhecido'}`
+                );
+            }
+        } catch (error) {
+            addFhirToast(
+                'danger', 
+                `❌ Erro ao enviar registos: ${error.message}`
+            );
+        } finally {
+            setSendingAllRecords(false);
+            // Remove setTimeout since we're usando toasts agora
+        }
+    };
+
     return (
         <Container className="py-4">
             {/* FHIR Alert for bulk operations */}
@@ -744,6 +845,13 @@ export default function Historico() {
                         <i className={`fas ${fhirAlert.variant === 'success' ? 'fa-check-circle' : fhirAlert.variant === 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2`}></i>
                         {fhirAlert.message}
                     </div>
+                </Alert>
+            )}
+
+            {/* Connection Status Alert */}
+            {connectionStatus && (
+                <Alert variant={connectionStatus.variant} dismissible onClose={() => setConnectionStatus(null)}>
+                    {connectionStatus.message}
                 </Alert>
             )}
 
@@ -778,16 +886,45 @@ export default function Historico() {
                             </div>
                         )}
                         
-                        {selectedRecords.size > 0 && (
+                        {/* FHIR Action Buttons */}
+                        <div className="d-flex flex-column flex-lg-row gap-2">
+                            {/* Test Connection Button */}
                             <Button 
-                                variant="success" 
-                                onClick={() => setShowFhirModal(true)}
-                                className="ms-2"
+                                variant="outline-primary"  // Changed from outline-info
+                                size="sm"
+                                onClick={handleTestConnection}
+                                disabled={testingConnection}
+                                className="me-2"
                             >
-                                <i className="fas fa-share-alt me-2"></i>
-                                Enviar FHIR ({selectedRecords.size})
+                                {testingConnection ? 'Testando...' : 'Testar Conexão'}
                             </Button>
-                        )}
+
+                            {/* Send All Records Button */}
+                            {data.length > 0 && (
+                                <Button 
+                                    variant="outline-primary"  // Changed from outline-success
+                                    size="sm"
+                                    onClick={handleSendAllRecords}
+                                    disabled={sendingAllRecords}
+                                    className="me-2"
+                                >
+                                    {sendingAllRecords ? 'Enviando...' : `Enviar Todos (${data.length})`}
+                                </Button>
+                            )}
+                            
+                            {/* Selected Records Button (existing) */}
+                            {selectedRecords.size > 0 && (
+                                <Button 
+                                    variant="success" 
+                                    size="sm"
+                                    onClick={() => setShowFhirModal(true)}
+                                    className="d-flex align-items-center"
+                                >
+                                    <i className="fas fa-share-alt me-2"></i>
+                                    Enviar Selecionados ({selectedRecords.size})
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -860,15 +997,28 @@ export default function Historico() {
                         key={toast.id}
                         show={true}
                         onClose={() => setShowFhirToasts(prev => prev.filter(t => t.id !== toast.id))}
-                        delay={5000}
+                        delay={7000} // Increased delay for bulk operations
                         autohide
                         bg={toast.variant}
-                        className={`text-white ${toast.variant === 'success' ? 'border-success' : 'border-danger'}`}
+                        className={`text-white ${
+                            toast.variant === 'success' ? 'border-success' : 
+                            toast.variant === 'warning' ? 'border-warning' :
+                            toast.variant === 'info' ? 'border-info' :
+                            'border-danger'
+                        }`}
                     >
                         <Toast.Header>
-                            <i className={`fas ${toast.variant === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-danger'} me-2`}></i>
+                            <i className={`fas ${
+                                toast.variant === 'success' ? 'fa-check-circle text-success' : 
+                                toast.variant === 'warning' ? 'fa-exclamation-triangle text-warning' :
+                                toast.variant === 'info' ? 'fa-info-circle text-info' :
+                                'fa-exclamation-triangle text-danger'
+                            } me-2`}></i>
                             <strong className="me-auto">
-                                {toast.variant === 'success' ? 'Sucesso' : 'Erro'} FHIR
+                                {toast.variant === 'success' ? 'Sucesso' : 
+                                 toast.variant === 'warning' ? 'Aviso' :
+                                 toast.variant === 'info' ? 'Informação' :
+                                 'Erro'} FHIR
                             </strong>
                             <small>{toast.timestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</small>
                         </Toast.Header>
