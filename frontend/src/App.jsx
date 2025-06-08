@@ -23,7 +23,7 @@ export default function App() {
         <AuthProvider>
             <Router>
                 <StyleManager />
-                <NotificationManager /> {/* Add this line */}
+                <NotificationManager /> 
                 <Routes>
                     <Route path="/" element={<Layout />}>
                         <Route path="login" element={<Login />} />

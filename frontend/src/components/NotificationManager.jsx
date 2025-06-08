@@ -9,15 +9,15 @@ export default function NotificationManager() {
     const [permission, setPermission] = useState(Notification.permission);
     const [marcacoes, setMarcacoes] = useState([]);
 
-    // Fetch marcacoes for notifications
     const fetchMarcacoes = async () => {
         if (!isAuthenticated) return;
         
         try {
             const data = await agendaApi.obterMarcacoes();
+            console.log(`📅 NotificationManager: Fetched ${data.length} marcacoes`);
             setMarcacoes(data);
             
-            // Clear notification cache when data updates
+            // Clear notification cache when data updates to allow new notifications
             NotificationService.clearNotificationCache();
         } catch (error) {
             console.error('Error fetching marcacoes for notifications:', error);
@@ -27,8 +27,10 @@ export default function NotificationManager() {
     // Request permission on component mount
     useEffect(() => {
         if (isAuthenticated && permission === 'default') {
+            console.log('🔔 Requesting notification permission...');
             NotificationService.requestPermission().then(granted => {
-                setPermission(granted ? 'granted' : 'denied');
+                const newPermission = granted ? 'granted' : 'denied';
+                setPermission(newPermission);
                 if (granted) {
                     console.log('✅ Notification permission granted');
                 } else {
@@ -38,51 +40,66 @@ export default function NotificationManager() {
         }
     }, [isAuthenticated, permission]);
 
-    // Fetch marcacoes more frequently
+    // Fetch marcacoes
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        fetchMarcacoes(); // Initial fetch
-
-        // Fetch every 1 minute instead of 5
-        const interval = setInterval(fetchMarcacoes, 60 * 1000);
+        fetchMarcacoes();
+        const interval = setInterval(fetchMarcacoes, 30 * 1000); // Check every 30 seconds
         
         return () => clearInterval(interval);
     }, [isAuthenticated]);
 
-    // Listen for storage events (when agenda is updated in another tab/component)
+    // Listen for agenda updates
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'agenda_updated') {
-                console.log('📅 Agenda updated - refreshing notifications');
+                console.log('📅 Agenda updated via storage - refreshing notifications');
                 fetchMarcacoes();
             }
         };
 
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
-
-    // Listen for custom events within the same tab
-    useEffect(() => {
         const handleAgendaUpdate = () => {
-            console.log('📅 Agenda updated - refreshing notifications');
+            console.log('📅 Agenda updated via event - refreshing notifications');
             fetchMarcacoes();
         };
 
+        window.addEventListener('storage', handleStorageChange);
         window.addEventListener('agendaUpdated', handleAgendaUpdate);
-        return () => window.removeEventListener('agendaUpdated', handleAgendaUpdate);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('agendaUpdated', handleAgendaUpdate);
+        };
     }, []);
 
     // Start notification monitoring
     useEffect(() => {
-        if (!isAuthenticated || permission !== 'granted') {
+        if (!isAuthenticated) {
+            console.log('❌ Not authenticated - stopping notification monitoring');
             NotificationService.stopMonitoring();
             return;
         }
 
-        const getMarcacoes = () => marcacoes;
-        NotificationService.startMonitoring(getMarcacoes, 60 * 1000);
+        if (permission !== 'granted') {
+            console.log(`❌ Permission not granted (${permission}) - stopping notification monitoring`);
+            NotificationService.stopMonitoring();
+            return;
+        }
+
+        if (marcacoes.length === 0) {
+            console.log('📭 No marcacoes available - not starting monitoring yet');
+            return;
+        }
+
+        console.log(`🔔 Starting notification monitoring with ${marcacoes.length} marcacoes`);
+        
+        const getMarcacoes = () => {
+            console.log(`📋 Providing ${marcacoes.length} marcacoes to NotificationService`);
+            return marcacoes;
+        };
+        
+        NotificationService.startMonitoring(getMarcacoes, 30 * 1000); // Check every 30 seconds
 
         return () => {
             NotificationService.stopMonitoring();
