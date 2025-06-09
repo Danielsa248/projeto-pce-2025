@@ -1,4 +1,4 @@
-import { pool } from '../src/routes/db.js';
+import { pool } from '../src/db/conexao.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Helper to create text field values in the format used by the form

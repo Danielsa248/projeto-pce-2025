@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { pool } from '../src/routes/db.js';
+import { pool } from '../src/db/conexao.js';
 import { v4 as uuidv4 } from 'uuid';
 
 async function createTestUser() {
