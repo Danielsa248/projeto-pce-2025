@@ -86,7 +86,7 @@ FOR EACH ROW
 EXECUTE FUNCTION check_user_id_exists();
 
 -- Função do trigger para atualizar o peso do utilizador
-CREATE OR REPLACE FUNCTION update_user_weight_from_registro()
+CREATE OR REPLACE FUNCTION update_user_weight_from_registo()
 RETURNS TRIGGER AS $$
 DECLARE
     peso_atual NUMERIC(5,2);
@@ -168,7 +168,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_user_weight_trigger
     AFTER INSERT ON registos
     FOR EACH ROW
-    EXECUTE FUNCTION update_user_weight_from_registro();
+    EXECUTE FUNCTION update_user_weight_from_registo();
 
 -- Função para o trigger de validação para contactos
 CREATE OR REPLACE FUNCTION validate_contacto()
