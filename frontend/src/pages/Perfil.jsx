@@ -111,7 +111,7 @@ export default function Perfil() {
             }
 
             const [profileResponse, statsResponse] = await Promise.all([
-                fetch('http://localhost:3000/api/bd/perfil', {
+                fetch('http://localhost:3000/api/perfil/perfil', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
@@ -175,7 +175,7 @@ export default function Perfil() {
             
             console.log('Enviando dados:', editableFields);
             
-            const response = await fetch('http://localhost:3000/api/bd/perfil', {
+            const response = await fetch('http://localhost:3000/api/perfil/perfil', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

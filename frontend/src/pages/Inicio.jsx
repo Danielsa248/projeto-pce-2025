@@ -51,13 +51,13 @@ export default function Inicio() {
             }
 
             const [glucoseResponse, insulinResponse, agendaResponse] = await Promise.all([
-                fetch('http://localhost:3000/api/bd/registos/Glucose?include=all', {
+                fetch('http://localhost:3000/api/registos/registos/Glucose?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
                     }
                 }),
-                fetch('http://localhost:3000/api/bd/registos/Insulina?include=all', {
+                fetch('http://localhost:3000/api/registos/registos/Insulina?include=all', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/json'
