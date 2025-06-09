@@ -1,277 +1,322 @@
-// Create a new file: frontend/src/services/NotificationService.js
+// =============================================
+// NOTIFICATION SERVICE
+// =============================================
+
+// Constants
+const DEFAULT_SETTINGS = {
+    enabled: false,
+    times: { first: 30, second: 15, third: 5 },
+    browserNotifications: true,
+    bellNotifications: true
+};
+
+const NOTIFICATION_CONFIG = {
+    ICON: '/favicon.ico',
+    TAG: 'diabetes-reminder',
+    AUTO_CLOSE_DELAY: 8000,
+    CACHE_CLEANUP_HOURS: 2
+};
+
+const URGENCY_LEVELS = {
+    DANGER: 'danger',
+    WARNING: 'warning', 
+    INFO: 'info'
+};
+
+// =============================================
+// MAIN SERVICE CLASS
+// =============================================
+
 class NotificationService {
     constructor() {
         this.permission = Notification.permission;
         this.checkInterval = null;
         this.dismissedNotifications = new Set();
         this.sentBrowserNotifications = new Map();
+        this.settings = { ...DEFAULT_SETTINGS };
         
-        // Default settings - will be overridden by user preferences
-        this.settings = {
-            enabled: false,
-            times: {
-                first: 30,   // First notification time
-                second: 15,  // Second notification time  
-                third: 5     // Third notification time
-            },
-            browserNotifications: true,
-            bellNotifications: true
-        };
-        
-        // Load settings from localStorage
         this.loadSettings();
     }
 
-    // Load settings from localStorage
+    // =============================================
+    // SETTINGS MANAGEMENT
+    // =============================================
+
     loadSettings() {
         try {
-            const savedSettings = localStorage.getItem('notificationSettings');
-            if (savedSettings) {
-                const parsed = JSON.parse(savedSettings);
-                this.settings = {
-                    ...this.settings,
-                    ...parsed,
-                    enabled: this.permission === 'granted' // Always sync with actual permission
-                };
-                console.log('📋 Loaded notification settings:', this.settings);
+            const saved = localStorage.getItem('notificationSettings');
+            if (saved) {
+                this.settings = { ...this.settings, ...JSON.parse(saved) };
+                this.settings.enabled = this.permission === 'granted';
             }
         } catch (error) {
-            console.error('Error loading notification settings:', error);
+            // Silent fail - use defaults
         }
     }
 
-    // Update settings (called from Opcoes page)
     updateSettings(newSettings) {
-        this.settings = {
-            ...this.settings,
-            ...newSettings,
-            enabled: this.permission === 'granted' // Always sync with actual permission
-        };
-        console.log('🔧 Updated notification settings:', this.settings);
+        this.settings = { ...this.settings, ...newSettings };
+        this.settings.enabled = this.permission === 'granted';
     }
 
-    // Request notification permission
+    // =============================================
+    // PERMISSION HANDLING
+    // =============================================
+
     async requestPermission() {
         if (this.permission === 'default') {
             this.permission = await Notification.requestPermission();
         }
-        
-        // Update settings when permission changes
         this.settings.enabled = this.permission === 'granted';
-        
         return this.permission === 'granted';
     }
 
-    // Send a basic notification
+    // =============================================
+    // NOTIFICATION CREATION
+    // =============================================
+
     sendNotification(title, body = '') {
-        if (this.permission !== 'granted' || !this.settings.browserNotifications) {
-            console.warn('Browser notifications disabled or permission not granted');
-            return null;
-        }
+        if (!this.canSendNotifications()) return null;
 
         const notification = new Notification(title, {
             body: body,
-            icon: '/favicon.ico',
-            tag: 'diabetes-reminder',
+            icon: NOTIFICATION_CONFIG.ICON,
+            tag: NOTIFICATION_CONFIG.TAG,
             requireInteraction: false
         });
 
-        setTimeout(() => {
-            if (notification) {
-                notification.close();
-            }
-        }, 8000);
+        this.setupNotificationHandlers(notification);
+        return notification;
+    }
 
+    canSendNotifications() {
+        return this.permission === 'granted' && this.settings.browserNotifications;
+    }
+
+    setupNotificationHandlers(notification) {
+        setTimeout(() => notification?.close(), NOTIFICATION_CONFIG.AUTO_CLOSE_DELAY);
+        
         notification.onclick = () => {
             window.focus();
             window.location.href = window.location.origin + '/agenda';
             notification.close();
         };
-
-        return notification;
     }
 
-    // Get pending notifications for bell icon (using custom timings)
+    // =============================================
+    // PENDING NOTIFICATIONS LOGIC
+    // =============================================
+
     getPendingNotifications(marcacoes) {
         if (!Array.isArray(marcacoes)) return [];
         
         const now = new Date();
-        const pendingNotifications = [];
+        const pending = [];
 
         marcacoes.forEach(marcacao => {
-            if (marcacao.realizado) return;
-            if (this.dismissedNotifications.has(marcacao.id)) return;
+            if (this.shouldSkipMarcacao(marcacao)) return;
 
-            const eventTime = new Date(marcacao.data_evento);
-            const diffInMinutes = Math.round((eventTime - now) / (1000 * 60));
-            
-            let shouldNotify = false;
-            let notificationType = '';
-            let priority = 0;
-
-            // Use custom timing settings
-            const { first, second, third } = this.settings.times;
-
-            if (diffInMinutes <= 0) {
-                shouldNotify = true;
-                notificationType = diffInMinutes === 0 ? 'now' : 'overdue';
-                priority = diffInMinutes === 0 ? 5 : 6; // Highest priority for overdue
-            } else if (diffInMinutes <= third) {
-                shouldNotify = true;
-                notificationType = 'third';
-                priority = 4;
-            } else if (diffInMinutes <= second) {
-                shouldNotify = true;
-                notificationType = 'second';
-                priority = 3;
-            } else if (diffInMinutes <= first) {
-                shouldNotify = true;
-                notificationType = 'first';
-                priority = 2;
-            }
-
-            if (shouldNotify) {
-                const typeLabel = marcacao.tipo_registo === 'Glucose' ? 'Glicose' : 'Insulina';
-                const timeStr = eventTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-                
-                let title, urgency;
-                
-                switch (notificationType) {
-                    case 'overdue':
-                        title = `${typeLabel} - Em atraso!`;
-                        urgency = 'danger';
-                        break;
-                    case 'now':
-                        title = `${typeLabel} - Agora!`;
-                        urgency = 'danger';
-                        break;
-                    case 'third':
-                        title = typeLabel;
-                        urgency = 'warning'; // Yellow for final warning
-                        break;
-                    case 'second':
-                    case 'first':
-                        title = typeLabel;
-                        urgency = 'info'; // Blue for early warnings
-                        break;
-                }
-
-                pendingNotifications.push({
-                    id: marcacao.id,
-                    title,
-                    time: timeStr,
-                    notes: marcacao.notas,
-                    urgency,
-                    priority,
-                    diffInMinutes,
-                    type: marcacao.tipo_registo,
-                    notificationType
-                });
+            const notificationData = this.calculateNotificationTiming(marcacao, now);
+            if (notificationData.shouldNotify) {
+                pending.push(this.createNotificationObject(marcacao, notificationData));
             }
         });
 
-        return pendingNotifications.sort((a, b) => b.priority - a.priority);
+        return this.sortNotificationsByPriority(pending);
     }
 
-    // Generate unique notification key for browser notifications
-    generateNotificationKey(marcacaoId, notificationType) {
-        return `${marcacaoId}-${notificationType}`;
+    shouldSkipMarcacao(marcacao) {
+        return marcacao.realizado || this.dismissedNotifications.has(marcacao.id);
     }
 
-    // Check if notification was already sent for this timing
+    calculateNotificationTiming(marcacao, now) {
+        const eventTime = new Date(marcacao.data_evento);
+        const diffInMinutes = Math.round((eventTime - now) / (1000 * 60));
+        const { first, second, third } = this.settings.times;
+        
+        // Add tolerance to catch edge cases
+        const tolerances = {
+            first: first + 1,
+            second: second + 1,
+            third: third + 1
+        };
+
+        if (diffInMinutes <= 0) {
+            return {
+                shouldNotify: true,
+                notificationType: diffInMinutes === 0 ? 'now' : 'overdue',
+                priority: diffInMinutes === 0 ? 5 : 6,
+                urgency: URGENCY_LEVELS.DANGER
+            };
+        } else if (diffInMinutes <= tolerances.third) {
+            return {
+                shouldNotify: true,
+                notificationType: 'third',
+                priority: 4,
+                urgency: URGENCY_LEVELS.WARNING
+            };
+        } else if (diffInMinutes <= tolerances.second) {
+            return {
+                shouldNotify: true,
+                notificationType: 'second',
+                priority: 3,
+                urgency: URGENCY_LEVELS.INFO
+            };
+        } else if (diffInMinutes <= tolerances.first) {
+            return {
+                shouldNotify: true,
+                notificationType: 'first',
+                priority: 2,
+                urgency: URGENCY_LEVELS.INFO
+            };
+        }
+
+        return { shouldNotify: false };
+    }
+
+    createNotificationObject(marcacao, notificationData) {
+        const typeLabel = marcacao.tipo_registo === 'Glucose' ? 'Glicose' : 'Insulina';
+        const eventTime = new Date(marcacao.data_evento);
+        const timeStr = eventTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        
+        const title = this.generateNotificationTitle(typeLabel, notificationData.notificationType);
+
+        return {
+            id: marcacao.id,
+            title,
+            time: timeStr,
+            notes: marcacao.notas,
+            urgency: notificationData.urgency,
+            priority: notificationData.priority,
+            diffInMinutes: Math.round((eventTime - new Date()) / (1000 * 60)),
+            type: marcacao.tipo_registo,
+            notificationType: notificationData.notificationType
+        };
+    }
+
+    generateNotificationTitle(typeLabel, notificationType) {
+        switch (notificationType) {
+            case 'overdue': return `${typeLabel} - Em atraso!`;
+            case 'now': return `${typeLabel} - Agora!`;
+            default: return typeLabel;
+        }
+    }
+
+    sortNotificationsByPriority(pending) {
+        return pending.sort((a, b) => b.priority - a.priority);
+    }
+
+    // =============================================
+    // CACHE MANAGEMENT
+    // =============================================
+
     wasNotificationSent(marcacaoId, notificationType) {
-        const key = this.generateNotificationKey(marcacaoId, notificationType);
-        return this.sentBrowserNotifications.has(key);
+        return this.sentBrowserNotifications.has(`${marcacaoId}-${notificationType}`);
     }
 
-    // Mark notification as sent
     markNotificationAsSent(marcacaoId, notificationType) {
-        const key = this.generateNotificationKey(marcacaoId, notificationType);
-        this.sentBrowserNotifications.set(key, Date.now());
-        console.log(`📝 Marked notification as sent: ${key}`);
+        this.sentBrowserNotifications.set(`${marcacaoId}-${notificationType}`, Date.now());
     }
 
-    // Clear sent browser notifications when marcacoes are updated
     clearNotificationCache() {
         this.sentBrowserNotifications.clear();
-        console.log('🔄 Browser notification cache cleared');
     }
 
-    // Dismiss a notification
+    cleanOldCacheEntries(marcacaoId) {
+        const cutoffTime = Date.now() - (NOTIFICATION_CONFIG.CACHE_CLEANUP_HOURS * 60 * 60 * 1000);
+        const keysToRemove = [];
+        
+        this.sentBrowserNotifications.forEach((timestamp, key) => {
+            if (key.startsWith(`${marcacaoId}-`) && timestamp < cutoffTime) {
+                keysToRemove.push(key);
+            }
+        });
+        
+        keysToRemove.forEach(key => this.sentBrowserNotifications.delete(key));
+    }
+
     dismissNotification(marcacaoId) {
         this.dismissedNotifications.add(marcacaoId);
-        console.log(`📱 Notification dismissed for marcacao ${marcacaoId}`);
     }
 
-    // Clear dismissed notifications
     clearDismissedNotifications() {
         this.dismissedNotifications.clear();
-        console.log('🔄 Dismissed notifications cleared');
     }
 
-    // Start monitoring for upcoming events
+    // =============================================
+    // MONITORING SYSTEM
+    // =============================================
+
     startMonitoring(getMarcacoes, interval = 30000) {
-        console.log('🔔 Starting notification monitoring with settings:', this.settings);
         this.stopMonitoring();
-
-        this.checkInterval = setInterval(() => {
-            const marcacoes = getMarcacoes();
-            if (!marcacoes || marcacoes.length === 0) {
-                return;
-            }
-
-            const pendingNotifications = this.getPendingNotifications(marcacoes);
-            
-            pendingNotifications.forEach(notification => {
-                if (!this.wasNotificationSent(notification.id, notification.notificationType)) {
-                    let browserTitle, browserBody;
-                    const { first, second, third } = this.settings.times;
-                    
-                    switch (notification.notificationType) {
-                        case 'overdue':
-                            browserTitle = notification.title;
-                            browserBody = `Estava agendado para ${notification.time}`;
-                            break;
-                        case 'now':
-                            browserTitle = notification.title;
-                            browserBody = `Agendado para ${notification.time}`;
-                            break;
-                        case 'third':
-                            browserTitle = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${third} minutos`;
-                            browserBody = `Agendado para ${notification.time}`;
-                            break;
-                        case 'second':
-                            browserTitle = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${second} minutos`;
-                            browserBody = `Agendado para ${notification.time}`;
-                            break;
-                        case 'first':
-                            browserTitle = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${first} minutos`;
-                            browserBody = `Agendado para ${notification.time}`;
-                            break;
-                    }
-                    
-                    if (notification.notes) {
-                        browserBody += `\nNotas: ${notification.notes}`;
-                    }
-                    
-                    console.log(`🔔 Sending browser notification: ${browserTitle} (${notification.notificationType}) for marcacao ${notification.id}`);
-                    
-                    const sentNotification = this.sendNotification(browserTitle, browserBody);
-                    
-                    if (sentNotification) {
-                        this.markNotificationAsSent(notification.id, notification.notificationType);
-                    }
-                }
-            });
-        }, interval);
+        this.checkNotifications(getMarcacoes);
+        this.checkInterval = setInterval(() => this.checkNotifications(getMarcacoes), interval);
     }
 
-    // Stop monitoring
+    checkNotifications(getMarcacoes) {
+        const marcacoes = getMarcacoes();
+        if (!marcacoes?.length) return;
+
+        const pending = this.getPendingNotifications(marcacoes);
+        
+        pending.forEach(notification => {
+            this.cleanOldCacheEntries(notification.id);
+            
+            if (!this.wasNotificationSent(notification.id, notification.notificationType)) {
+                const browserMessage = this.createBrowserMessage(notification);
+                
+                if (this.sendNotification(browserMessage.title, browserMessage.body)) {
+                    this.markNotificationAsSent(notification.id, notification.notificationType);
+                }
+            }
+        });
+    }
+
+    createBrowserMessage(notification) {
+        const { first, second, third } = this.settings.times;
+        let title, body;
+        
+        switch (notification.notificationType) {
+            case 'overdue':
+                title = notification.title;
+                body = `Estava agendado para ${notification.time}`;
+                break;
+            case 'now':
+                title = notification.title;
+                body = `Agendado para ${notification.time}`;
+                break;
+            case 'third':
+                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${third} minutos`;
+                body = `Agendado para ${notification.time}`;
+                break;
+            case 'second':
+                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${second} minutos`;
+                body = `Agendado para ${notification.time}`;
+                break;
+            case 'first':
+                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${first} minutos`;
+                body = `Agendado para ${notification.time}`;
+                break;
+            default:
+                title = notification.title;
+                body = `Agendado para ${notification.time}`;
+        }
+        
+        if (notification.notes) {
+            body += `\nNotas: ${notification.notes}`;
+        }
+        
+        return { title, body };
+    }
+
+    refreshNotifications(getMarcacoes) {
+        this.checkNotifications(getMarcacoes);
+    }
+
     stopMonitoring() {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            console.log('🛑 Stopped notification monitoring');
         }
     }
 }

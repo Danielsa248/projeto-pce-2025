@@ -1,68 +1,76 @@
-// Create: frontend/src/components/NotificationManager.jsx
+// =============================================
+// NOTIFICATION MANAGER COMPONENT
+// =============================================
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import NotificationService from '../services/NotificationService';
 import * as agendaApi from '../api/agenda.js';
+
+// Constants
+const FETCH_INTERVAL = 30 * 1000;
+const MONITORING_INTERVAL = 30 * 1000;
+
+// =============================================
+// MAIN COMPONENT
+// =============================================
 
 export default function NotificationManager() {
     const { isAuthenticated } = useAuth();
     const [permission, setPermission] = useState(Notification.permission);
     const [marcacoes, setMarcacoes] = useState([]);
 
+    // =============================================
+    // DATA FETCHING
+    // =============================================
+
     const fetchMarcacoes = async () => {
         if (!isAuthenticated) return;
         
         try {
             const data = await agendaApi.obterMarcacoes();
-            console.log(`📅 NotificationManager: Fetched ${data.length} marcacoes`);
             setMarcacoes(data);
-            
-            // Clear notification cache when data updates to allow new notifications
             NotificationService.clearNotificationCache();
+            
+            if (NotificationService.checkInterval) {
+                NotificationService.refreshNotifications(() => data);
+            }
         } catch (error) {
-            console.error('Error fetching marcacoes for notifications:', error);
+            // Silent fail
         }
     };
 
-    // Request permission on component mount
+    // =============================================
+    // PERMISSION MANAGEMENT
+    // =============================================
+
     useEffect(() => {
         if (isAuthenticated && permission === 'default') {
-            console.log('🔔 Requesting notification permission...');
             NotificationService.requestPermission().then(granted => {
-                const newPermission = granted ? 'granted' : 'denied';
-                setPermission(newPermission);
-                if (granted) {
-                    console.log('✅ Notification permission granted');
-                } else {
-                    console.warn('❌ Notification permission denied');
-                }
+                setPermission(granted ? 'granted' : 'denied');
             });
         }
     }, [isAuthenticated, permission]);
 
-    // Fetch marcacoes
+    // =============================================
+    // DATA SYNCHRONIZATION
+    // =============================================
+
     useEffect(() => {
         if (!isAuthenticated) return;
 
         fetchMarcacoes();
-        const interval = setInterval(fetchMarcacoes, 30 * 1000); // Check every 30 seconds
+        const interval = setInterval(fetchMarcacoes, FETCH_INTERVAL);
         
         return () => clearInterval(interval);
     }, [isAuthenticated]);
 
-    // Listen for agenda updates
     useEffect(() => {
         const handleStorageChange = (e) => {
-            if (e.key === 'agenda_updated') {
-                console.log('📅 Agenda updated via storage - refreshing notifications');
-                fetchMarcacoes();
-            }
+            if (e.key === 'agenda_updated') fetchMarcacoes();
         };
 
-        const handleAgendaUpdate = () => {
-            console.log('📅 Agenda updated via event - refreshing notifications');
-            fetchMarcacoes();
-        };
+        const handleAgendaUpdate = () => fetchMarcacoes();
 
         window.addEventListener('storage', handleStorageChange);
         window.addEventListener('agendaUpdated', handleAgendaUpdate);
@@ -73,39 +81,32 @@ export default function NotificationManager() {
         };
     }, []);
 
-    // Start notification monitoring
+    // =============================================
+    // MONITORING CONTROL
+    // =============================================
+
     useEffect(() => {
-        if (!isAuthenticated) {
-            console.log('❌ Not authenticated - stopping notification monitoring');
+        if (!shouldStartMonitoring()) {
             NotificationService.stopMonitoring();
             return;
         }
 
-        if (permission !== 'granted') {
-            console.log(`❌ Permission not granted (${permission}) - stopping notification monitoring`);
-            NotificationService.stopMonitoring();
-            return;
-        }
+        const getMarcacoes = () => marcacoes;
+        NotificationService.startMonitoring(getMarcacoes, MONITORING_INTERVAL);
 
-        if (marcacoes.length === 0) {
-            console.log('📭 No marcacoes available - not starting monitoring yet');
-            return;
-        }
-
-        console.log(`🔔 Starting notification monitoring with ${marcacoes.length} marcacoes`);
-        
-        const getMarcacoes = () => {
-            console.log(`📋 Providing ${marcacoes.length} marcacoes to NotificationService`);
-            return marcacoes;
-        };
-        
-        NotificationService.startMonitoring(getMarcacoes, 30 * 1000); // Check every 30 seconds
-
-        return () => {
-            NotificationService.stopMonitoring();
-        };
+        return () => NotificationService.stopMonitoring();
     }, [isAuthenticated, permission, marcacoes]);
 
-    // This component doesn't render anything
+    // =============================================
+    // HELPER FUNCTIONS
+    // =============================================
+
+    const shouldStartMonitoring = () => {
+        return isAuthenticated && 
+               permission === 'granted' && 
+               marcacoes.length > 0;
+    };
+
+    // Component doesn't render anything
     return null;
 }
