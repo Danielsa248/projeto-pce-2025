@@ -1,4 +1,4 @@
-import { pool } from '../routes/db.js'
+import { pool } from './conexao.js'
 
 
 // Listar marcações da agenda por utilizador

@@ -1,9 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { pool } from './db.js';
+import { pool } from '../db/conexao.js';
 import { v4 as uuidv4 } from 'uuid';
-import * as info_trat from '../clean_info.js'; // Not from 'public/js/info_trat.js'
+import * as info_trat from '../services/clean_info.js';
 
 import env from '../../config.js';
 

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { pool } from '../routes/db.js';
+import { pool } from '../db/conexao.js';
 
 import env from '../../config.js';
 

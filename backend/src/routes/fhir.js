@@ -2,7 +2,7 @@ import express from 'express';
 import { FHIRConverter } from '../services/fhirConverter.js';
 import { sendToMirth, testMirthConnection, MIRTH_CONFIG } from '../services/mirth.js'
 import { authenticateToken } from '../middleware/auth.js';
-import { getRecordById } from './db.js';
+import { getRecordById } from '../db/registos.js';
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-import * as info_trat from '../clean_info.js';
+import * as info_trat from '../services/clean_info.js';
 
 export class FHIRConverter {
     static convertGlucoseToFHIR(rawData, userId, timestamp) {
