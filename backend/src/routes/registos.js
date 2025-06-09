@@ -1,4 +1,5 @@
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import * as bd from '../db/registos.js';
 import { authenticateToken } from '../middleware/auth.js';
 import * as info_trat from '../services/clean_info.js';
