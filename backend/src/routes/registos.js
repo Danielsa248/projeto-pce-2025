@@ -2,6 +2,7 @@ import express from 'express';
 import * as bd from '../db/registos.js';
 import { authenticateToken } from '../middleware/auth.js';
 import * as info_trat from '../services/clean_info.js';
+import { v4 as uuidv4 } from 'uuid';
 const router = express.Router();
 
 
