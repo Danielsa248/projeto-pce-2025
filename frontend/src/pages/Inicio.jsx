@@ -246,67 +246,90 @@ export default function Inicio() {
     }
 
     return (
-
-        <main className="container py-4">
-            <div className="dashboard-header mb-4 text-start">
-                <div>
-                    <h1 className="display-6 fw-bold text-primary mb-1">
-                        <i className="fas fa-tachometer-alt me-3"></i>
+        <div className="container mt-4">
+            {/* Header */}
+            <div className="mb-4">
+                <h1 className="display-6 fw-bold text-primary mb-1">
+                    <i className="fas fa-tachometer-alt me-3"></i>
                         Dashboard
-                    </h1>
-                    <p className="text-muted mb-0">
-                        Resumo das suas medições mais recentes
-                    </p>
-                </div>
+                </h1>
+                <p className="text-muted mb-0">Resumo das suas medições mais recentes</p>
             </div>
 
-            <Row className="g-4">
-                {/* Card Última Glicose */}
+            {/* Primeira linha - Cards de estatísticas principais */}
+            <Row className="g-3 mb-4">
+                {/* Card Pacientes Cadastrados (Última Glicose) */}
+                <Col xl={3} lg={6} md={6}>
+                    <Card className="border-0 shadow-sm h-100" style={{ backgroundColor: '#e3f2fd' }}>
+                        <Card.Body className="text-center py-4">
+                            <div className="d-flex align-items-center justify-content-center mb-3">
+                                <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                     style={{ width: '48px', height: '48px' }}>
+                                    <i className="fas fa-tint fs-5"></i>
+                                </div>
+                            </div>
+                            <h2 className="fw-bold text-primary mb-1">
+                                {dashboardData.lastGlucose ? dashboardData.lastGlucose.glucose_value : '0'}
+                            </h2>
+                            <p className="text-muted small mb-0">Última Glicose (mg/dL)</p>
+                        </Card.Body>
+                    </Card>
+                </Col>
+
+                {/* Card Aniversariantes (Última Insulina) */}
+                <Col xl={3} lg={6} md={6}>
+                    <Card className="border-0 shadow-sm h-100" style={{ backgroundColor: '#fff3e0' }}>
+                        <Card.Body className="text-center py-4">
+                            <div className="d-flex align-items-center justify-content-center mb-3">
+                                <div className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center" 
+                                     style={{ width: '48px', height: '48px' }}>
+                                    <i className="fas fa-syringe fs-5"></i>
+                                </div>
+                            </div>
+                            <h2 className="fw-bold text-warning mb-1">
+                                {dashboardData.lastInsulin ? dashboardData.lastInsulin.insulin_value : '0'}
+                            </h2>
+                            <p className="text-muted small mb-0">Última Insulina (U)</p>
+                        </Card.Body>
+                    </Card>
+                </Col>
+
+                {/* Última Medição de Glicose */}
                 <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-primary text-white">
-                            <h5 className="mb-0">
-                                <i className="fas fa-tint me-2"></i>
-                                Última Medição de Glicose
-                            </h5>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white border-0 pb-0">
+                            <h6 className="fw-bold text-dark mb-0">Última Medição de Glicose</h6>
                         </Card.Header>
-                        <Card.Body>
+                        <Card.Body className="pt-2">
                             {dashboardData.lastGlucose ? (
-                                <>
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <div className="d-flex align-items-center">
-                                            <h2 className="display-4 fw-bold text-primary mb-0 me-3">
-                                                {dashboardData.lastGlucose.glucose_value}
-                                                <small className="text-muted"> mg/dL</small>
-                                            </h2>
-                                            
-                                            {/* Glucose Status Indicator */}
-                                            {glucoseThresholds && (() => {
-                                                const status = getGlucoseStatus(
-                                                    dashboardData.lastGlucose.glucose_value,
-                                                    dashboardData.lastGlucose.condition,
-                                                    glucoseThresholds
-                                                );
-                                                
-                                                return status.showAlert && (
-                                                    <div className="d-flex flex-column align-items-center">
-                                                        <div className={`badge ${status.bgColor} ${status.textColor} p-2 mb-1`}>
-                                                            <i className={`${status.icon} me-1`}></i>
-                                                            <span className="small fw-bold">{status.message}</span>
-                                                        </div>
-                                                        {status.level.includes('very') && (
-                                                            <small className="text-danger fw-bold">
-                                                                <i className="fas fa-exclamation-circle me-1"></i>
-                                                                Contacte o médico
-                                                            </small>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })()}
+                                <div className="d-flex flex-column gap-3">
+                                    {/* Informações principais */}
+                                    <div className="row text-center">
+                                        <div className="col-4">
+                                            <div className="border-end pe-3">
+                                                <h5 className="fw-bold text-primary mb-1">
+                                                    {dashboardData.lastGlucose.glucose_value}
+                                                </h5>
+                                                <small className="text-muted">mg/dL</small>
+                                            </div>
+                                        </div>
+                                        <div className="col-4">
+                                            <div className="border-end pe-3">
+                                                <h6 className="fw-bold text-success mb-1">
+                                                    {dashboardData.lastGlucose.weight || '-'}
+                                                </h6>
+                                                <small className="text-muted">Peso (kg)</small>
+                                            </div>
+                                        </div>
+                                        <div className="col-4">
+                                            <h6 className="fw-bold text-info mb-1">
+                                                {dashboardData.lastGlucose.condition}
+                                            </h6>
+                                            <small className="text-muted">Regime</small>
                                         </div>
                                     </div>
-                                    
-                                    {/* Glucose Status Alert */}
+
+                                    {/* Status da Glicose */}
                                     {glucoseThresholds && (() => {
                                         const status = getGlucoseStatus(
                                             dashboardData.lastGlucose.glucose_value,
@@ -315,186 +338,195 @@ export default function Inicio() {
                                         );
                                         
                                         return status.showAlert && (
-                                            <Alert variant={status.alertType} className="mb-3">
+                                            <Alert variant={status.alertType} className="py-2 mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <i className={`${status.icon} me-2`}></i>
-                                                    <div>
-                                                        <strong>{status.message}</strong>
-                                                        <div className="small mt-1">
-                                                            Valor: {dashboardData.lastGlucose.glucose_value} mg/dL | 
-                                                            Regime: {dashboardData.lastGlucose.condition}
-                                                        </div>
-                                                        {status.level.includes('very') && (
-                                                            <div className="small text-danger mt-1">
-                                                                <i className="fas fa-phone me-1"></i>
-                                                                Recomenda-se contacto médico imediato
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    <small><strong>{status.message}</strong></small>
                                                 </div>
                                             </Alert>
                                         );
                                     })()}
 
-                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                        <div className="detail-item mb-0">
-                                            <h6 className="text-primary mb-2 fw-bold">
-                                                <i className="fas fa-calendar-alt me-2"></i>
-                                                Data e Hora
-                                            </h6>
-                                            <p className="mb-0 fs-6 fw-semibold text-dark">
-                                                {new Date(dashboardData.lastGlucose.timestamp).toLocaleString('pt-PT', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </p>
-                                        </div>
-                                                                        
-                                        <div className="detail-item mb-0">
-                                            <h6 className="text-primary mb-2 fw-bold">
-                                                <i className="fas fa-utensils me-2"></i>
-                                                Regime
-                                            </h6>
-                                            <p className="mb-0 fs-6 fw-semibold text-dark">
-                                                {dashboardData.lastGlucose.condition}
-                                                {glucoseThresholds && (
-                                                    <small className="d-block text-muted">
-                                                        Normal: {(() => {
-                                                            const normalizedRegime = dashboardData.lastGlucose.condition?.toLowerCase().includes('jejum') ? 'jejum' :
-                                                                dashboardData.lastGlucose.condition?.toLowerCase().includes('pós') ? 'posPrandial' :
-                                                                dashboardData.lastGlucose.condition?.toLowerCase().includes('pré') ? 'prePrandial' : 'aleatorio';
-                                                            const threshold = glucoseThresholds[normalizedRegime];
-                                                            return `${threshold.min}-${threshold.max} mg/dL`;
-                                                        })()}
-                                                    </small>
-                                                )}
-                                            </p>
-                                        </div>
-
-                                        <div className="detail-item mb-0">
-                                            <h6 className="text-primary mb-2 fw-bold">
-                                                <i className="fas fa-weight me-2"></i>
-                                                Peso Corporal
-                                            </h6>
-                                            <p className="mb-0 fs-6 fw-semibold text-dark">
-                                                {dashboardData.lastGlucose.weight ? 
-                                                    `${dashboardData.lastGlucose.weight} kg` : 
-                                                    <span className="text-muted">-</span>
-                                                }
-                                            </p>
-                                        </div>
+                                    {/* Data */}
+                                    <div className="text-center">
+                                        <small className="text-muted">
+                                            <i className="fas fa-calendar me-1"></i>
+                                            {new Date(dashboardData.lastGlucose.timestamp).toLocaleString('pt-PT')}
+                                        </small>
                                     </div>
-                                </>
+                                </div>
                             ) : (
                                 <div className="text-center py-4">
-                                    <i className="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Nenhuma medição encontrada</p>
+                                    <i className="fas fa-tint fa-2x text-muted mb-2"></i>
+                                    <p className="text-muted small mb-0">Nenhuma medição encontrada</p>
                                 </div>
                             )}
                         </Card.Body>
                     </Card>
                 </Col>
+            </Row>
 
-                {/* Card Última Insulina */}
+            {/* Segunda linha - Cards de detalhes */}
+            <Row className="g-3 mb-4">
+                {/* Próximos Eventos de insulina*/}
                 <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-danger text-white">
-                            <h5 className="mb-0">
-                                <i className="fas fa-syringe me-2"></i>
-                                Última Administração de Insulina
-                            </h5>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white border-0 pb-0">
+                            <h6 className="fw-bold text-dark mb-0">Próximo Evento de Insulina</h6>
                         </Card.Header>
-                        <Card.Body>
-                            {dashboardData.lastInsulin ? (
-                                <>
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h2 className="display-4 fw-bold text-danger mb-0">
-                                                {dashboardData.lastInsulin.insulin_value}
-                                                <small className="text-muted"> U</small>
-                                            </h2>
+                        <Card.Body className="pt-2">
+                            <div className="d-flex flex-column gap-3">
+                                {dashboardData.nextInsulinEvent ? (
+                                    <div className="d-flex align-items-center p-3 bg-light rounded">
+                                        <div className="me-3">
+                                            <div className="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" 
+                                                 style={{ width: '40px', height: '40px' }}>
+                                                <i className="fas fa-syringe" style={{ fontSize: '16px' }}></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                        <div className="detail-item mb-0">
-                                            <h6 className="text-danger mb-2 fw-bold">
-                                                <i className="fas fa-calendar-alt me-2"></i>
-                                                Data e Hora
-                                            </h6>
-                                            <p className="mb-0 fs-6 fw-semibold text-dark">
-                                                {new Date(dashboardData.lastInsulin.timestamp).toLocaleString('pt-PT', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
+                                        <div className="flex-grow-1">
+                                            <div className="fw-bold">Administração de Insulina</div>
+                                            <div className="text-muted small">
+                                                {new Date(dashboardData.nextInsulinEvent.data_evento).toLocaleString('pt-PT', {
+                                                    weekday: 'short',
+                                                    day: '2-digit',
+                                                    month: '2-digit',
                                                     hour: '2-digit',
                                                     minute: '2-digit'
                                                 })}
-                                            </p>
+                                            </div>
+                                            {dashboardData.nextInsulinEvent.notas && (
+                                                <div className="text-muted small mt-1">
+                                                    <i className="fas fa-sticky-note me-1"></i>
+                                                    {dashboardData.nextInsulinEvent.notas}
+                                                </div>
+                                            )}
                                         </div>
-                                                                        
-                                        <div className="detail-item mb-0">
-                                            <h6 className="text-danger mb-2 fw-bold">
-                                                <i className="fas fa-route me-2"></i>
-                                                Rota de Administração
-                                            </h6>
-                                            <Badge bg="danger" className="fs-6 px-3 py-2">
-                                                {dashboardData.lastInsulin.route}
+                                        <div className="text-end">
+                                            <Badge bg="danger" className="small">
+                                                {getTimeUntilEvent(dashboardData.nextInsulinEvent.data_evento)}
                                             </Badge>
                                         </div>
                                     </div>
-                                </>
-                            ) : (
-                                <div className="text-center py-4">
-                                    <i className="fas fa-syringe fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Nenhuma administração encontrada</p>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <i className="fas fa-syringe fa-3x text-muted mb-3" style={{ opacity: 0.3 }}></i>
+                                        <h6 className="text-muted">Nenhuma administração agendada</h6>
+                                        <p className="text-muted small mb-0">Aceda à Agenda para criar uma nova administração</p>
+                                        <Button 
+                                            variant="outline-primary" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.href = '/agenda'}
+                                        >
+                                            <i className="fas fa-calendar-plus me-1"></i>
+                                            Criar Agendamento
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         </Card.Body>
                     </Card>
                 </Col>
 
+                {/* Próximos Eventos de glicose*/}
+                <Col lg={6}>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white border-0 pb-0">
+                            <h6 className="fw-bold text-dark mb-0">Próximo Evento de Glicose</h6>
+                        </Card.Header>
+                        <Card.Body className="pt-2">
+                            <div className="d-flex flex-column gap-3">
+                                {dashboardData.nextGlucoseEvent ? (
+                                    <div className="d-flex align-items-center p-3 bg-light rounded">
+                                        <div className="me-3">
+                                            <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                                 style={{ width: '40px', height: '40px' }}>
+                                                <i className="fas fa-tint" style={{ fontSize: '16px' }}></i>
+                                            </div>
+                                        </div>
+                                        <div className="flex-grow-1">
+                                            <div className="fw-bold">Medição de Glicose</div>
+                                            <div className="text-muted small">
+                                                {new Date(dashboardData.nextGlucoseEvent.data_evento).toLocaleString('pt-PT', {
+                                                    weekday: 'short',
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </div>
+                                            {dashboardData.nextGlucoseEvent.notas && (
+                                                <div className="text-muted small mt-1">
+                                                    <i className="fas fa-sticky-note me-1"></i>
+                                                    {dashboardData.nextGlucoseEvent.notas}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-end">
+                                            <Badge bg="primary" className="small">
+                                                {getTimeUntilEvent(dashboardData.nextGlucoseEvent.data_evento)}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <i className="fas fa-tint fa-3x text-muted mb-3" style={{ opacity: 0.3 }}></i>
+                                        <h6 className="text-muted">Nenhuma medição agendada</h6>
+                                        <p className="text-muted small mb-0">Aceda à Agenda para criar uma nova medição</p>
+                                        <Button 
+                                            variant="outline-primary" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.href = '/agenda'}
+                                        >
+                                            <i className="fas fa-calendar-plus me-1"></i>
+                                            Criar Agendamento
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Terceira linha - Estatísticas */}
+            <Row className="g-3">
                 {/* Estatísticas de Glicose */}
                 <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-info text-white">
-                            <h5 className="mb-0">
-                                <i className="fas fa-chart-bar me-2"></i>
-                                Estatísticas de Glicose (7 dias)
-                            </h5>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white border-0 pb-0">
+                            <h6 className="fw-bold text-dark mb-0">Estatísticas de Glicose (7 dias)</h6>
                         </Card.Header>
-                        <Card.Body>
+                        <Card.Body className="pt-2">
                             {dashboardData.glucoseStats ? (
                                 <>
-                                    <Row className="text-center mb-4">
-                                        <Col>
-                                            <h4 className="fw-bold text-info">{dashboardData.glucoseStats.average}</h4>
-                                            <small className="text-muted">Média (mg/dL)</small>
+                                    <Row className="text-center mb-3">
+                                        <Col className="border-end">
+                                            <h5 className="fw-bold text-info mb-1">{dashboardData.glucoseStats.average}</h5>
+                                            <small className="text-muted">Média</small>
+                                        </Col>
+                                        <Col className="border-end">
+                                            <h5 className="fw-bold text-success mb-1">{dashboardData.glucoseStats.min}</h5>
+                                            <small className="text-muted">Mínima</small>
                                         </Col>
                                         <Col>
-                                            <h4 className="fw-bold text-success">{dashboardData.glucoseStats.min}</h4>
-                                            <small className="text-muted">Mínima (mg/dL)</small>
-                                        </Col>
-                                        <Col>
-                                            <h4 className="fw-bold text-warning">{dashboardData.glucoseStats.max}</h4>
-                                            <small className="text-muted">Máxima (mg/dL)</small>
+                                            <h5 className="fw-bold text-warning mb-1">{dashboardData.glucoseStats.max}</h5>
+                                            <small className="text-muted">Máxima</small>
                                         </Col>
                                     </Row>
-                                    
                                     <div className="text-center">
-                                        <span className="text-muted">
+                                        <small className="text-muted">
                                             <i className="fas fa-calendar me-1"></i>
-                                            {dashboardData.glucoseStats.count} medições nos últimos 7 dias
-                                        </span>
+                                            {dashboardData.glucoseStats.count} medições
+                                        </small>
                                     </div>
                                 </>
                             ) : (
                                 <div className="text-center py-4">
-                                    <i className="fas fa-chart-bar fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Dados insuficientes</p>
+                                    <i className="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                                    <p className="text-muted small mb-0">Dados insuficientes</p>
                                 </div>
                             )}
                         </Card.Body>
@@ -503,160 +535,40 @@ export default function Inicio() {
 
                 {/* Estatísticas de Insulina */}
                 <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-secondary text-white">
-                            <h5 className="mb-0">
-                                <i className="fas fa-chart-pie me-2"></i>
-                                Estatísticas de Insulina (7 dias)
-                            </h5>
+                    <Card className="border-0 shadow-sm h-100">
+                        <Card.Header className="bg-white border-0 pb-0">
+                            <h6 className="fw-bold text-dark mb-0">Estatísticas de Insulina (7 dias)</h6>
                         </Card.Header>
-                        <Card.Body>
+                        <Card.Body className="pt-2">
                             {dashboardData.insulinStats ? (
                                 <>
-                                    <Row className="text-center mb-4">
-                                        <Col>
-                                            <h4 className="fw-bold text-secondary">{dashboardData.insulinStats.dailyAverage}</h4>
-                                            <small className="text-muted">Média Diária (U)</small>
+                                    <Row className="text-center mb-3">
+                                        <Col className="border-end">
+                                            <h5 className="fw-bold text-secondary mb-1">{dashboardData.insulinStats.dailyAverage}</h5>
+                                            <small className="text-muted">Média Diária</small>
                                         </Col>
                                         <Col>
-                                            <h4 className="fw-bold text-primary">{dashboardData.insulinStats.weeklyTotal}</h4>
-                                            <small className="text-muted">Total Semanal (U)</small>
+                                            <h5 className="fw-bold text-primary mb-1">{dashboardData.insulinStats.weeklyTotal}</h5>
+                                            <small className="text-muted">Total Semanal</small>
                                         </Col>
                                     </Row>
-                                    
                                     <div className="text-center">
-                                        <span className="text-muted">
+                                        <small className="text-muted">
                                             <i className="fas fa-syringe me-1"></i>
-                                            {dashboardData.insulinStats.count} administrações nos últimos 7 dias
-                                        </span>
+                                            {dashboardData.insulinStats.count} administrações
+                                        </small>
                                     </div>
                                 </>
                             ) : (
                                 <div className="text-center py-4">
-                                    <i className="fas fa-chart-pie fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Dados insuficientes</p>
+                                    <i className="fas fa-chart-pie fa-2x text-muted mb-2"></i>
+                                    <p className="text-muted small mb-0">Dados insuficientes</p>
                                 </div>
                             )}
                         </Card.Body>
                     </Card>
                 </Col>
-                
-                {/* Próximo Evento de Glicose */}
-                <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-success text-white">
-                            <h5 className="mb-0">
-                                <i className="fas fa-calendar-plus me-2"></i>
-                                Próxima Medição de Glicose
-                            </h5>
-                        </Card.Header>
-                        <Card.Body>
-                            {dashboardData.nextGlucoseEvent ? (
-                                <>
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h4 className="fw-bold text-success mb-1">
-                                                {new Date(dashboardData.nextGlucoseEvent.data_evento).toLocaleDateString('pt-PT', {
-                                                    weekday: 'long',
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </h4>
-                                            <h5 className="text-muted mb-0">
-                                                às {new Date(dashboardData.nextGlucoseEvent.data_evento).toLocaleTimeString('pt-PT', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </h5>
-                                        </div>
-                                        <div className="text-end">
-                                            <Badge bg="success" className="fs-6">
-                                                {getTimeUntilEvent(dashboardData.nextGlucoseEvent.data_evento)}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    
-                                    {dashboardData.nextGlucoseEvent.notas && (
-                                        <div className="mt-3">
-                                            <h6 className="text-success mb-2 fw-bold">
-                                                <i className="fas fa-sticky-note me-2"></i>
-                                                Notas
-                                            </h6>
-                                            <p className="mb-0 text-muted">
-                                                {dashboardData.nextGlucoseEvent.notas}
-                                            </p>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-4">
-                                    <i className="fas fa-calendar-check fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Nenhuma medição agendada</p>
-                                </div>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-
-                {/* Próximo Evento de Insulina */}
-                <Col lg={6}>
-                    <Card className="h-100 shadow-sm border-0">
-                        <Card.Header className="bg-warning text-dark">
-                            <h5 className="mb-0">
-                                <i className="fas fa-calendar-plus me-2"></i>
-                                Próxima Administração de Insulina
-                            </h5>
-                        </Card.Header>
-                        <Card.Body>
-                            {dashboardData.nextInsulinEvent ? (
-                                <>
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h4 className="fw-bold text-warning mb-1">
-                                                {new Date(dashboardData.nextInsulinEvent.data_evento).toLocaleDateString('pt-PT', {
-                                                    weekday: 'long',
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </h4>
-                                            <h5 className="text-muted mb-0">
-                                                às {new Date(dashboardData.nextInsulinEvent.data_evento).toLocaleTimeString('pt-PT', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </h5>
-                                        </div>
-                                        <div className="text-end">
-                                            <Badge bg="warning" text="dark" className="fs-6">
-                                                {getTimeUntilEvent(dashboardData.nextInsulinEvent.data_evento)}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    
-                                    {dashboardData.nextInsulinEvent.notas && (
-                                        <div className="mt-3">
-                                            <h6 className="text-warning mb-2 fw-bold">
-                                                <i className="fas fa-sticky-note me-2"></i>
-                                                Notas
-                                            </h6>
-                                            <p className="mb-0 text-muted">
-                                                {dashboardData.nextInsulinEvent.notas}
-                                            </p>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-4">
-                                    <i className="fas fa-calendar-check fa-3x text-muted mb-3"></i>
-                                    <p className="text-muted">Nenhuma administração agendada</p>
-                                </div>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>   
-        </main>
+            </Row>
+        </div>
     );
 }
