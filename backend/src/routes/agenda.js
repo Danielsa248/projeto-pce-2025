@@ -19,7 +19,7 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // POST /api/agenda
 router.post('/', authenticateToken, async (req, res) => {
-    const utilizador = req.user.id; // Obter do token
+    const utilizador = req.user.id; // Obter o token
     const { tipo_registo, data_evento, notas } = req.body;
     
     if (!tipo_registo || !data_evento) {
