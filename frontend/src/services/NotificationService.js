@@ -175,7 +175,7 @@ class NotificationService {
     }
 
     createNotificationObject(marcacao, notificationData) {
-        const typeLabel = marcacao.tipo_registo === 'G' ? 'G' : 'I';
+        const typeLabel = marcacao.tipo_registo === 'G' ? 'Glicose' : 'Insulina';
         const eventTime = new Date(marcacao.data_evento);
         const timeStr = eventTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
         
@@ -272,8 +272,10 @@ class NotificationService {
         });
     }
 
+    // SUBSTITUIR: A função createBrowserMessage (linha ~277)
     createBrowserMessage(notification) {
         const { first, second, third } = this.settings.times;
+        const typeLabel = notification.type === 'G' ? 'Glicose' : 'Insulina';
         let title, body;
         
         switch (notification.notificationType) {
@@ -286,15 +288,15 @@ class NotificationService {
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'third':
-                title = `${notification.type === 'G' ? 'G' : 'I'} em ${third} minutos`;
+                title = `${typeLabel} em ${third} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'second':
-                title = `${notification.type === 'G' ? 'G' : 'I'} em ${second} minutos`;
+                title = `${typeLabel} em ${second} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'first':
-                title = `${notification.type === 'G' ? 'G' : 'I'} em ${first} minutos`;
+                title = `${typeLabel} em ${first} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             default:

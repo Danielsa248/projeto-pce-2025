@@ -9,7 +9,14 @@ const REGISTO_TYPES = {
     INSULIN: 'I'
 };
 
+
 const REGISTO_TYPE_LABELS = {
+    [REGISTO_TYPES.GLUCOSE]: 'Glicose',
+    [REGISTO_TYPES.INSULIN]: 'Insulina'
+};
+
+
+const REGISTO_TYPE_SHORT_LABELS = {
     [REGISTO_TYPES.GLUCOSE]: 'G',
     [REGISTO_TYPES.INSULIN]: 'I'
 };
