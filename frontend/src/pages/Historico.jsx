@@ -288,7 +288,7 @@ export default function Historico() {
             pageLength: 10,
             lengthChange: true,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[1, 'desc']], // Sort by date column (index 1)
+            order: [[1, 'asc']],
             language: {
                 paginate: {
                     previous: '<i class="fas fa-chevron-left"></i>',

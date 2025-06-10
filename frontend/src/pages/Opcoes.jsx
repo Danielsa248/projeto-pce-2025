@@ -345,12 +345,23 @@ export default function Opcoes() {
                 </Row>
 
                 <Alert variant="info" className="mt-4">
-                    <i className="fas fa-info-circle me-2"></i>
-                    <strong>Cores dos alertas:</strong>
-                    <div className="mt-2">
-                        <Badge bg="success" className="me-2">Normal</Badge> Valores dentro dos limites
-                        <Badge bg="warning" text="dark" className="me-2">Cuidado</Badge> Valores ligeiramente fora dos limites
-                        <Badge bg="danger" className="me-2">Perigo</Badge> Valores muito fora dos limites
+                    <div className="d-flex flex-wrap align-items-center gap-3">
+                        <div className="d-flex align-items-center">
+                            <i className="fas fa-info-circle me-2"></i>
+                            <strong>Cores dos alertas:</strong>
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <Badge bg="success" className="me-1">Normal</Badge>
+                            <small className="text-muted me-3">Dentro dos limites</small>
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <Badge bg="warning" text="dark" className="me-1">Cuidado</Badge>
+                            <small className="text-muted me-3">Ligeiramente fora</small>
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <Badge bg="danger" className="me-1">Perigo</Badge>
+                            <small className="text-muted">Muito fora dos limites</small>
+                        </div>
                     </div>
                 </Alert>
             </Card.Body>
