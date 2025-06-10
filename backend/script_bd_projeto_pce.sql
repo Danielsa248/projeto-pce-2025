@@ -2,7 +2,7 @@ CREATE TYPE sexo_tipo AS ENUM ('M', 'F', 'O');
 
 CREATE TYPE contacto_tipo AS ENUM ('T', 'E');
 
-CREATE TYPE registo_tipo AS ENUM ('Insulina', 'Glucose');
+CREATE TYPE registo_tipo AS ENUM ('I', 'G');
 
 
 -- Tabela de utilizador
@@ -95,7 +95,7 @@ DECLARE
     peso_key TEXT;
     dados_keys TEXT[];
 BEGIN
-    IF NEW.tipo_registo = 'Glucose' THEN
+    IF NEW.tipo_registo = 'G' THEN
         
         BEGIN
             SELECT key INTO peso_key

@@ -57,7 +57,7 @@ export default function FormRender({ type, onSubmitComplete }) {
                 console.log("Guardado com sucesso:", result);
                 
                 if (formType === 'glicose' || formType === 'insulina') {
-                    const formName = formType === 'glicose' ? 'Glicose' : 'Insulina';
+                    const formName = formType === 'glicose' ? 'glicose' : 'insulina';
                     setSuccess(`Medição de ${formName} registada com sucesso!`);
                     
                     setTimeout(() => {

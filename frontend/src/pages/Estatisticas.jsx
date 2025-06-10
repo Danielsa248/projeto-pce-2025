@@ -378,8 +378,9 @@ export default function Estatisticas() {
     
     const total = values.reduce((sum, value) => sum + value, 0);
     const average = values.length ? (dataType === 'weight' ? (total / values.length).toFixed(1) : Math.round(total / values.length)) : 0;
-    const min = values.length ? (dataType === 'weight' ? Math.min(...values).toFixed(1) : Math.min(...values)) : null;
-    const max = values.length ? (dataType === 'weight' ? Math.max(...values).toFixed(1) : Math.max(...values)) : null;
+    
+    const min = values.length ? (dataType === 'weight' ? Math.min(...values).toFixed(1) : Math.round(Math.min(...values))) : null;
+    const max = values.length ? (dataType === 'weight' ? Math.max(...values).toFixed(1) : Math.round(Math.max(...values))) : null;
     
     const chartData = {
       datasets: [
@@ -569,60 +570,81 @@ export default function Estatisticas() {
     </div>
   ), [averages, minMaxValues, loadingState]);
 
-  // Updated renderChart to handle weight (no filter selectors for weight)
-  const renderChart = useCallback((dataType) => (
-    <div className={`col-md-${dataType === 'weight' ? '12' : '6'} mb-4`}>
-      <div className="card shadow">
-        <div className="card-header bg-white">
-          <div className="d-flex justify-content-between align-items-start">
-            <div>
-              <h5 className="mb-0">{DATA_TYPE_LABELS[dataType].name}</h5>
-              <p className="text-muted small mb-0">
-                {dataType === 'weight' 
-                  ? `${DATA_TYPE_LABELS[dataType].description} (baseado no período de glicose)`
-                  : DATA_TYPE_LABELS[dataType].description
-                }
-              </p>
-            </div>
-            {dataType !== 'weight' && (
-              <div className="d-flex align-items-center gap-3">
-                <div className="d-flex align-items-center gap-2">
-                  <small className="text-muted text-nowrap">Período:</small>
-                  {renderTimeRangeSelector(dataType)}
-                </div>
-                <div className="d-flex align-items-center gap-2">
-                  <small className="text-muted text-nowrap">
-                    {dataType === 'glucose' ? 'Tipo:' : 'Via:'}
-                  </small>
-                  {renderFilterSelector(dataType)}
-                </div>
+  const renderChart = useCallback((dataType) => {
+    const separatorColors = {
+      glucose: '#0d6efd',
+      insulin: '#dc3545',
+      weight: '#198754'
+    };
+
+    return (
+      <div className={`col-md-${dataType === 'weight' ? '12' : '6'} mb-4 d-flex`}>
+        <div className="card shadow w-100 h-100">
+          <div className="card-header bg-white">
+            {dataType === 'weight' ? (
+              <div>
+                <h5 className="mb-2">{DATA_TYPE_LABELS[dataType].name}</h5>
+                <p className="text-muted small mb-0">
+                  {DATA_TYPE_LABELS[dataType].description} (baseado no período de glicose)
+                </p>
               </div>
-            )}
-          </div>
-        </div>
-        <div className="card-body">
-          <div style={{ height: '300px' }}>
-            {(dataType === 'weight' ? loadingState.glucose : loadingState[dataType]) ? (
-              <div className="d-flex align-items-center justify-content-center h-100">
-                <Spinner animation="border" />
-              </div>
-            ) : chartData[dataType] ? (
-              <Line data={chartData[dataType]} options={chartOptions} />
             ) : (
-              <div className="d-flex align-items-center justify-content-center h-100">
-                <p className="text-muted">
-                  {dataType === 'weight' 
-                    ? 'Nenhum dado de peso disponível para o período selecionado'
-                    : 'Nenhum dado disponível para o período selecionado'
-                  }
+              <div>
+                <div className="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-start gap-2">
+                  <h5 className="mb-0 flex-shrink-0">{DATA_TYPE_LABELS[dataType].name}</h5>
+                
+                  <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <small className="text-muted text-nowrap">Período:</small>
+                      {renderTimeRangeSelector(dataType)}
+                    </div>
+                    <div className="d-flex align-items-center gap-2">
+                      <small className="text-muted text-nowrap">
+                        {dataType === 'glucose' ? 'Tipo:' : 'Via:'}
+                      </small>
+                      {renderFilterSelector(dataType)}
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-muted small mb-0 mt-2">
+                  {DATA_TYPE_LABELS[dataType].description}
                 </p>
               </div>
             )}
           </div>
+          
+          <div style={{ 
+            height: '2px', 
+            backgroundColor: separatorColors[dataType],
+            opacity: 0.3,
+            margin: '0'
+          }}></div>
+          
+          <div className="card-body d-flex flex-column">
+            <div className="flex-grow-1" style={{ height: '400px', minHeight: '400px' }}>
+              {(dataType === 'weight' ? loadingState.glucose : loadingState[dataType]) ? (
+                <div className="d-flex align-items-center justify-content-center h-100">
+                  <Spinner animation="border" />
+                </div>
+              ) : chartData[dataType] ? (
+                <Line data={chartData[dataType]} options={chartOptions} />
+              ) : (
+                <div className="d-flex align-items-center justify-content-center h-100">
+                  <p className="text-muted">
+                    {dataType === 'weight' 
+                      ? 'Nenhum dado de peso disponível para o período selecionado'
+                      : 'Nenhum dado disponível para o período selecionado'
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  ), [chartData, chartOptions, loadingState, renderTimeRangeSelector, renderFilterSelector]);
+    );
+  }, [chartData, chartOptions, loadingState, renderTimeRangeSelector, renderFilterSelector]);
 
   // Show error message if data fetching failed
   if (error) {
@@ -676,10 +698,150 @@ export default function Estatisticas() {
               <p className="text-muted small mb-0">Visão geral das medições mais recentes</p>
             </div>
             <div className="card-body">
-              <div className="row mb-4">
-                {renderDataCard('glucose')}
-                {renderDataCard('insulin')}
-                {renderDataCard('weight')}
+              <div className="row g-3 mb-4">
+                {/* Card de Glicose */}
+                <div className="col-md-4 d-flex">
+                  <div className="card bg-light border-0 w-100 h-100">
+                    <div className="card-body text-center d-flex flex-column justify-content-center">
+                      <h5 className="mb-4">Estatísticas de Glicose</h5>
+                      {loadingState.glucose ? (
+                        <div className="d-flex justify-content-center">
+                          <Spinner animation="border" size="sm" />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="row h-100">
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Mínimo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.glucose.min !== null ? minMaxValues.glucose.min : '0'}
+                                </div>
+                                <small className="text-muted">mg/dL</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Média</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {averages.glucose}
+                                </div>
+                                <small className="text-muted">mg/dL</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Máximo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.glucose.max !== null ? minMaxValues.glucose.max : '0'}
+                                </div>
+                                <small className="text-muted">mg/dL</small>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card de Insulina */}
+                <div className="col-md-4 d-flex">
+                  <div className="card bg-light border-0 w-100 h-100">
+                    <div className="card-body text-center d-flex flex-column justify-content-center">
+                      <h5 className="mb-4">Estatísticas de Insulina</h5>
+                      {loadingState.insulin ? (
+                        <div className="d-flex justify-content-center">
+                          <Spinner animation="border" size="sm" />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="row h-100">
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Mínimo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.insulin.min !== null ? minMaxValues.insulin.min : '0'}
+                                </div>
+                                <small className="text-muted">U</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Média</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {averages.insulin}
+                                </div>
+                                <small className="text-muted">U</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Máximo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.insulin.max !== null ? minMaxValues.insulin.max : '0'}
+                                </div>
+                                <small className="text-muted">U</small>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card de Peso */}
+                <div className="col-md-4 d-flex">
+                  <div className="card bg-light border-0 w-100 h-100">
+                    <div className="card-body text-center d-flex flex-column justify-content-center">
+                      <h5 className="mb-4">Estatísticas de Peso</h5>
+                      {loadingState.glucose ? (
+                        <div className="d-flex justify-content-center">
+                          <Spinner animation="border" size="sm" />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="row h-100">
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Mínimo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.weight.min !== null ? minMaxValues.weight.min : '0'}
+                                </div>
+                                <small className="text-muted">kg</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Média</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {averages.weight}
+                                </div>
+                                <small className="text-muted">kg</small>
+                              </div>
+                            </div>
+                            
+                            <div className="col-4 d-flex flex-column justify-content-center">
+                              <div className="text-center">
+                                <small className="text-muted d-block mb-2">Máximo</small>
+                                <div className="h3 fw-bold text-primary">
+                                  {minMaxValues.weight.max !== null ? minMaxValues.weight.max : '0'}
+                                </div>
+                                <small className="text-muted">kg</small>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -687,13 +849,13 @@ export default function Estatisticas() {
       </div>
       
       {/* Charts */}
-      <div className="row">
+      <div className="row g-4 mb-4">
         {renderChart('glucose')}
         {renderChart('insulin')}
       </div>
-      
+
       {/* Weight chart full width */}
-      <div className="row">
+      <div className="row g-4">
         {renderChart('weight')}
       </div>
     </div>

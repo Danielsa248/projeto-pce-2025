@@ -25,12 +25,12 @@ router.post('/send/:recordId', authenticateToken, async (req, res) => {
         
         // Convert to FHIR
         let fhirResource;
-        if (record.tipo_registo === 'Glucose') {
+        if (record.tipo_registo === 'G') {
             console.log(`Converting Glucose record to FHIR...`);
             fhirResource = FHIRConverter.convertGlucoseToFHIR(
                 record.dados, userId, record.data_registo
             );
-        } else if (record.tipo_registo === 'Insulina') {
+        } else if (record.tipo_registo === 'I') {
             console.log(`Converting Insulin record to FHIR...`);
             fhirResource = FHIRConverter.convertInsulinToFHIR(
                 record.dados, userId, record.data_registo
@@ -112,11 +112,11 @@ router.post('/send-bulk', authenticateToken, async (req, res) => {
                 }
 
                 let fhirResource;
-                if (record.tipo_registo === 'Glucose') {
+                if (record.tipo_registo === 'G') {
                     fhirResource = FHIRConverter.convertGlucoseToFHIR(
                         record.dados, userId, record.data_registo
                     );
-                } else if (record.tipo_registo === 'Insulina') {
+                } else if (record.tipo_registo === 'I') {
                     fhirResource = FHIRConverter.convertInsulinToFHIR(
                         record.dados, userId, record.data_registo
                     );
