@@ -15,12 +15,13 @@ export default function Historico() {
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedRecords, setSelectedRecords] = useState(new Set());
-    const [showFhirModal, setShowFhirModal] = useState(false);
+    const [showFhirModal, setShowFhirModal] = useState(false); // Remove this as we won't need the modal anymore
     const [fhirStatus, setFhirStatus] = useState({});
     const [fhirLoading, setFhirLoading] = useState(new Set());
     const [connectionStatus, setConnectionStatus] = useState(null);
     const [testingConnection, setTestingConnection] = useState(false);
     const [sendingAllRecords, setSendingAllRecords] = useState(false);
+    const [sendingSelectedRecords, setSendingSelectedRecords] = useState(false); // Add this new state
     const [fhirAlert, setFhirAlert] = useState({ show: false, variant: '', message: '', recordId: null });
     const [showFhirToasts, setShowFhirToasts] = useState([]);
     const tableRef = useRef(null);
@@ -301,12 +302,15 @@ export default function Historico() {
             },
             responsive: true,
             autoWidth: false,
-            dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+            dom: '<"row mb-3"<"col-sm-12 col-md-6 d-flex align-items-center"l<"selected-count-badge ms-3">><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             drawCallback: function() {
                 // Add fade-in animation to rows
                 $('.dataTables_wrapper tbody tr').addClass('fade-in-row');
+                
+                // Update the selected count badge
+                updateSelectedCountBadge();
                 
                 // Add click event listeners to details buttons
                 $('.details-btn').off('click').on('click', function(e) {
@@ -323,7 +327,7 @@ export default function Historico() {
                     handleSendSingleRecord(recordId);
                 });
                 
-                // Checkbox handlers
+                // Individual checkbox handlers
                 $('.record-checkbox').off('change').on('change', function() {
                     const recordId = $(this).data('id');
                     if (this.checked) {
@@ -335,13 +339,90 @@ export default function Historico() {
                             return newSet;
                         });
                     }
+                    updateSelectAllCheckbox();
+                    updateSelectedCountBadge();
                 });
+
+                // Select all checkbox handler
+                $('#select-all').off('change').on('change', function() {
+                    const isChecked = this.checked;
+                    const currentPageRecords = [];
+                    
+                    // Get all records currently visible on the page
+                    $('.record-checkbox').each(function() {
+                        const recordId = $(this).data('id');
+                        currentPageRecords.push(recordId);
+                        this.checked = isChecked;
+                    });
+                    
+                    if (isChecked) {
+                        // Add all current page records to selection
+                        setSelectedRecords(prev => new Set([...prev, ...currentPageRecords]));
+                    } else {
+                        // Remove all current page records from selection
+                        setSelectedRecords(prev => {
+                            const newSet = new Set(prev);
+                            currentPageRecords.forEach(id => newSet.delete(id));
+                            return newSet;
+                        });
+                    }
+                    updateSelectedCountBadge();
+                });
+
+                // Update select-all checkbox state based on current selection
+                updateSelectAllCheckbox();
             }
         });
         
         tableInitializedRef.current = true;
-    }, [handleViewDetails, fhirLoading]); // Removed fhirStatus from dependencies
-    
+    }, [handleViewDetails, fhirLoading]);
+
+    // Helper function to update select-all checkbox state
+    const updateSelectAllCheckbox = () => {
+        const currentPageRecords = [];
+        $('.record-checkbox').each(function() {
+            currentPageRecords.push($(this).data('id'));
+        });
+        
+        const selectedOnCurrentPage = currentPageRecords.filter(id => selectedRecords.has(id));
+        const selectAllCheckbox = $('#select-all')[0];
+        
+        if (selectAllCheckbox) {
+            if (selectedOnCurrentPage.length === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (selectedOnCurrentPage.length === currentPageRecords.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+                selectAllCheckbox.checked = false;
+            }
+        }
+    };
+
+    // New helper function to update the selected count badge in the table
+    const updateSelectedCountBadge = () => {
+        const badgeContainer = $('.selected-count-badge');
+        if (badgeContainer.length > 0) {
+            if (selectedRecords.size > 0) {
+                badgeContainer.html(`
+                    <span class="badge bg-info text-white">
+                        <i class="fas fa-check-square me-1"></i>
+                        ${selectedRecords.size} selecionado(s)
+                    </span>
+                `);
+            } else {
+                badgeContainer.html('');
+            }
+        }
+    };
+
+    // Add useEffect to update badge when selectedRecords changes
+    useEffect(() => {
+        updateSelectedCountBadge();
+    }, [selectedRecords]);
+
     // Split the effects - first for data fetching
     useEffect(() => {
         fetchAllData();
@@ -827,27 +908,88 @@ export default function Historico() {
             );
         } finally {
             setSendingAllRecords(false);
-            // Remove setTimeout since we're usando toasts agora
+            // Remove setTimeout since estamos usando toasts agora
+        }
+    };
+
+    // Remove the old handleSendBulkRecords function and replace with this:
+    const handleSendSelectedRecords = async () => {
+        if (selectedRecords.size === 0) {
+            addFhirToast('warning', 'Nenhum registo selecionado');
+            return;
+        }
+
+        setSendingSelectedRecords(true);
+        
+        // Show initial toast for bulk operation start
+        addFhirToast(
+            'info',
+            `A enviar ${selectedRecords.size} registos selecionados para o Mirth Connect...`
+        );
+        
+        try {
+            const recordIds = Array.from(selectedRecords);
+            const result = await sendBulkRecordsToFHIR(recordIds);
+            
+            // Check if the operation actually succeeded
+            if (result.success && result.processed > 0) {
+                // Update status for all records
+                const newStatus = {};
+                result.results.forEach(res => {
+                    if (res.success) {
+                        newStatus[res.recordId] = 'sent';
+                    } else {
+                        newStatus[res.recordId] = 'error';
+                    }
+                });
+                
+                setFhirStatus(prev => ({ ...prev, ...newStatus }));
+                
+                // Clear selection after successful send
+                setSelectedRecords(new Set());
+                
+                // Show detailed success/error toast
+                if (result.errors > 0) {
+                    addFhirToast(
+                        'warning', 
+                        `⚠️ Enviados ${result.processed} de ${recordIds.length} registos selecionados. ${result.errors} falharam.`
+                    );
+                } else {
+                    addFhirToast(
+                        'success', 
+                        `✅ Todos os ${result.processed} registos selecionados enviados com sucesso!`
+                    );
+                }
+                
+                // Refresh table
+                if (dataTableRef.current) {
+                    dataTableRef.current.draw(false);
+                }
+            } else if (result.success && result.processed === 0) {
+                // This means the request succeeded but nothing was actually sent (like when Mirth is down)
+                addFhirToast(
+                    'danger', 
+                    `❌ Falha total no envio: 0 de ${recordIds.length} registos enviados. Verifique se o Mirth Connect está ligado.`
+                );
+            } else {
+                // Complete failure from the backend
+                addFhirToast(
+                    'danger', 
+                    `❌ Falha no envio: ${result.error || 'Erro desconhecido'}`
+                );
+            }
+        } catch (error) {
+            addFhirToast(
+                'danger', 
+                `❌ Erro ao enviar registos selecionados: ${error.message}`
+            );
+        } finally {
+            setSendingSelectedRecords(false);
         }
     };
 
     return (
         <Container className="py-4">
-            {/* FHIR Alert for bulk operations */}
-            {fhirAlert.show && (
-                <Alert 
-                    variant={fhirAlert.variant} 
-                    onClose={() => setFhirAlert({ show: false, variant: '', message: '', recordId: null })} 
-                    dismissible
-                    className="mb-4"
-                >
-                    <div className="d-flex align-items-center">
-                        <i className={`fas ${fhirAlert.variant === 'success' ? 'fa-check-circle' : fhirAlert.variant === 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2`}></i>
-                        {fhirAlert.message}
-                    </div>
-                </Alert>
-            )}
-
             {/* Connection Status Alert */}
             {connectionStatus && (
                 <Alert variant={connectionStatus.variant} dismissible onClose={() => setConnectionStatus(null)}>
@@ -865,11 +1007,7 @@ export default function Historico() {
                         <p className="text-muted mb-1">
                             Consulte o seu histórico de medições de glicose e administrações de insulina
                         </p>
-                        {selectedRecords.size > 0 && (
-                            <Badge bg="info" className="ms-2">
-                                {selectedRecords.size} selecionados
-                            </Badge>
-                        )}
+                        {/* Remove the badge from here since it's now in the table */}
                     </div>
                     
                     <div className="d-flex align-items-center">
@@ -890,7 +1028,7 @@ export default function Historico() {
                         <div className="d-flex flex-column flex-lg-row gap-2">
                             {/* Test Connection Button */}
                             <Button 
-                                variant="outline-primary"  // Changed from outline-info
+                                variant="outline-primary"
                                 size="sm"
                                 onClick={handleTestConnection}
                                 disabled={testingConnection}
@@ -899,29 +1037,27 @@ export default function Historico() {
                                 {testingConnection ? 'Testando...' : 'Testar Conexão'}
                             </Button>
 
+                            {/* Send Selected Records Button */}
+                            <Button 
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={handleSendSelectedRecords}
+                                disabled={sendingSelectedRecords || selectedRecords.size === 0}
+                                className="me-2"
+                            >
+                                {sendingSelectedRecords ? 'Enviando...' : `Enviar Selecionados${selectedRecords.size > 0 ? ` (${selectedRecords.size})` : ''}`}
+                            </Button>
+
                             {/* Send All Records Button */}
                             {data.length > 0 && (
                                 <Button 
-                                    variant="outline-primary"  // Changed from outline-success
+                                    variant="outline-primary"
                                     size="sm"
                                     onClick={handleSendAllRecords}
                                     disabled={sendingAllRecords}
                                     className="me-2"
                                 >
                                     {sendingAllRecords ? 'Enviando...' : `Enviar Todos (${data.length})`}
-                                </Button>
-                            )}
-                            
-                            {/* Selected Records Button (existing) */}
-                            {selectedRecords.size > 0 && (
-                                <Button 
-                                    variant="success" 
-                                    size="sm"
-                                    onClick={() => setShowFhirModal(true)}
-                                    className="d-flex align-items-center"
-                                >
-                                    <i className="fas fa-share-alt me-2"></i>
-                                    Enviar Selecionados ({selectedRecords.size})
                                 </Button>
                             )}
                         </div>
@@ -967,37 +1103,14 @@ export default function Historico() {
             {/* Modal para detalhes do registo */}
             <DetailsModal />
 
-            {/* FHIR Confirmation Modal */}
-            <Modal show={showFhirModal} onHide={() => setShowFhirModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Enviar Dados FHIR</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Pretende enviar {selectedRecords.size} registos para o Mirth Connect em formato FHIR?</p>
-                    <Alert variant="info">
-                        <i className="fas fa-info-circle me-2"></i>
-                        Os dados serão convertidos automaticamente para o formato FHIR antes do envio.
-                    </Alert>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowFhirModal(false)}>
-                        Cancelar
-                    </Button>
-                    <Button variant="success" onClick={handleSendBulkRecords}>
-                        <i className="fas fa-share-alt me-2"></i>
-                        Enviar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Toast Container for individual FHIR notifications - moved to bottom-start */}
+            {/* Toast Container for individual FHIR notifications */}
             <ToastContainer position="bottom-start" className="p-3" style={{ zIndex: 9999 }}>
                 {showFhirToasts.map((toast) => (
                     <Toast
                         key={toast.id}
                         show={true}
                         onClose={() => setShowFhirToasts(prev => prev.filter(t => t.id !== toast.id))}
-                        delay={7000} // Increased delay for bulk operations
+                        delay={7000}
                         autohide
                         bg={toast.variant}
                         className={`text-white ${
