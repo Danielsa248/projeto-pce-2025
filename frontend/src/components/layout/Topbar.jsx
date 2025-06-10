@@ -76,7 +76,7 @@ const NotificationItem = ({ notification, onDismiss }) => (
       <div className="flex-grow-1">
         <h6 className="mb-1">
           <span className="text-muted small me-2">
-            {notification.type === 'Glucose' ? '🩸' : '💉'}
+            {notification.type === 'G' ? '🩸' : '💉'}
           </span>
           {notification.title}
         </h6>
