@@ -20,10 +20,10 @@ router.post("/compositions", authenticateToken, async (req, res) => {
     try {
         let tipo = null;
         if (type === "Medição de Insulina") {
-            tipo = "Insulina";
+            tipo = "I";
         } 
         else if (type === "Medição de Glicose") {
-            tipo = "Glucose";
+            tipo = "G";
         }
         else {
             return res.status(400).json({ 
@@ -58,11 +58,18 @@ router.post("/compositions", authenticateToken, async (req, res) => {
 
 // Rota para obter registos de um determinado tipo
 router.get('/registos/:tipo', authenticateToken, async (req, res) => {
-  const { tipo } = req.params;
+  const { tipo: tipoParam } = req.params;
   const userId = req.user.id;
   
+  const tipoMap = {
+    'Glucose': 'G',
+    'Insulina': 'I'
+  };
+  
+  const tipo = tipoMap[tipoParam];
+
   try {
-    if (!['Insulina', 'Glucose'].includes(tipo)) {
+    if (!tipo) {
       return res.status(400).json({ 
         success: false, 
         message: 'Tipo inválido. Deve ser Insulina ou Glucose' 
@@ -85,7 +92,7 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
     
         let processedInfo = null;
         try {
-          processedInfo = tipo === 'Glucose' 
+          processedInfo = tipo === 'G' 
             ? info_trat.extractGlucoseInfo(rawData) 
             : info_trat.extractInsulinInfo(rawData);
         } catch (extractError) {
@@ -98,7 +105,7 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
         }
         
         const value = processedInfo ? 
-          parseValue(tipo === 'Glucose' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
+          parseValue(tipo === 'G' ? processedInfo.ValorGlicose : processedInfo.ValorInsulina) : 
           null;
         
         const baseRecord = {
@@ -107,7 +114,7 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
           value: value
         };
         
-        if (tipo === 'Glucose' && processedInfo) {
+        if (tipo === 'G' && processedInfo) {
           return {
             ...baseRecord,
             glucose_value: parseValue(processedInfo.ValorGlicose),
@@ -119,7 +126,7 @@ router.get('/registos/:tipo', authenticateToken, async (req, res) => {
             weight: parseValue(processedInfo.PesoAtual),
             notes: processedInfo.NomeRegisto || null
           };
-        } else if (tipo === 'Insulina' && processedInfo) {
+        } else if (tipo === 'I' && processedInfo) {
           return {
             ...baseRecord,
             route: processedInfo.Rota,

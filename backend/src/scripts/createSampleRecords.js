@@ -169,7 +169,7 @@ async function createSampleRecords() {
         id: uuidv4(),
         utilizador: userId,
         data_registo: new Date(baseDate.setHours(8, 30, 0, 0)),
-        tipo_registo: 'Glucose',
+        tipo_registo: 'G',
         dados: morningGlucose
       });
       
@@ -177,7 +177,7 @@ async function createSampleRecords() {
         id: uuidv4(),
         utilizador: userId,
         data_registo: new Date(baseDate.setHours(13, 30, 0, 0)),
-        tipo_registo: 'Glucose',
+        tipo_registo: 'G',
         dados: afternoonGlucose
       });
       
@@ -185,7 +185,7 @@ async function createSampleRecords() {
         id: uuidv4(),
         utilizador: userId,
         data_registo: new Date(baseDate.setHours(20, 30, 0, 0)),
-        tipo_registo: 'Glucose',
+        tipo_registo: 'G',
         dados: eveningGlucose
       });
       
@@ -193,7 +193,7 @@ async function createSampleRecords() {
         id: uuidv4(),
         utilizador: userId,
         data_registo: new Date(baseDate.setHours(8, 0, 0, 0)),
-        tipo_registo: 'Insulina',
+        tipo_registo: 'I',
         dados: morningInsulin
       });
       
@@ -201,7 +201,7 @@ async function createSampleRecords() {
         id: uuidv4(),
         utilizador: userId,
         data_registo: new Date(baseDate.setHours(19, 30, 0, 0)),
-        tipo_registo: 'Insulina',
+        tipo_registo: 'I',
         dados: eveningInsulin
       });
     }
@@ -221,7 +221,7 @@ async function createSampleRecords() {
     console.log("\nTesting data retrieval and processing...");
     const testRecord = await client.query(
       'SELECT id, data_registo, dados FROM registos WHERE utilizador = $1 AND tipo_registo = $2 ORDER BY data_registo DESC LIMIT 1',
-      [userId, 'Glucose']
+      [userId, 'G']
     );
     
     if (testRecord.rows.length > 0) {

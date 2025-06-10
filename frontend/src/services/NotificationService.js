@@ -175,7 +175,7 @@ class NotificationService {
     }
 
     createNotificationObject(marcacao, notificationData) {
-        const typeLabel = marcacao.tipo_registo === 'Glucose' ? 'Glicose' : 'Insulina';
+        const typeLabel = marcacao.tipo_registo === 'G' ? 'G' : 'I';
         const eventTime = new Date(marcacao.data_evento);
         const timeStr = eventTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
         
@@ -286,15 +286,15 @@ class NotificationService {
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'third':
-                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${third} minutos`;
+                title = `${notification.type === 'G' ? 'G' : 'I'} em ${third} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'second':
-                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${second} minutos`;
+                title = `${notification.type === 'G' ? 'G' : 'I'} em ${second} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             case 'first':
-                title = `${notification.type === 'Glucose' ? 'Glicose' : 'Insulina'} em ${first} minutos`;
+                title = `${notification.type === 'G' ? 'G' : 'I'} em ${first} minutos`;
                 body = `Agendado para ${notification.time}`;
                 break;
             default:

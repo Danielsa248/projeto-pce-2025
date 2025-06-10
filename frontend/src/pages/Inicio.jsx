@@ -30,7 +30,7 @@ export default function Inicio() {
     // Add this useEffect to listen for threshold updates
     useEffect(() => {
         const handleThresholdsUpdate = (event) => {
-            console.log('🔄 Glucose thresholds updated, reloading...');
+            console.log('Glucose thresholds updated, reloading...');
             setGlucoseThresholds(event.detail);
         };
 
@@ -87,14 +87,14 @@ export default function Inicio() {
 
             if (glucoseData.success && insulinData.success) {
                 const processedData = {
-                    lastGlucose: glucoseData.data[0] || null,
-                    lastInsulin: insulinData.data[0] || null,
+                    lastGlucose: getMostRecentRecord(glucoseData.data) || null,
+                    lastInsulin: getMostRecentRecord(insulinData.data) || null,
+                    
                     glucoseStats: calculateGlucoseStats(glucoseData.data),
                     insulinStats: calculateInsulinStats(insulinData.data),
-                    nextGlucoseEvent: getNextEvent(agendaData, 'Glucose'),
-                    nextInsulinEvent: getNextEvent(agendaData, 'Insulina')
+                    nextGlucoseEvent: getNextEvent(agendaData, 'G'),
+                    nextInsulinEvent: getNextEvent(agendaData, 'I')
                 };
-
                 setDashboardData(processedData);
             } else {
                 throw new Error('Erro ao processar dados');
@@ -202,6 +202,21 @@ export default function Inicio() {
         } else {
             return `${diffInDays} dia${diffInDays !== 1 ? 's' : ''} para o evento`;
         }
+    };
+
+    const getMostRecentRecord = (records) => {
+        if (!records || !Array.isArray(records) || records.length === 0) {
+            return null;
+        }
+        
+        const sortedRecords = [...records].sort((a, b) => {
+            const dateA = new Date(a.timestamp);
+            const dateB = new Date(b.timestamp);
+            
+            return dateB - dateA;
+        });
+                
+        return sortedRecords[0];
     };
 
     if (isLoading) {

@@ -579,7 +579,7 @@ export default function Perfil() {
                                                     return (
                                                         <div>
                                                             <Badge bg={variant} className="mb-1">
-                                                                IMC: {imc.toFixed(1)}
+                                                                {imc.toFixed(1)}
                                                             </Badge>
                                                             <br />
                                                             <small className="text-muted">{interpretation}</small>

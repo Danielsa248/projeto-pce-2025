@@ -34,7 +34,7 @@ export default function Historico() {
         const transformedGlucose = glucoseData.map((item, index) => ({
             id: item.id, // Use the actual database ID
             data_registo: item.timestamp,
-            tipo: 'Glicose',
+            tipo: 'G',
             valor: `${item.glucose_value ?? 0} mg/dL`,
             regime: item.condition,
             calorias_refeicao: item.meal_calories ?? null,
@@ -48,7 +48,7 @@ export default function Historico() {
         const transformedInsulin = insulinData.map((item, index) => ({
             id: item.id, // Use the actual database ID
             data_registo: item.timestamp,
-            tipo: 'Insulina',
+            tipo: 'I',
             valor: `${item.insulin_value ?? item.value ?? 0} U`,
             regime: item.route || 'Subcutânea',
             raw_data: item // Keep the original data for reference
@@ -195,11 +195,19 @@ export default function Historico() {
                 data: 'tipo', 
                 title: '<i class="fas fa-tag me-2"></i>Tipo',
                 render: function(data) {
-                    const badgeClass = data === 'Glicose' ? 'bg-primary' : 'bg-danger';
-                    const icon = data === 'Glicose' ? 'fas fa-tint' : 'fas fa-syringe';
+                    const tipoMap = {
+                        'G': 'Glicose',
+                        'I': 'Insulina',
+                        'Glicose': 'Glicose',
+                        'Insulina': 'Insulina'
+                    };
+                    const tipoCompleto = tipoMap[data] || data;
+                    const badgeClass = (data === 'Glicose' || data === 'G') ? 'bg-primary' : 'bg-danger';
+                    const icon = (data === 'Glicose' || data === 'G') ? 'fas fa-tint' : 'fas fa-syringe';
+                    
                     return `
                         <span class="badge ${badgeClass} type-badge">
-                            <i class="${icon} me-1"></i>${data}
+                            <i class="${icon} me-1"></i>${tipoCompleto}
                         </span>
                     `;
                 },
@@ -486,7 +494,7 @@ export default function Historico() {
             return formatDuration(durationArray) !== null;
         };
 
-        const isGlucose = selectedRecord.tipo === 'Glicose';
+        const isGlucose = selectedRecord.tipo === 'G';
         const badgeClass = isGlucose ? 'bg-primary' : 'bg-danger';
         const icon = isGlucose ? 'fas fa-tint' : 'fas fa-syringe';
 
@@ -502,7 +510,7 @@ export default function Historico() {
                     <Modal.Title className="d-flex align-items-center">
                         <Badge bg={isGlucose ? 'primary' : 'danger'} className="me-3">
                             <i className={`${icon} me-2`}></i>
-                            {selectedRecord.tipo}
+                            {isGlucose ? 'Glicose' : 'Insulina'}
                         </Badge>
                         <span>Detalhes do Registo</span>
                     </Modal.Title>
@@ -1014,11 +1022,11 @@ export default function Historico() {
                         {data.length > 0 && (
                             <div className="stats-cards d-none d-lg-flex me-3">
                                 <div className="stat-card me-3">
-                                    <div className="stat-number">{data.filter(d => d.tipo === 'Glicose').length}</div>
+                                    <div className="stat-number">{data.filter(d => d.tipo === 'G').length}</div>
                                     <div className="stat-label">Glicose</div>
                                 </div>
                                 <div className="stat-card">
-                                    <div className="stat-number">{data.filter(d => d.tipo === 'Insulina').length}</div>
+                                    <div className="stat-number">{data.filter(d => d.tipo === 'I').length}</div>
                                     <div className="stat-label">Insulina</div>
                                 </div>
                             </div>

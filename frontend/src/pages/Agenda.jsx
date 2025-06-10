@@ -5,13 +5,13 @@ import * as agendaApi from '../api/agenda.js';
 
 // Constants
 const REGISTO_TYPES = {
-    GLUCOSE: 'Glucose',
-    INSULIN: 'Insulina'
+    GLUCOSE: 'G',
+    INSULIN: 'I'
 };
 
 const REGISTO_TYPE_LABELS = {
-    [REGISTO_TYPES.GLUCOSE]: 'Glicose',
-    [REGISTO_TYPES.INSULIN]: 'Insulina'
+    [REGISTO_TYPES.GLUCOSE]: 'G',
+    [REGISTO_TYPES.INSULIN]: 'I'
 };
 
 const VIEW_MODES = {
