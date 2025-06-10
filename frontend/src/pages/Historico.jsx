@@ -1012,7 +1012,7 @@ export default function Historico() {
                             <i className="fas fa-history me-3"></i>
                             Histórico de Registos
                         </h1>
-                        <p className="text-muted mb-1">
+                        <p className="text-muted mb-1 pe-3">
                             Consulte o seu histórico de medições de glicose e administrações de insulina
                         </p>
                         {/* Remove the badge from here since it's now in the table */}
