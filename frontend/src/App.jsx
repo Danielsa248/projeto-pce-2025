@@ -13,8 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ChatWidget from './components/Assistant/ChatWidget.jsx'; 
 import Agenda from './pages/Agenda.jsx';
 import Perfil from './pages/Perfil.jsx';
-import NotificationManager from './components/NotificationManager.jsx'; // Add this
-import Opcoes from './pages/Opcoes.jsx'; // Add this import
+import NotificationManager from './components/NotificationManager.jsx';
+import Opcoes from './pages/Opcoes.jsx'; 
 
 // Lazy load the form component
 const FormRender = lazy(() => import('./FormRender.jsx'));

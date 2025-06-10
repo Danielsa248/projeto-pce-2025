@@ -520,7 +520,6 @@ export default function Estatisticas() {
     }
   }, [mealStates, routeStates, handleMealStateChange, handleRouteStateChange]);
 
-  // Updated renderDataCard to handle weight
   const renderDataCard = useCallback((dataType) => (
     <div className="col-md-4">
       <div className="card bg-light border-0">
@@ -854,7 +853,7 @@ export default function Estatisticas() {
         {renderChart('insulin')}
       </div>
 
-      {/* Weight chart full width */}
+      {/* Weight chart */}
       <div className="row g-4">
         {renderChart('weight')}
       </div>

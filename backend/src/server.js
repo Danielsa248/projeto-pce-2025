@@ -10,7 +10,7 @@ import botRoutes from './routes/bot.js';
 const app = express();
 const PORT = 3000;
 
-app.use(cors()); // Permitir requisições do frontend
+app.use(cors()); 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/agenda', agendaRoutes);

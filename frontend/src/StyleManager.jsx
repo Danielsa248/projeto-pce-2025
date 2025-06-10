@@ -1,4 +1,3 @@
-// StyleManager.jsx - with forced reload for all form pages
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 

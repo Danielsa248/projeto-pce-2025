@@ -15,13 +15,13 @@ export default function Historico() {
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedRecords, setSelectedRecords] = useState(new Set());
-    const [showFhirModal, setShowFhirModal] = useState(false); // Remove this as we won't need the modal anymore
+    const [showFhirModal, setShowFhirModal] = useState(false); 
     const [fhirStatus, setFhirStatus] = useState({});
     const [fhirLoading, setFhirLoading] = useState(new Set());
     const [connectionStatus, setConnectionStatus] = useState(null);
     const [testingConnection, setTestingConnection] = useState(false);
     const [sendingAllRecords, setSendingAllRecords] = useState(false);
-    const [sendingSelectedRecords, setSendingSelectedRecords] = useState(false); // Add this new state
+    const [sendingSelectedRecords, setSendingSelectedRecords] = useState(false);
     const [fhirAlert, setFhirAlert] = useState({ show: false, variant: '', message: '', recordId: null });
     const [showFhirToasts, setShowFhirToasts] = useState([]);
     const tableRef = useRef(null);
@@ -32,7 +32,7 @@ export default function Historico() {
 
     const transformData = (glucoseData, insulinData) => {
         const transformedGlucose = glucoseData.map((item, index) => ({
-            id: item.id, // Use the actual database ID
+            id: item.id,
             data_registo: item.timestamp,
             tipo: 'G',
             valor: `${item.glucose_value ?? 0} mg/dL`,
@@ -42,16 +42,16 @@ export default function Historico() {
             tempo_ult_exercicio: item.exercise_duration ?? null,
             calorias_exercicio: item.exercise_calories ?? null,
             peso: item.weight ?? null,
-            raw_data: item // Keep the original data for reference
+            raw_data: item 
         }));
         
         const transformedInsulin = insulinData.map((item, index) => ({
-            id: item.id, // Use the actual database ID
+            id: item.id,
             data_registo: item.timestamp,
             tipo: 'I',
             valor: `${item.insulin_value ?? item.value ?? 0} U`,
             regime: item.route || 'Subcutânea',
-            raw_data: item // Keep the original data for reference
+            raw_data: item
         }));
         
         return [...transformedGlucose, ...transformedInsulin];
@@ -93,12 +93,11 @@ export default function Historico() {
                 throw new Error('Erro ao obter dados');
             }
             
-            // Pre-sort the data before passing it to DataTables
             const combinedData = transformData(glucoseResult.data, insulinResult.data)
                 .sort((a, b) => {
                     const dateA = new Date(a.data_registo).getTime();
                     const dateB = new Date(b.data_registo).getTime();
-                    return dateB - dateA; // Newest first
+                    return dateB - dateA; 
                 });
 
             setData(combinedData);
@@ -115,7 +114,6 @@ export default function Historico() {
 
     // Função para mostrar detalhes no modal
     const handleViewDetails = useCallback((registoId, tipo) => {
-        // Encontrar o registo nos dados
         const record = data.find(item => 
             (item.raw_data?.id === registoId) || 
             `${item.tipo}-${data.indexOf(item)}` === registoId
@@ -127,7 +125,6 @@ export default function Historico() {
         }
     }, [data]);
 
-    // Função para fechar modal
     const handleCloseModal = () => {
         setShowModal(false);
         setSelectedRecord(null);
@@ -142,7 +139,6 @@ export default function Historico() {
         
         if (!tableRef.current) return;
         
-        // Enhanced custom sorting for dates
         $.fn.dataTable.ext.type.order['date-pt-pre'] = function (d) {
             try {
                 const parts = d.split(',')[0].split('/');
@@ -314,13 +310,10 @@ export default function Historico() {
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             drawCallback: function() {
-                // Add fade-in animation to rows
                 $('.dataTables_wrapper tbody tr').addClass('fade-in-row');
                 
-                // Update the selected count badge
                 updateSelectedCountBadge();
                 
-                // Add click event listeners to details buttons
                 $('.details-btn').off('click').on('click', function(e) {
                     e.preventDefault();
                     const registoId = $(this).data('registo-id');
@@ -328,14 +321,12 @@ export default function Historico() {
                     handleViewDetails(registoId, tipo);
                 });
                 
-                // FHIR send button handlers
                 $('.send-fhir-btn').off('click').on('click', function(e) {
                     e.preventDefault();
                     const recordId = $(this).data('id');
                     handleSendSingleRecord(recordId);
                 });
                 
-                // Individual checkbox handlers
                 $('.record-checkbox').off('change').on('change', function() {
                     const recordId = $(this).data('id');
                     if (this.checked) {
@@ -351,12 +342,10 @@ export default function Historico() {
                     updateSelectedCountBadge();
                 });
 
-                // Select all checkbox handler
                 $('#select-all').off('change').on('change', function() {
                     const isChecked = this.checked;
                     const currentPageRecords = [];
                     
-                    // Get all records currently visible on the page
                     $('.record-checkbox').each(function() {
                         const recordId = $(this).data('id');
                         currentPageRecords.push(recordId);
@@ -364,10 +353,10 @@ export default function Historico() {
                     });
                     
                     if (isChecked) {
-                        // Add all current page records to selection
+
                         setSelectedRecords(prev => new Set([...prev, ...currentPageRecords]));
                     } else {
-                        // Remove all current page records from selection
+
                         setSelectedRecords(prev => {
                             const newSet = new Set(prev);
                             currentPageRecords.forEach(id => newSet.delete(id));
@@ -377,7 +366,6 @@ export default function Historico() {
                     updateSelectedCountBadge();
                 });
 
-                // Update select-all checkbox state based on current selection
                 updateSelectAllCheckbox();
             }
         });
@@ -385,7 +373,7 @@ export default function Historico() {
         tableInitializedRef.current = true;
     }, [handleViewDetails, fhirLoading]);
 
-    // Helper function to update select-all checkbox state
+
     const updateSelectAllCheckbox = () => {
         const currentPageRecords = [];
         $('.record-checkbox').each(function() {
@@ -409,7 +397,7 @@ export default function Historico() {
         }
     };
 
-    // New helper function to update the selected count badge in the table
+
     const updateSelectedCountBadge = () => {
         const badgeContainer = $('.selected-count-badge');
         if (badgeContainer.length > 0) {
@@ -426,17 +414,17 @@ export default function Historico() {
         }
     };
 
-    // Add useEffect to update badge when selectedRecords changes
+
     useEffect(() => {
         updateSelectedCountBadge();
     }, [selectedRecords]);
 
-    // Split the effects - first for data fetching
+
     useEffect(() => {
         fetchAllData();
     }, [fetchAllData]);
     
-    // Second effect for DataTable initialization - only runs when data changes
+
     useEffect(() => {
         if (data.length > 0) {
             initializeDataTable(data);
@@ -451,7 +439,6 @@ export default function Historico() {
         };
     }, [data, initializeDataTable]);
     
-    // Componente Modal para mostrar detalhes
     const DetailsModal = () => {
         if (!selectedRecord) return null;
 
@@ -703,24 +690,23 @@ export default function Historico() {
         
         setShowFhirToasts(prev => [...prev, newToast]);
         
-        // Auto-remove toast after 5 seconds
+
         setTimeout(() => {
             setShowFhirToasts(prev => prev.filter(toast => toast.id !== toastId));
         }, 5000);
     };
 
-    // FHIR sending function with improved feedback
+
     const handleSendSingleRecord = async (recordId) => {
         if (!recordId) {
             console.error('No record ID provided');
             return;
         }
 
-        // Find the record to get its type for better messaging
+
         const record = data.find(item => item.id === recordId);
         const recordType = record ? record.tipo : 'registo';
 
-        // Add to loading state
         setFhirLoading(prev => new Set([...prev, recordId]));
         
         try {
@@ -730,7 +716,6 @@ export default function Historico() {
                 setFhirStatus(prev => ({ ...prev, [recordId]: 'sent' }));
                 console.log('FHIR data sent successfully:', result);
                 
-                // Show success toast
                 addFhirToast(
                     'success', 
                     `${recordType} enviado com sucesso para o Mirth Connect!`, 
@@ -743,21 +728,18 @@ export default function Historico() {
             console.error('Error sending FHIR data:', error);
             setFhirStatus(prev => ({ ...prev, [recordId]: 'error' }));
             
-            // Show error toast
             addFhirToast(
                 'danger', 
                 `Erro ao enviar ${recordType}: ${error.message}`, 
                 recordId
             );
         } finally {
-            // Remove from loading state
             setFhirLoading(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(recordId);
                 return newSet;
             });
             
-            // Refresh table to show updated status
             if (dataTableRef.current) {
                 dataTableRef.current.draw(false);
             }
@@ -770,7 +752,6 @@ export default function Historico() {
             return;
         }
 
-        // Show initial alert
         setFhirAlert({
             show: true,
             variant: 'info',
@@ -783,7 +764,6 @@ export default function Historico() {
             const result = await sendBulkRecordsToFHIR(recordIds);
             
             if (result.success) {
-                // Update status for all sent records
                 const newStatus = {};
                 result.results.forEach(res => {
                     if (res.success) {
@@ -797,7 +777,7 @@ export default function Historico() {
                 setShowFhirModal(false);
                 setSelectedRecords(new Set());
                 
-                // Show success alert
+                
                 setFhirAlert({
                     show: true,
                     variant: 'success',
@@ -805,15 +785,13 @@ export default function Historico() {
                     recordId: null
                 });
                 
-                // Refresh table
                 if (dataTableRef.current) {
                     dataTableRef.current.draw(false);
                 }
             }
         } catch (error) {
             console.error('Error sending bulk FHIR data:', error);
-            
-            // Show error alert
+
             setFhirAlert({
                 show: true,
                 variant: 'danger',
@@ -828,34 +806,29 @@ export default function Historico() {
         try {
             const result = await testMirthConnection();
             if (result.success && result.connected) {
-                // Show success toast instead of connectionStatus alert
                 addFhirToast(
                     'success', 
                     '✅ Conexão estabelecida com sucesso!'
                 );
             } else {
-                // Show error toast instead of connectionStatus alert
                 addFhirToast(
                     'danger', 
                     `❌ Falha na conexão: ${result.error || 'Mirth Connect não está acessível'}`
                 );
             }
         } catch (error) {
-            // Show error toast instead of connectionStatus alert
             addFhirToast(
                 'danger', 
                 `❌ Erro de conexão: ${error.message}`
             );
         } finally {
             setTestingConnection(false);
-            // Remove setTimeout since we're usando toasts agora
         }
     };
 
     const handleSendAllRecords = async () => {
         setSendingAllRecords(true);
         
-        // Show initial toast for bulk operation start
         addFhirToast(
             'info',
             `A enviar todos os ${data.length} registos para o Mirth Connect...`
@@ -865,9 +838,7 @@ export default function Historico() {
             const allRecordIds = data.map(record => record.id);
             const result = await sendBulkRecordsToFHIR(allRecordIds);
             
-            // Check if the operation actually succeeded
             if (result.success && result.processed > 0) {
-                // Update status for all records
                 const newStatus = {};
                 result.results.forEach(res => {
                     if (res.success) {
@@ -879,7 +850,6 @@ export default function Historico() {
                 
                 setFhirStatus(prev => ({ ...prev, ...newStatus }));
                 
-                // Show detailed success/error toast
                 if (result.errors > 0) {
                     addFhirToast(
                         'warning', 
@@ -892,7 +862,6 @@ export default function Historico() {
                     );
                 }
                 
-                // Refresh table
                 if (dataTableRef.current) {
                     dataTableRef.current.draw(false);
                 }
@@ -903,7 +872,6 @@ export default function Historico() {
                     `❌ Falha total no envio: 0 de ${allRecordIds.length} registos enviados. Verifique se o Mirth Connect está ligado.`
                 );
             } else {
-                // Complete failure from the backend
                 addFhirToast(
                     'danger', 
                     `❌ Falha no envio: ${result.error || 'Erro desconhecido'}`
@@ -916,11 +884,9 @@ export default function Historico() {
             );
         } finally {
             setSendingAllRecords(false);
-            // Remove setTimeout since estamos usando toasts agora
         }
     };
 
-    // Remove the old handleSendBulkRecords function and replace with this:
     const handleSendSelectedRecords = async () => {
         if (selectedRecords.size === 0) {
             addFhirToast('warning', 'Nenhum registo selecionado');
@@ -929,7 +895,6 @@ export default function Historico() {
 
         setSendingSelectedRecords(true);
         
-        // Show initial toast for bulk operation start
         addFhirToast(
             'info',
             `A enviar ${selectedRecords.size} registos selecionados para o Mirth Connect...`
@@ -939,9 +904,7 @@ export default function Historico() {
             const recordIds = Array.from(selectedRecords);
             const result = await sendBulkRecordsToFHIR(recordIds);
             
-            // Check if the operation actually succeeded
             if (result.success && result.processed > 0) {
-                // Update status for all records
                 const newStatus = {};
                 result.results.forEach(res => {
                     if (res.success) {
@@ -953,10 +916,8 @@ export default function Historico() {
                 
                 setFhirStatus(prev => ({ ...prev, ...newStatus }));
                 
-                // Clear selection after successful send
                 setSelectedRecords(new Set());
                 
-                // Show detailed success/error toast
                 if (result.errors > 0) {
                     addFhirToast(
                         'warning', 
@@ -969,7 +930,6 @@ export default function Historico() {
                     );
                 }
                 
-                // Refresh table
                 if (dataTableRef.current) {
                     dataTableRef.current.draw(false);
                 }
@@ -980,7 +940,6 @@ export default function Historico() {
                     `❌ Falha total no envio: 0 de ${recordIds.length} registos enviados. Verifique se o Mirth Connect está ligado.`
                 );
             } else {
-                // Complete failure from the backend
                 addFhirToast(
                     'danger', 
                     `❌ Falha no envio: ${result.error || 'Erro desconhecido'}`

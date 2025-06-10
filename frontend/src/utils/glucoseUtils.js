@@ -1,6 +1,3 @@
-// Create: frontend/src/utils/glucoseUtils.js
-
-// Default glucose thresholds (mg/dL)
 export const DEFAULT_GLUCOSE_THRESHOLDS = {
     jejum: { min: 70, max: 100 },
     'Jejum': { min: 70, max: 100 },
@@ -16,7 +13,7 @@ export const DEFAULT_GLUCOSE_THRESHOLDS = {
 export const getGlucoseStatus = (value, regime, customThresholds = null) => {
     const thresholds = customThresholds || DEFAULT_GLUCOSE_THRESHOLDS;
     
-    // Normalize regime name to match thresholds
+
     const normalizedRegime = normalizeRegimeName(regime);
     const threshold = thresholds[normalizedRegime] || thresholds.aleatorio;
     
@@ -27,7 +24,7 @@ export const getGlucoseStatus = (value, regime, customThresholds = null) => {
     }
     
     const { min, max } = threshold;
-    const warningMargin = 20; // 20 mg/dL margin for warning
+    const warningMargin = 20;
     
     // Very low (dangerous)
     if (glucoseValue < min - warningMargin) {
@@ -98,7 +95,6 @@ export const getGlucoseStatus = (value, regime, customThresholds = null) => {
     };
 };
 
-// Normalize regime names to match threshold keys
 const normalizeRegimeName = (regime) => {
     if (!regime) return 'aleatorio';
     
@@ -111,7 +107,7 @@ const normalizeRegimeName = (regime) => {
     return 'aleatorio';
 };
 
-// Get glucose range text for display
+
 export const getGlucoseRangeText = (regime, thresholds) => {
     const normalizedRegime = normalizeRegimeName(regime);
     const threshold = thresholds[normalizedRegime] || thresholds.aleatorio;

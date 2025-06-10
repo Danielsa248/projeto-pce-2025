@@ -1,4 +1,0 @@
-Agenda:
-- Repeat: Never, Daily (Default), Weekly, Monthly
-- Database: repeat pattern type (N, D, W, M)
-- Frontend: Criar de acordo com repeat pattern

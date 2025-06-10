@@ -1,5 +1,3 @@
-// Criado para facilitar o carregamento do .env em qualquer ficheiro
-
 import { config } from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
